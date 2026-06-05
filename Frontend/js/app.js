@@ -1,6 +1,6 @@
 const imagenes = [
 
-"",
+"img/2.png",
 
 "",
 
