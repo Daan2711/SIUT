@@ -1,145 +1,52 @@
-# BUZON-ESCOLAR-WEB
-Repositorio para proyecto de Desarrollo Web 
-# 🎓 Sistema Digital de Atención Universitaria
+Arquitectura del Proyecto
+👥 Capa de Usuario (Roles)
+Alumno: Acceso a quejas, horarios, eventos y consulta de profesores.
 
-Sistema web diseñado para registrar, gestionar y dar seguimiento a quejas y sugerencias dentro de la comunidad universitaria.
+Profesor: Acceso a quejas y gestión de su horario propio.
 
----
+Admin: Encargado de subir horarios, gestionar eventos y administrar profesores.
 
-## 📌 1. Identificación del Proyecto
+🎨 Frontend
+Tecnologías: HTML + CSS + JS puro (Sin frameworks JS).
 
-### 🏷 Título
-Sistema Digital de Atención Universitaria
+Framework de estilos: Bootstrap para el diseño responsivo.
 
-### 📖 Contexto / Problema
-En el entorno universitario, estudiantes y docentes enfrentan problemáticas relacionadas con:
+Renderizado: Archivos .html servidos directamente por Flask desde la carpeta /templates, utilizando Jinja2 para renderizar los datos dinámicos en las páginas.
 
-- Organización de horarios académicos  
-- Estado de la infraestructura  
-- Servicios de apoyo estudiantil  
-- Procesos administrativos  
+Comunicación: Uso de fetch() para realizar llamadas AJAX asíncronas donde sea necesario.
 
-Actualmente, estas situaciones se comunican de manera informal o por canales no estructurados, lo que dificulta su registro, seguimiento y resolución efectiva.
+⚙️ Backend
+Tecnología Principal: Flask (Python)
 
-### 💡 Justificación
-La implementación de un sistema web tipo buzón digital permitirá:
+Módulos / Servicios:
 
-- Centralizar la recepción de quejas y sugerencias  
-- Mejorar la comunicación entre la comunidad y las autoridades  
-- Facilitar la toma de decisiones basada en información organizada  
-- Contribuir a la mejora continua de los servicios universitarios  
+Auth: Gestión de Login, sesiones y control de roles.
 
----
+Quejas: Funcionalidades para crear, listar y ver el historial.
 
-## 🎯 2. Objetivos
+Horarios: Visualización y exportación a PDF (utilizando WeasyPrint).
 
-### 🎯 Objetivo General
-Desarrollar un sistema web que permita registrar, gestionar y dar seguimiento a quejas y sugerencias relacionadas con horarios, infraestructura y servicios de apoyo universitario.
+Eventos / Prof.: Listar y crear (módulo exclusivo para el administrador).
 
-### ✅ Objetivos Específicos
+🗄️ Base de Datos
+Motores Soportados: SQL Server / PostgreSQL / MySQL.
 
-- Analizar las necesidades de la comunidad universitaria.
-- Diseñar una interfaz web intuitiva y accesible.
-- Implementar un formulario estructurado para el registro de reportes.
-- Clasificar las quejas y sugerencias por categoría y prioridad.
-- Desarrollar un módulo administrativo para el seguimiento de reportes.
+Mapeo del Modelo: SQLAlchemy ORM — Los modelos se definen directamente en Python y las tablas se generan de forma automática.
 
----
+Tablas principales:
 
-## 📦 3. Alcance del Proyecto
+usuarios
 
-### ✔️ Incluye
+quejas
 
-- Registro y autenticación de usuarios universitarios.
-- Registro de quejas y sugerencias categorizadas.
-- Gestión del estado de reportes:
-  - Registrado
-  - En revisión
-  - Atendido
-- Panel administrativo para gestión y visualización de reportes.
+horarios
 
-### ❌ No Incluye
+eventos
 
-- Integración con sistemas académicos institucionales existentes.
-- Automatización de respuestas por correo electrónico.
-- Desarrollo de aplicaciones móviles nativas.
-- Implementación directa de acciones administrativas fuera del sistema.
+profesores
 
----
+materias
 
-## 📚 4. Marco Teórico
+grupos
 
-### 🔑 Conceptos Clave
-
-- Desarrollo Web
-- Sistemas de Información
-- Gestión de Incidencias
-- Usabilidad y Experiencia de Usuario (UX)
-
-### 📌 Antecedentes
-
-- Sistemas de mesas de ayuda (Help Desk)
-- Plataformas digitales de atención en instituciones educativas
-
-### 🏗 Modelos y Teorías Relacionadas
-
-- Arquitectura MVC (Modelo–Vista–Controlador)
-- Diseño centrado en el usuario
-- Buenas prácticas de seguridad en aplicaciones web
-
----
-
-## 🛠 5. Metodología
-
-### 📌 Tipo de Proyecto
-Proyecto de desarrollo tecnológico orientado a la mejora de procesos institucionales.
-
-### 🔄 Actividades Realizadas
-
-1. Recolección y análisis de requerimientos.
-2. Diseño de la arquitectura del sistema.
-3. Desarrollo del frontend y backend.
-4. Pruebas funcionales y de usabilidad.
-5. Documentación técnica y presentación del proyecto.
-
----
-
-## 🖥 Tecnologías Utilizadas
-
-*(Completar según lo que estés usando)*
-
-- HTML / CSS / JavaScript
-- Framework frontend (ej: React, Vue, etc.)
-- Backend (ej: Node.js, Laravel, etc.)
-- Base de datos (ej: MySQL, MongoDB, etc.)
-
----
-
-## 👥 Usuarios del Sistema
-
-- Estudiantes
-- Docentes
-- Personal administrativo
-
----
-
-## 🔐 Estados de los Reportes
-
-- 🟡 Registrado  
-- 🔵 En revisión  
-- 🟢 Atendido  
-
----
-
-## 📈 Futuras Mejoras
-
-- Notificaciones por correo electrónico
-- Dashboard estadístico
-- Aplicación móvil
-- Integración con sistemas institucionales
-
----
-
-## 📄 Licencia
-
-Proyecto académico con fines educativos.
+horario_detalle (campos: hora, día, aula)

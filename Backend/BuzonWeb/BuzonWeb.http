@@ -1,6 +1,0 @@
-@BuzonWeb_HostAddress = http://localhost:5179
-
-GET {{BuzonWeb_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
