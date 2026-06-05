@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Portal UTSC - Inicio</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+
+    <header>
+
+        <div class="logo">
+
+            <img src="img/logo.png" alt="UTSC">
+
+        </div>
+
+        <nav>
+
+            <a class="activo" href="index.html">Inicio</a>
+
+            <a href="horario.html">Mi Horario</a>
+
+            <a href="maestros.html">Directorio de Maestros</a>
+
+            <a href="reportes.html">Reportes</a>
+
+            <a href="historial.html">Historial</a>
+
+            <a href="soporte.html">Soporte</a>
+
+        </nav>
+
+        <div class="perfil">
+
+            <img src="assets/img/user.png" alt="Usuario">
+
+            <span>Nombre del Alumno</span>
+
+        </div>
+
+    </header>
+
+    <!-- CARRUSEL -->
+
+    <section class="slider">
+
+        <button class="flecha izquierda" onclick="anterior()">
+            &#10094;
+        </button>
+
+        <img id="imagenSlider"
+             src="img/1.png"
+             alt="Evento">
+
+        <button class="flecha derecha" onclick="siguiente()">
+            &#10095;
+        </button>
+
+        <button class="btn-inscribete">
+            Inscríbete Aquí
+        </button>
+
+    </section>
+
+    <!-- NOTICIAS -->
+
+    <section class="contenedor">
+
+        <h2>Noticias y Eventos</h2>
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>Inscripciones Abiertas</h3>
+
+                <p>
+                    Consulta fechas importantes para el próximo cuatrimestre.
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Conferencia de Tecnología</h3>
+
+                <p>
+                    Participa en los eventos de innovación tecnológica.
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Hackathon UTSC</h3>
+
+                <p>
+                    Demuestra tus habilidades de programación.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
