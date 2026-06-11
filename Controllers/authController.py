@@ -2,11 +2,13 @@ from flask import Blueprint, request, jsonify
 from flask_bcrypt import Bcrypt
 from Models.models import Usuario
 from Database.database import db
+from flask import session
 
 # Inicializamos bcrypt y nuestro blueprint de rutas
 bcrypt = Bcrypt()
 auth_bp = Blueprint('auth', __name__)
 
+# RUTA DE REGISTRO PARA NUEVOS USUARIOS
 @auth_bp.route('/registro', methods=['POST'])
 def registrar_usuario():
     data = request.get_json()
@@ -35,3 +37,34 @@ def registrar_usuario():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+    
+# RUTA DE LOGIN PARA USUARIOS EXISTENTES
+
+@auth_bp.route('/login', methods=['POST'])
+def login_usuario():
+    data = request.get_json()
+    
+    email = data.get('email') 
+    password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({'error': 'Faltan credenciales'}), 400
+
+    # 1. Buscamos directamente por el correo institucional
+    usuario = Usuario.query.filter_by(email=email).first()
+    
+    # 2. Verificamos si existe el usuario y si la contraseña coincide
+    if usuario and bcrypt.check_password_hash(usuario.password_hash, password):
+        session['usuario_id'] = usuario.id
+        session['rol'] = usuario.rol
+        
+        # Detectamos si está usando la contraseña genérica temporal
+        es_primer_login = (password == 'UTSC2026')
+        
+        return jsonify({
+            'mensaje': 'Login exitoso', 
+            'rol': usuario.rol,
+            'sugerir_cambio': es_primer_login # Enviamos el aviso al frontend
+        }), 200
+        
+    return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
