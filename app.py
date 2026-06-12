@@ -31,7 +31,7 @@ app.secret_key = 'una_clave_muy_secreta_para_myutsc'
 # SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
 # =========================================================================
 # Configuramos la conexión a Neon leyendo la variable de entorno
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("NEON_DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Vinculamos la base de datos con nuestra aplicación de Flask
