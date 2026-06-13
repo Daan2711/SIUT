@@ -179,3 +179,24 @@ class UsuarioEvento(db.Model):
     rol_evento = db.Column(db.String(50))
     
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Auditoria(db.Model):
+
+    __tablename__ = 'auditoria'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    usuario_id = db.Column(
+        db.Integer,
+        db.ForeignKey('usuarios.id')
+    )
+
+    accion = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    fecha = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )

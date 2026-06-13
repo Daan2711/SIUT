@@ -27,12 +27,17 @@ app = Flask(__name__, static_folder='Frontend', static_url_path='')
 # Llave secreta obligatoria para encriptar y manejar las sesiones de usuario
 app.secret_key = 'una_clave_muy_secreta_para_myutsc'
 
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # =========================================================================
 # SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
 # =========================================================================
 # Configuramos la conexión a Neon leyendo la variable de entorno
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+print("DATABASE_URL =", os.getenv("DATABASE_URL"))
 
 # Vinculamos la base de datos con nuestra aplicación de Flask
 db.init_app(app)
