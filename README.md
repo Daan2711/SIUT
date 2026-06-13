@@ -6,7 +6,7 @@ Profesor: Acceso a quejas y gestión de su horario propio.
 
 Admin: Encargado de subir horarios, gestionar eventos y administrar profesores.
 
-🎨 Frontend
+🎨 Frontend a
 Tecnologías: HTML + CSS + JS puro (Sin frameworks JS).
 
 Framework de estilos: Bootstrap para el diseño responsivo.
