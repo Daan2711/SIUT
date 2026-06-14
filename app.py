@@ -24,6 +24,14 @@ load_dotenv()
 # Configuramos 'Frontend' como la carpeta para estilos, imágenes y scripts
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
 
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    return response
+
 # Llave secreta obligatoria para encriptar y manejar las sesiones de usuario
 app.secret_key = 'una_clave_muy_secreta_para_myutsc'
 
