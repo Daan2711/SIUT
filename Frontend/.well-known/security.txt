@@ -1,0 +1,4 @@
+Contact: mailto:soporte@virtual.utsc.edu.mx
+Expires: 2027-06-15T00:00:00z
+Preferred-Languages: es, en
+Canonical: https://siut.onrender.com/.well-known/security.txt
