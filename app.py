@@ -1,37 +1,41 @@
 # =========================================================================
-# SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
+# SECCIÓN 1: IMPORTACIONES
 # =========================================================================
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, make_response
 from dotenv import load_dotenv
-# Conexión con la instancia de la base de datos y carga de modelos
 from Database.database import db
-import Models.models 
-# Importación del controlador de autenticación (Blueprint)
+import Models.models
 from Controllers.authController import auth_bp
+
 # =========================================================================
-# SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
+# SECCIÓN 2: CARGA DE ENTORNO
 # =========================================================================
 load_dotenv()
+
 # =========================================================================
-# SECCIÓN 3: INICIALIZACIÓN Y CONFIGURACIÓN DE LA APP DE FLASK
+# SECCIÓN 3: INICIALIZACIÓN DE FLASK
 # =========================================================================
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
 app.secret_key = os.getenv("SECRET_KEY", "fallback_solo_para_dev")
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = True
+
 # =========================================================================
-# SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
+# SECCIÓN 4: BASE DE DATOS
 # =========================================================================
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+
 # =========================================================================
-# SECCIÓN 5: REGISTRO DE BLUEPRINTS (CONTROLADORES DE LAS RUTAS)
+# SECCIÓN 5: BLUEPRINTS
 # =========================================================================
 app.register_blueprint(auth_bp)
+
 # =========================================================================
-# SECCIÓN 5.5: SECURITY HEADERS (parcha findings 1-4 del reporte)
+# SECCIÓN 5.5: SECURITY HEADERS
 # =========================================================================
 @app.after_request
 def set_security_headers(response):
@@ -46,24 +50,32 @@ def set_security_headers(response):
     response.headers['Referrer-Policy'] = 'no-referrer'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Forzamos que Cloudflare NO cachee — así siempre pasa por Flask
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
     return response
+
 # =========================================================================
-# SECCIÓN 5.6: RUTAS PARA RENDERIZAR LAS VISTAS HTML
+# SECCIÓN 5.6: RUTAS HTML
 # =========================================================================
 @app.route('/')
 def index():
-    return send_from_directory('Frontend', 'login.html')
+    response = make_response(send_from_directory('Frontend', 'login.html'))
+    return response
 
 @app.route('/login')
 def login_page():
-    return send_from_directory('Frontend', 'login.html')
+    response = make_response(send_from_directory('Frontend', 'login.html'))
+    return response
+
 # =========================================================================
-# SECCIÓN 6: VERIFICACIÓN E INICIALIZACIÓN DE TABLAS EN NEON
+# SECCIÓN 6: INICIALIZACIÓN DE TABLAS
 # =========================================================================
 with app.app_context():
     db.create_all()
+
 # =========================================================================
-# SECCIÓN 7: ARRANQUE DEL SERVIDOR DE DESARROLLO
+# SECCIÓN 7: ARRANQUE
 # =========================================================================
 if __name__ == '__main__':
     app.run(debug=False)
