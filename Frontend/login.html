@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyUTSC - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-container">
+                <img src="img/logo.png" alt="Logo UTSC" class="logo">
+            </div>
+
+            <h1>MyUTSC</h1>
+
+            <p class="bienvenida">
+                Bienvenido
+            </p>
+
+            <form id="loginForm">
+
+                <div class="input-group">
+                    <label>Usuario (Correo)</label>
+                    <input 
+                        type="text" 
+                        id="email"
+                        placeholder="Ingrese su correo"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        placeholder="Ingrese su contraseña"
+                        required>
+                </div>
+
+                <div class="recuperar">
+                    <a href="#">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="btn-login">
+                    ENTRAR
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <script src="js/login.js"></script>
+</body>
+
+</html>
