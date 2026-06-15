@@ -67,6 +67,11 @@ def index():
 def login_page():
     response = make_response(send_from_directory('Frontend', 'login.html'))
     return response
+    
+    @app.route('/cambiar-password')
+def cambiar_password_page():
+    response = make_response(send_from_directory('Frontend', 'cambiar-password.html'))
+    return response
 
 # =========================================================================
 # SECCIÓN 6: INICIALIZACIÓN DE TABLAS
