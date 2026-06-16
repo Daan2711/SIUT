@@ -68,6 +68,12 @@ def index():
 def login_page():
     response = make_response(send_from_directory('Frontend', 'login.html'))
     return response
+  
+  @app.route('/.well-known/security.txt')
+def security_txt():
+    response = make_response(send_from_directory('Frontend/.well-known', 'security.txt'))
+    response.headers['Content-Type'] = 'text/plain'
+    return response
 
 # =========================================================================
 # SECCIÓN 6: INICIALIZACIÓN DE TABLAS
