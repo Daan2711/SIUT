@@ -2,7 +2,7 @@
 # SECCIÓN 1: IMPORTACIONES
 # =========================================================================
 import os
-from flask import Flask, send_from_directory, make_response
+from flask import Flask, send_from_directory, make_response, request
 from dotenv import load_dotenv
 from Database.database import db
 import Models.models
@@ -54,6 +54,9 @@ def set_security_headers(response):
     # Forzamos que Cloudflare NO cachee — así siempre pasa por Flask
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
+if request.method == 'OPTIONS':
+    response.headers['Allow'] = 'GET, POST, HEAD'
+    return response, 405
     return response
 
 # =========================================================================
