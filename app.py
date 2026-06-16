@@ -39,14 +39,15 @@ app.register_blueprint(auth_bp)
 # =========================================================================
 @app.after_request
 def set_security_headers(response):
-    response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; "
-        "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; "
-        "font-src 'self'; "
-        "object-src 'none';"
-    )
+  response.headers['Content-Security-Policy'] = (
+    "default-src 'self'; "
+    "script-src 'self'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data:; "
+    "font-src 'self'; "
+    "object-src 'none'; "
+    "base-uri 'self';"
+)
     response.headers['Referrer-Policy'] = 'no-referrer'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     response.headers['X-Content-Type-Options'] = 'nosniff'
