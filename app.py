@@ -76,6 +76,10 @@ def login_page():
 def security_txt():
     response = make_response(send_from_directory('Frontend/.well-known', 'security.txt'))
     response.headers['Content-Type'] = 'text/plain'
+    
+    @app.route('/cambiar-password')
+def cambiar_password_page():
+    response = make_response(send_from_directory('Frontend', 'cambiar-password.html'))
     return response
 
 # =========================================================================
