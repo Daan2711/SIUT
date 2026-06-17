@@ -69,6 +69,7 @@ def login_page():
     # Ruta explícita para acceder al formulario de login
     return send_from_directory('Frontend', 'login.html')
 
+
 @app.route('/index.html')
 def pagina_principal():
     return send_from_directory('Frontend', 'index.html')
