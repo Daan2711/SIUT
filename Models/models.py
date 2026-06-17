@@ -11,6 +11,7 @@ class Usuario(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     rol = db.Column(db.String(50), nullable=False) 
     activo = db.Column(db.Boolean, default=True)
+    primer_login = db.Column(db.Boolean, default=True)
     
     creado_por = db.Column(db.Integer, nullable=True)
     modificado_por = db.Column(db.Integer, nullable=True)

@@ -1,81 +1,115 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
-from Models.models import Usuario
+from Models.models import Usuario, Auditoria
 from Database.database import db
-from flask import session
-from Models.models import Auditoria
 
-# Inicializamos bcrypt y nuestro blueprint de rutas
 bcrypt = Bcrypt()
 auth_bp = Blueprint('auth', __name__)
 
-# RUTA DE REGISTRO PARA NUEVOS USUARIOS
+# =========================================================================
+# REGISTRO
+# =========================================================================
 @auth_bp.route('/registro', methods=['POST'])
 def registrar_usuario():
     data = request.get_json()
     
-    # Validamos que nos manden la info básica
     if not data or not data.get('email') or not data.get('password'):
         return jsonify({'mensaje': 'Faltan datos requeridos'}), 400
 
-    # Aquí está la magia de BCrypt: encriptamos la contraseña
     hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
     
-    # Creamos la instancia del modelo de SQLAlchemy
     nuevo_usuario = Usuario(
         nombre=data.get('nombre'),
         apellido=data.get('apellido'),
         email=data['email'],
         password_hash=hashed_password,
-        rol=data.get('rol', 'Alumno') 
+        rol=data.get('rol', 'Alumno'),
+        primer_login=True  # Todo usuario nuevo arranca con esto en True
     )
     
     try:
-        # Lo guardamos en la base de datos
         db.session.add(nuevo_usuario)
         db.session.commit()
         return jsonify({'mensaje': 'Usuario creado exitosamente'}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-    
-# RUTA DE LOGIN PARA USUARIOS EXISTENTES
 
+# =========================================================================
+# LOGIN
+# =========================================================================
 @auth_bp.route('/login', methods=['POST'])
 def login_usuario():
     data = request.get_json()
-
     email = data.get('email')
     password = data.get('password')
+
     if not email or not password:
         return jsonify({'error': 'Faltan credenciales'}), 400
 
-    # 1. Buscamos directamente por el correo institucional
     usuario = Usuario.query.filter_by(email=email).first()
 
-    # 2. Verificamos si existe el usuario y si la contraseña coincide
     if usuario and bcrypt.check_password_hash(usuario.password_hash, password):
-
         session['usuario_id'] = usuario.id
         session['rol'] = usuario.rol
 
-        # Registrar auditoría
         nuevo_log = Auditoria(
             usuario_id=usuario.id,
             accion='Inicio de sesión'
         )
-
         db.session.add(nuevo_log)
         db.session.commit()
 
-        # Detectamos si está usando la contraseña genérica temporal
-        es_primer_login = (password == 'UTSC2026')
+        # Si es primer login, lo forzamos — no lo sugerimos
+        if usuario.primer_login:
+            return jsonify({
+                'mensaje': 'Login exitoso',
+                'rol': usuario.rol,
+                'forzar_cambio': True
+            }), 200
 
         return jsonify({
             'mensaje': 'Login exitoso',
             'rol': usuario.rol,
-            'sugerir_cambio': es_primer_login
+            'forzar_cambio': False
         }), 200
 
-
     return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
+
+# =========================================================================
+# CAMBIO DE CONTRASEÑA (primer login)
+# =========================================================================
+@auth_bp.route('/cambiar-password', methods=['POST'])
+def cambiar_password():
+    if 'usuario_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    data = request.get_json()
+    nueva_password = data.get('nueva_password')
+    confirmar_password = data.get('confirmar_password')
+
+    if not nueva_password or not confirmar_password:
+        return jsonify({'error': 'Faltan datos'}), 400
+
+    if nueva_password != confirmar_password:
+        return jsonify({'error': 'Las contraseñas no coinciden'}), 400
+
+    # Mínimo 8 caracteres, no puede ser la temporal
+    if len(nueva_password) < 8:
+        return jsonify({'error': 'La contraseña debe tener al menos 8 caracteres'}), 400
+
+    if nueva_password == 'UTSC2026':
+        return jsonify({'error': 'No puedes usar la contraseña temporal'}), 400
+
+    usuario = Usuario.query.get(session['usuario_id'])
+    usuario.password_hash = bcrypt.generate_password_hash(nueva_password).decode('utf-8')
+    usuario.primer_login = False  # Ya no es primer login
+
+    nuevo_log = Auditoria(
+        usuario_id=usuario.id,
+        accion='Cambio de contraseña obligatorio completado'
+    )
+    db.session.add(nuevo_log)
+    db.session.commit()
+
+    return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
