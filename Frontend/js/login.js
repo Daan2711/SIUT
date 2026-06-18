@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
+
     loginForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -11,28 +12,26 @@ document.addEventListener('DOMContentLoaded', function () {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email: email, password: password })
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
         })
         .then(response => response.json())
         .then(data => {
+            console.log("Respuesta del servidor:", data);
+
             if (data.mensaje === 'Login exitoso') {
-                // Si es primer login lo mandamos FORZADO a cambiar contraseña
-                if (data.forzar_cambio) {
-                    window.location.href = '/cambiar-password';
-                    return;
+
+                if (data.sugerir_cambio) {
+                    alert('Por seguridad, te sugerimos cambiar tu contraseña temporal lo antes posible. 🔒');
                 }
-                // Redirección normal por rol
-                if (data.rol === 'admin') {
-                    window.location.href = '/admin-dashboard';
-                } else if (data.rol === 'profesor') {
-                    window.location.href = '/profesor-dashboard';
-                } else if (data.rol === 'alumno') {
-                    window.location.href = '/alumno-dashboard';
-                } else {
-                    window.location.href = '/';
-                }
+
+                // Redirección directa al index
+                window.location.href = '/index.html';
+
             } else {
-                alert(data.error || 'Ocurrió un error al iniciar sesión');
+                alert(data.error || 'Usuario o contraseña incorrectos');
             }
         })
         .catch(error => {
