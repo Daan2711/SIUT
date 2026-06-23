@@ -2,8 +2,8 @@
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
 import os
-from flask import Flask, send_from_directory
 from dotenv import load_dotenv
+from flask import Flask, send_from_directory, request, make_response
 
 # Conexión con la instancia de la base de datos y carga de modelos
 from Database.database import db

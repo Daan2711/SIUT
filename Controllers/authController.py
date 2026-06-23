@@ -65,12 +65,16 @@ def login_usuario():
             return jsonify({
                 'mensaje': 'Login exitoso',
                 'rol': usuario.rol,
+                'nombre': usuario.nombre,        # ← NUEVO
+                'apellido': usuario.apellido,    # ← NUEVO
                 'forzar_cambio': True
             }), 200
 
         return jsonify({
             'mensaje': 'Login exitoso',
             'rol': usuario.rol,
+            'nombre': usuario.nombre,            # ← NUEVO
+            'apellido': usuario.apellido,        # ← NUEVO
             'forzar_cambio': False
         }), 200
 

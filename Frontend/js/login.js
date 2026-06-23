@@ -23,12 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.mensaje === 'Login exitoso') {
 
-                if (data.sugerir_cambio) {
-                    alert('Por seguridad, te sugerimos cambiar tu contraseña temporal lo antes posible. 🔒');
-                }
+                const nombreCompleto = (data.nombre || '') + ' ' + (data.apellido || '');
+                localStorage.setItem('nombreUsuario', nombreCompleto.trim());
 
-                // Redirección directa al index
-                window.location.href = '/index.html';
+                if (data.forzar_cambio) {
+                    window.location.href = '/cambiar-password.html';
+                } else {
+                    window.location.href = '/index.html';
+                }
 
             } else {
                 alert(data.error || 'Usuario o contraseña incorrectos');
