@@ -1,8 +1,11 @@
 const imagenes = [
-    "img/1.png", // Asegúrate de tener esta imagen
-    "img/2.png",
-    "img/3.jpeg",
-    "img/4.jpeg" // Agrega la segunda foto
+
+"img/2.png",
+
+"img/3.jpeg",
+
+"img/4.jpeg"
+
 ];
 
 let indice = 0;
