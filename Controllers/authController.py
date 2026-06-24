@@ -117,3 +117,11 @@ def cambiar_password():
     db.session.commit()
 
     return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
+
+# =========================================================================
+# LOGOUT
+# =========================================================================
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'mensaje': 'Sesión cerrada correctamente'}), 200
