@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud Enviada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: #b2dfdb;
+            padding: 40px;
+            border-radius: 12px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 20px;
+            color: #222;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #444;
+            font-size: 15px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        button {
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e09400;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>¡Solicitud enviada!</h1>
+        <p>Tu solicitud se envió correctamente.<br>En breve nos pondremos en contacto contigo.</p>
+        <button onclick="window.location.href='index.html'">Regresar al inicio</button>
+    </div>
+</body>
+</html>
