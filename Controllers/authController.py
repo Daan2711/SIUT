@@ -172,8 +172,6 @@ def cambiar_password():
 
     db.session.add(nuevo_log)
     db.session.commit()
-
-<<<<<<< Updated upstream
     return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
 
 # =========================================================================
@@ -183,8 +181,3 @@ def cambiar_password():
 def logout():
     session.clear()
     return jsonify({'mensaje': 'Sesión cerrada correctamente'}), 200
-=======
-    return jsonify({
-        'mensaje': 'Contraseña actualizada correctamente'
-    }), 200
->>>>>>> Stashed changes
