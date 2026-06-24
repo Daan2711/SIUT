@@ -2,7 +2,11 @@
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
 import os
+<<<<<<< Updated upstream
 from flask import Flask, send_from_directory, request, make_response, redirect, session
+=======
+from flask import Flask, request, send_from_directory, make_response
+>>>>>>> Stashed changes
 from dotenv import load_dotenv
 
 # Conexión con la instancia de la base de datos y carga de modelos
