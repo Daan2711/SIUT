@@ -104,6 +104,11 @@ def login_page():
 def pagina_principal():
     if 'usuario_id' not in session:
         return redirect('/login')
+
+@app.route('/horario.html')
+def pagina_principal():
+    if 'usuario_id' not in session:
+        return redirect('/login')
     
     from Models.models import Usuario
     usuario = Usuario.query.get(session['usuario_id'])
