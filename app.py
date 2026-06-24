@@ -2,9 +2,8 @@
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
 import os
-from flask import Flask, send_from_directory, request, make_response
+from flask import Flask, send_from_directory, request, make_response, redirect, session
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory, request, make_response
 
 # Conexión con la instancia de la base de datos y carga de modelos
 from Database.database import db
@@ -101,9 +100,18 @@ def login_page():
 
 @app.route('/index.html')
 def pagina_principal():
-    return send_from_directory('Frontend', 'index.html')
-    response = make_response(send_from_directory('Frontend', 'login.html'))
-    return response
+    if 'usuario_id' not in session:
+        return redirect('/login')
+    
+    from Models.models import Usuario
+    usuario = Usuario.query.get(session['usuario_id'])
+    nombre = f"{usuario.nombre} {usuario.apellido}" if usuario else 'Nombre del Alumno'
+    
+    with open('Frontend/index.html', 'r', encoding='utf-8') as f:
+        html = f.read()
+    
+    html = html.replace('Nombre del Alumno', nombre)
+    return html
 
 @app.route('/.well-known/security.txt')
 def security_txt():

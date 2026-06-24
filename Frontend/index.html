@@ -31,17 +31,9 @@
     <!-- CARRUSEL -->
     <section class="slider">
 
-        <button class="flecha izquierda" onclick="anterior()">
-            &#10094;
-        </button>
-
         <img id="imagenSlider"
              src="img/1.PNG"
             >
-
-        <button class="flecha derecha" onclick="siguiente()">
-            &#10095;
-        </button>
 
     </section>
 
@@ -67,11 +59,4 @@
     </section>
 
     <script src="js/app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const nombre = localStorage.getItem('nombreUsuario') || 'Nombre del Alumno';
-            document.getElementById('spanNombre').textContent = nombre;
-        });
-    </script>
-</body>
 </html>
