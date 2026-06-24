@@ -65,12 +65,16 @@ def login_usuario():
             return jsonify({
                 'mensaje': 'Login exitoso',
                 'rol': usuario.rol,
+                'nombre': usuario.nombre,        # ← NUEVO
+                'apellido': usuario.apellido,    # ← NUEVO
                 'forzar_cambio': True
             }), 200
 
         return jsonify({
             'mensaje': 'Login exitoso',
             'rol': usuario.rol,
+            'nombre': usuario.nombre,            # ← NUEVO
+            'apellido': usuario.apellido,        # ← NUEVO
             'forzar_cambio': False
         }), 200
 
@@ -113,3 +117,11 @@ def cambiar_password():
     db.session.commit()
 
     return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
+
+# =========================================================================
+# LOGOUT
+# =========================================================================
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'mensaje': 'Sesión cerrada correctamente'}), 200
