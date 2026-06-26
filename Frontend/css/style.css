@@ -308,3 +308,349 @@ body{
     margin:5px 0;
     color:#555;
 }
+
+/* HEADER */
+header{
+    background:#c9ebe7;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 30px;
+}
+
+.logo img{
+    width:120px;
+}
+
+nav{
+    display:flex;
+    gap:20px;
+}
+
+nav a{
+    text-decoration:none;
+    color:#222;
+    font-size:14px;
+    font-weight:600;
+}
+
+nav a.activo{
+    border-bottom:2px solid black;
+}
+
+.perfil{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.perfil img{
+    width:35px;
+    height:35px;
+}
+
+/* EVENTOS PILL */
+.cards-eventos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.card-evento {
+    background: #c9ebe7;
+    border-radius: 50px;
+    padding: 22px 28px 18px 28px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-evento h3 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+
+.card-evento p {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+}
+
+.card-evento a {
+    color: #e07b00;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    margin-top: 4px;
+}
+
+.card-evento a:hover {
+    color: #b86200;
+}
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid #888;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #444;
+}
+
+.btn-logout:hover {
+    background: #f0f0f0;
+}
+.perfil-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+/*======================================================
+                    BUZÓN DE SUGERENCIAS
+======================================================*/
+
+.buzon-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.buzon-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.buzon-divider {
+    border: none;
+    border-top: 1px solid #d9d9d9;
+    margin-bottom: 25px;
+}
+
+.buzon-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.buzon-form .input-group {
+    margin-bottom: 20px;
+}
+
+.buzon-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #333;
+    font-weight: bold;
+}
+
+.buzon-form input,
+.buzon-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #e6e6e6;
+    outline: none;
+    font-size: 15px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.buzon-form input:focus,
+.buzon-form textarea:focus {
+    background: #f3f3f3;
+}
+
+.buzon-form textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+.btn-enviar {
+    background: #f28100;
+    color: #fff;
+    border: none;
+    padding: 12px 45px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    align-self: center;
+    transition: .3s;
+}
+
+.btn-enviar:hover {
+    background: #d96f00;
+    transform: scale(1.05);
+}
+
+/*======================================================
+                        SOPORTE
+======================================================*/
+
+.contenedor {
+    width: 100%;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.titulo-pagina {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.titulo-pagina h1 {
+    color: #333;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.tarjetas-soporte-flex {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 45px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.tarjeta-soporte {
+    width: 320px;
+    background: #fff;
+    padding: 35px 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 18px rgba(0,0,0,.10);
+    transition: .3s;
+}
+
+.tarjeta-soporte:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
+}
+
+.circulo-icono {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 25px;
+    border: 4px solid #f28100;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circulo-icono i {
+    color: #f28100;
+    font-size: 42px;
+}
+
+.datos-soporte p {
+    margin: 12px 0;
+    color: #333;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.datos-soporte a {
+    color: #333;
+    text-decoration: none;
+    transition: .3s;
+    word-break: break-word;
+}
+
+.datos-soporte a:hover {
+    color: #f28100;
+}
+
+.datos-soporte a:visited {
+    color: #333;
+}
+
+/*======================================================
+                    RESPONSIVE
+======================================================*/
+
+@media (max-width: 992px) {
+
+    .tarjetas-soporte-flex {
+        gap: 30px;
+    }
+
+    .tarjeta-soporte {
+        width: 300px;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .contenedor {
+        padding: 25px 15px;
+    }
+
+    .titulo-pagina h1 {
+        font-size: 28px;
+    }
+
+    .tarjetas-soporte-flex {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tarjeta-soporte {
+        width: 95%;
+        max-width: 360px;
+    }
+
+    .circulo-icono {
+        width: 100px;
+        height: 100px;
+    }
+
+    .circulo-icono i {
+        font-size: 36px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .buzon-container {
+        margin: 20px 15px;
+        padding: 25px;
+    }
+
+    .buzon-container h1 {
+        font-size: 24px;
+    }
+
+    .btn-enviar {
+        width: 100%;
+    }
+
+    .titulo-pagina h1 {
+        font-size: 24px;
+    }
+
+    .datos-soporte p {
+        font-size: 15px;
+    }
+
+}
