@@ -70,7 +70,7 @@ def login_usuario():
 
         nuevo_log = Auditoria(
             usuario_id=usuario.id,
-            accion='Inicio de sesión'
+            accion='Inicio de sesiÃ³n'
         )
 
         db.session.add(nuevo_log)
@@ -80,21 +80,21 @@ def login_usuario():
             return jsonify({
                 'mensaje': 'Login exitoso',
                 'rol': usuario.rol,
-                'nombre': usuario.nombre,        # ← NUEVO
-                'apellido': usuario.apellido,    # ← NUEVO
+                'nombre': usuario.nombre,        # â NUEVO
+                'apellido': usuario.apellido,    # â NUEVO
                 'forzar_cambio': True
             }), 200
 
         return jsonify({
             'mensaje': 'Login exitoso',
             'rol': usuario.rol,
-            'nombre': usuario.nombre,            # ← NUEVO
-            'apellido': usuario.apellido,        # ← NUEVO
+            'nombre': usuario.nombre,            # â NUEVO
+            'apellido': usuario.apellido,        # â NUEVO
             'forzar_cambio': False
         }), 200
 
     return jsonify({
-        'error': 'Usuario o contraseña incorrectos'
+        'error': 'Usuario o contraseÃ±a incorrectos'
     }), 401
 
 
@@ -123,12 +123,12 @@ def logout():
     session.clear()
 
     return jsonify({
-        'mensaje': 'Sesión cerrada'
+        'mensaje': 'SesiÃ³n cerrada'
     })
 
 
 # =========================================================================
-# CAMBIO DE CONTRASEÑA (primer login)
+# CAMBIO DE CONTRASEÃA (primer login)
 # =========================================================================
 @auth_bp.route('/cambiar-password', methods=['POST'])
 def cambiar_password():
@@ -145,16 +145,16 @@ def cambiar_password():
         return jsonify({'error': 'Faltan datos'}), 400
 
     if nueva_password != confirmar_password:
-        return jsonify({'error': 'Las contraseñas no coinciden'}), 400
+        return jsonify({'error': 'Las contraseÃ±as no coinciden'}), 400
 
     if len(nueva_password) < 8:
         return jsonify({
-            'error': 'La contraseña debe tener al menos 8 caracteres'
+            'error': 'La contraseÃ±a debe tener al menos 8 caracteres'
         }), 400
 
     if nueva_password == 'UTSC2026':
         return jsonify({
-            'error': 'No puedes usar la contraseña temporal'
+            'error': 'No puedes usar la contraseÃ±a temporal'
         }), 400
 
     usuario = Usuario.query.get(session['usuario_id'])
@@ -167,10 +167,17 @@ def cambiar_password():
 
     nuevo_log = Auditoria(
         usuario_id=usuario.id,
-        accion='Cambio de contraseña obligatorio completado'
+        accion='Cambio de contraseÃ±a obligatorio completado'
     )
 
     db.session.add(nuevo_log)
     db.session.commit()
-    return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
+    return jsonify({'mensaje': 'ContraseÃ±a actualizada correctamente'}), 200
 
+# =========================================================================
+# LOGOUT
+# =========================================================================
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'mensaje': 'SesiÃ³n cerrada correctamente'}), 200
