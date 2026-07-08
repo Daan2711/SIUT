@@ -100,20 +100,46 @@ def login_page():
     return send_from_directory('Frontend', 'login.html')
 
 
-@app.route('/index.html')
-def pagina_principal():
+def _render_con_nombre(nombre_archivo):
+    """Sirve una vista del Frontend reemplazando 'Nombre del Alumno' por el nombre real."""
     if 'usuario_id' not in session:
         return redirect('/login')
-    
+
     from Models.models import Usuario
     usuario = Usuario.query.get(session['usuario_id'])
     nombre = f"{usuario.nombre} {usuario.apellido}" if usuario else 'Nombre del Alumno'
-    
-    with open('Frontend/index.html', 'r', encoding='utf-8') as f:
+
+    with open(f'Frontend/{nombre_archivo}', 'r', encoding='utf-8') as f:
         html = f.read()
-    
+
     html = html.replace('Nombre del Alumno', nombre)
     return html
+
+
+@app.route('/index.html')
+def pagina_principal():
+    return _render_con_nombre('index.html')
+
+
+@app.route('/buzon.html')
+def buzon_page():
+    return _render_con_nombre('buzon.html')
+
+
+@app.route('/maestros.html')
+def maestros_page():
+    return _render_con_nombre('maestros.html')
+
+
+@app.route('/horario.html')
+def horario_page():
+    return _render_con_nombre('horario.html')
+
+
+@app.route('/soporte.html')
+def soporte_page():
+    return _render_con_nombre('soporte.html')
+
 
 @app.route('/.well-known/security.txt')
 def security_txt():
