@@ -94,7 +94,7 @@ def login_usuario():
         }), 200
 
     return jsonify({
-        'error': 'Usuario o contraseÃ±a incorrectos'
+        'error': 'Usuario o contraseña incorrectos'
     }), 401
 
 
@@ -123,7 +123,7 @@ def logout():
     session.clear()
 
     return jsonify({
-        'mensaje': 'SesiÃ³n cerrada correctamente'
+        'mensaje': 'Sesión cerrada correctamente'
     }), 200
 
 
@@ -149,12 +149,12 @@ def cambiar_password():
 
     if len(nueva_password) < 8:
         return jsonify({
-            'error': 'La contraseÃ±a debe tener al menos 8 caracteres'
+            'error': 'La contraseña debe tener al menos 8 caracteres'
         }), 400
 
     if nueva_password == 'UTSC2026':
         return jsonify({
-            'error': 'No puedes usar la contraseÃ±a temporal'
+            'error': 'No puedes usar la contraseña temporal'
         }), 400
 
     usuario = Usuario.query.get(session['usuario_id'])
@@ -172,5 +172,5 @@ def cambiar_password():
 
     db.session.add(nuevo_log)
     db.session.commit()
-    return jsonify({'mensaje': 'ContraseÃ±a actualizada correctamente'}), 200
+    return jsonify({'mensaje': 'Contraseña actualizada correctamente'}), 200
 
