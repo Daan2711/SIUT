@@ -64,7 +64,7 @@ app.register_blueprint(auth_bp)
 def set_security_headers(response):
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self'; "
+        "script-src 'self' https://cdnjs.cloudflare.com; "
         "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
         "img-src 'self' data:; "
         "font-src 'self' https://cdnjs.cloudflare.com; "
