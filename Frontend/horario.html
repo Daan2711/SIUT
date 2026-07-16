@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal UTSC - Mi Horario</title>
     <link rel="stylesheet" href="css/style.css">
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
-
     <header>
         <div class="logo">
             <img src="img/logo.png" alt="UTSC">
@@ -29,41 +26,20 @@
             <span>Nombre del Alumno</span>
         </div>
     </header>
-
     <main class="contenedor">
         <div class="titulo-pagina">
             <h1>Mi Horario</h1>
             <p>Consulta tu horario escolar actualizado.</p>
-            
+
             <button id="btn-pdf" style="margin-top: 10px; padding: 10px 15px; cursor: pointer;">
                 Descargar Horario en PDF
             </button>
         </div>
-
         <div class="horario-imagen" id="area-pdf">
             <img src="img/horario.png" alt="Horario Escolar" style="width: 100%; display: block;">
         </div>
     </main>
-
-    <script>
-      document.getElementById('btn-pdf').addEventListener('click', () => {
-    const elemento = document.getElementById('area-pdf');
-    const opciones = {
-        margin:       0.5,
-        filename:     'Mi_Horario_UTSC.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opciones).from(elemento).save()
-        .catch(err => alert('Error PDF: ' + err.message));
-});
-
-            // Ejecutar la conversión
-            html2pdf().set(opciones).from(elemento).save();
-        });
-    </script>
-
+    <script src="js/horario-pdf.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>
