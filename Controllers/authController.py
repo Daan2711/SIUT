@@ -70,7 +70,7 @@ def login_usuario():
 
         nuevo_log = Auditoria(
             usuario_id=usuario.id,
-            accion='Inicio de sesiÃ³n'
+            accion='Inicio de sesión'
         )
 
         db.session.add(nuevo_log)
@@ -145,7 +145,7 @@ def cambiar_password():
         return jsonify({'error': 'Faltan datos'}), 400
 
     if nueva_password != confirmar_password:
-        return jsonify({'error': 'Las contraseÃ±as no coinciden'}), 400
+        return jsonify({'error': 'Las contraseñas no coinciden'}), 400
 
     if len(nueva_password) < 8:
         return jsonify({
