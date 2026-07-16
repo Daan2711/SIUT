@@ -123,8 +123,8 @@ def logout():
     session.clear()
 
     return jsonify({
-        'mensaje': 'SesiÃ³n cerrada'
-    })
+        'mensaje': 'SesiÃ³n cerrada correctamente'
+    }), 200
 
 
 # =========================================================================
@@ -174,10 +174,3 @@ def cambiar_password():
     db.session.commit()
     return jsonify({'mensaje': 'ContraseÃ±a actualizada correctamente'}), 200
 
-# =========================================================================
-# LOGOUT
-# =========================================================================
-@auth_bp.route('/logout', methods=['POST'])
-def logout():
-    session.clear()
-    return jsonify({'mensaje': 'SesiÃ³n cerrada correctamente'}), 200
