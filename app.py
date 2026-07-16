@@ -47,8 +47,6 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-print("DATABASE_URL =", os.getenv("DATABASE_URL"))
-
 # Vinculamos la base de datos con nuestra aplicación de Flask
 db.init_app(app)
 
@@ -67,9 +65,9 @@ def set_security_headers(response):
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
         "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
         "img-src 'self' data:; "
-        "font-src 'self'; "
+        "font-src 'self' https://cdnjs.cloudflare.com; "
         "object-src 'none'; "
         "base-uri 'self';"
     )
