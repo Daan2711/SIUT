@@ -3,66 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud Enviada</title>
+    <title>Solicitud Enviada - SIUT</title>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        body{
+            background:#f4f4f4;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
         }
 
-        .card {
-            background-color: #b2dfdb;
-            padding: 40px;
-            border-radius: 12px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .card{
+            background:#b2dfdb;
+            width:420px;
+            padding:40px;
+            border-radius:15px;
+            text-align:center;
+            box-shadow:0 5px 15px rgba(0,0,0,.2);
         }
 
-        h1 {
-            font-size: 20px;
-            color: #222;
-            margin-bottom: 16px;
+        .icono{
+            font-size:60px;
+            color:#2e7d32;
+            margin-bottom:15px;
         }
 
-        p {
-            color: #444;
-            font-size: 15px;
-            margin-bottom: 30px;
-            line-height: 1.6;
+        h1{
+            color:#222;
+            margin-bottom:15px;
         }
 
-        button {
-            background-color: #f5a623;
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
+        p{
+            color:#444;
+            line-height:1.6;
+            margin-bottom:25px;
         }
 
-        button:hover {
-            background-color: #e09400;
+        button{
+            background:#f5a623;
+            color:white;
+            border:none;
+            padding:14px 30px;
+            border-radius:30px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight:bold;
+            transition:.3s;
         }
+
+        button:hover{
+            background:#dd9300;
+        }
+
+        .contador{
+            margin-top:20px;
+            color:#555;
+            font-size:14px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>¡Solicitud enviada!</h1>
-        <p>Tu solicitud se envió correctamente.<br>En breve nos pondremos en contacto contigo.</p>
-        <button onclick="window.location.href='index.html'">Regresar al inicio</button>
+
+<div class="card">
+
+    <div class="icono">✔</div>
+
+    <h1>¡Solicitud enviada correctamente!</h1>
+
+    <p>
+        Gracias por registrarte en el Sistema Integral Universitario de la UTSC.
+        <br><br>
+        Tu solicitud fue enviada con éxito.
+        En breve nos pondremos en contacto contigo.
+    </p>
+
+    <button onclick="window.location.href='index.html'">
+        Regresar al inicio
+    </button>
+
+    <div class="contador">
+        Serás redirigido automáticamente en <span id="segundos">5</span> segundos...
     </div>
+
+</div>
+
+<script>
+
+let tiempo = 5;
+
+const contador = document.getElementById("segundos");
+
+const intervalo = setInterval(() => {
+
+    tiempo--;
+    contador.textContent = tiempo;
+
+    if(tiempo <= 0){
+        clearInterval(intervalo);
+        window.location.href = "index.html";
+    }
+
+},1000);
+
+</script>
+
 </body>
 </html>
