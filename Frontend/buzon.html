@@ -1,62 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Buzón de Sugerencias</title>
+
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <header>
+
         <div class="logo">
             <img src="img/logo.png" alt="Logo Institución">
         </div>
-        
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">&#9776;</button>
+
         <nav>
             <a href="index.html">Inicio</a>
             <a href="horario.html">Mi Horario</a>
             <a href="maestros.html">Directorio de Maestros</a>
-            <a href="buzon.html" class="activo">Buzón de Sugerencias</a>
+            <a href="buzon.html" class="activo">
+                Buzón de Sugerencias
+            </a>
             <a href="soporte.html">Soporte</a>
         </nav>
 
         <div class="perfil">
             <img src="img/usuario.png" alt="Usuario">
-            <span>Nombre del Alumno</span>
+
+            <span id="nombreAlumno">
+                Nombre del Alumno
+            </span>
         </div>
+
     </header>
 
-    <div class="buzon-container">
-        <h1>Envía tú sugerencia</h1>
+    <main class="buzon-container">
+
+        <h1>Formulario de reporte</h1>
+
         <hr class="buzon-divider">
 
-        <form class="buzon-form" action="#" method="POST">
+        <form
+            class="buzon-form"
+            id="formularioReporte"
+            action="#"
+            method="POST"
+        >
+
             <div class="input-group">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre">
+
+                <label for="nombre">
+                    Nombre:
+                </label>
+
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    required
+                >
+
             </div>
 
             <div class="input-group">
-                <label for="grupo">Grupo y Grado:</label>
-                <input type="text" id="grupo" name="grupo">
+
+                <label for="grupo">
+                    Grupo y grado:
+                </label>
+
+                <input
+                    type="text"
+                    id="grupo"
+                    name="grupo"
+                    required
+                >
+
             </div>
 
             <div class="input-group">
-                <label for="departamento">Departamento o área de mejora:</label>
-                <input type="text" id="departamento" name="departamento" placeholder="Ej. Infraestructura de edificios">
+
+                <label for="departamento">
+                    Departamento o área de mejora:
+                </label>
+
+                <input
+                    type="text"
+                    id="departamento"
+                    name="departamento"
+                    placeholder="Ej. Infraestructura de edificios"
+                    required
+                >
+
             </div>
 
             <div class="input-group">
-                <label for="descripcion">Descripción:</label>
-                <textarea id="descripcion" name="descripcion" placeholder="Ej. Aire acondicionado averiado en salón 11 Edificio Docencia 1"></textarea>
+
+                <label for="descripcion">
+                    Descripción:
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    placeholder="Ej. Aire acondicionado averiado en salón 11, Edificio Docencia 1"
+                    required
+                ></textarea>
+
             </div>
 
-            <button type="submit" class="btn-enviar">Enviar</button>
+            <button
+                type="submit"
+                class="btn-enviar"
+            >
+                Enviar
+            </button>
+
         </form>
-    </div>
 
-    <script src="js/nav.js"></script>
+    </main>
+
+    <!-- Librería SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const formulario =
+                document.getElementById("formularioReporte");
+
+            formulario.addEventListener("submit", function (evento) {
+
+                evento.preventDefault();
+
+                Swal.fire({
+                    title: "¡Envío exitoso!",
+                    text: "Tu reporte ha sido procesado correctamente.",
+                    icon: "success",
+                    confirmButtonColor: "#ff8a00",
+                    confirmButtonText: "Aceptar"
+                }).then(function () {
+
+                    formulario.reset();
+
+                });
+
+            });
+
+        });
+
+    </script>
+
 </body>
+
 </html>
