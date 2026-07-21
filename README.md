@@ -59,18 +59,13 @@ horario_detalle (campos: hora, día, aula)
 
 Un matiz importante para tu explicación: Flask no impone MVC "puro", sino algo que se suele llamar MVT (Model-View-Template), igual que Django. La diferencia de nombres confunde mucho, así que aclara esto si te preguntan:
 
-┌──────────────────┬──────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────┐
-│ Concepto clásico │                         En tu proyecto Flask                         │                        Dónde vive                         │
-│        MVC       │                                                                      │                                                           │
-├──────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────┤
-│ Modelo           │ Clases SQLAlchemy (Usuario, Queja, Horario, Evento, Profesor,        │ Definen estructura de datos y reglas de negocio básicas   │
-│                  │ Materia, Grupo, HorarioDetalle)                                      │ (validaciones, relaciones)                                │
-├──────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────┤
-│ Controlador      │ Las funciones de ruta de Flask (@app.route(...) o Blueprints de      │ Reciben la request, consultan/modifican el Modelo,        │
-│                  │ Auth/Quejas/Horarios/Eventos)                                        │ deciden qué Vista renderizar                              │
-├──────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────┤
-│ Vista            │ Los archivos .html en /templates renderizados con Jinja2             │ Solo presentan los datos que el Controlador les pasa      │
-└──────────────────┴──────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────┘
+Tabla 1 — Mapeo MVC
+
+| Concepto clásico MVC | En tu proyecto Flask | Dónde vive |
+|---|---|---|
+| **Modelo** | Clases SQLAlchemy (`Usuario`, `Queja`, `Horario`, `Evento`, `Profesor`, `Materia`, `Grupo`, `HorarioDetalle`) | Definen estructura de datos y reglas de negocio básicas (validaciones, relaciones) |
+| **Controlador** | Funciones de ruta de Flask (`@app.route(...)` o Blueprints de Auth/Quejas/Horarios/Eventos) | Reciben la request, consultan/modifican el Modelo, deciden qué Vista renderizar |
+| **Vista** | Archivos `.html` en `/templates` renderizados con Jinja2 | Solo presentan los datos que el Controlador les pasa |
 
 En Flask, a lo que la mayoría llama "view function" (la función decorada con @app.route) en realidad cumple el rol de Controlador del MVC clásico; el verdadero "View" es la plantilla Jinja2. Explicar esta distinción de nomenclatura suele ganar puntos porque muestra que entiendes el patrón más allá de la terminología de Flask.
 
@@ -92,23 +87,16 @@ Flujo típico (ejemplo con Quejas):
 
 3. Frameworks y tecnologías usadas
 
-┌──────────────┬───────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐
-│     Capa     │                Tecnología                 │                                           Rol                                            │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ Backend      │ Flask (Python)                            │ Micro-framework web: enrutamiento, manejo de sesiones/requests                           │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ Templating   │ Jinja2                                    │ Motor de plantillas incluido en Flask, renderiza HTML dinámico                           │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORM          │ SQLAlchemy                                │ Mapea clases Python a tablas SQL, evita escribir SQL manual                              │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ Frontend CSS │ Bootstrap                                 │ Framework de estilos para diseño responsivo                                              │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ Frontend JS  │ JS puro + fetch()                         │ Sin framework (no React/Vue/Angular); AJAX nativo para llamadas asíncronas               │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ PDF          │ WeasyPrint                                │ Librería (no framework) que convierte HTML/CSS a PDF, usada para exportar horarios       │
-├──────────────┼───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
-│ Base de      │ SQL Server / PostgreSQL / MySQL, alojada  │ Neon es un proveedor de PostgreSQL serverless en la nube — evitas mantener tu propio     │
-│ datos        │ en Neon                                   │ servidor SQL Server                                                                      │
-└──────────────┴───────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘
+Tabla 2 — Frameworks y tecnologías
+
+| Capa | Tecnología | Rol |
+|---|---|---|
+| Backend | **Flask** (Python) | Micro-framework web: enrutamiento, manejo de sesiones/requests |
+| Templating | **Jinja2** | Motor de plantillas incluido en Flask, renderiza HTML dinámico |
+| ORM | **SQLAlchemy** | Mapea clases Python a tablas SQL, evita escribir SQL manual |
+| Frontend CSS | **Bootstrap** | Framework de estilos para diseño responsivo |
+| Frontend JS | JS puro + `fetch()` | Sin framework (no React/Vue/Angular); AJAX nativo para llamadas asíncronas |
+| PDF | **WeasyPrint** | Librería (no framework) que convierte HTML/CSS a PDF, usada para exportar horarios |
+| Base de datos | SQL Server / PostgreSQL / MySQL, alojada en **Neon** | Neon es un proveedor de PostgreSQL *serverless* en la nube — evitas mantener tu propio servidor SQL Server |
 
 Punto clave para tu explicación de Neon: no es un framework ni un ORM, es un DBaaS (Database as a Service) de Postgres. Lo usaste para no pagar/mantener infraestructura de servidor SQL propia — SQLAlchemy simplemente apunta su connection string a Neon en vez de a un servidor local.
