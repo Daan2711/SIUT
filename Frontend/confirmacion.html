@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud Enviada - SIUT</title>
-
     <style>
         *{
             margin:0;
@@ -12,7 +11,6 @@
             box-sizing:border-box;
             font-family:Arial, Helvetica, sans-serif;
         }
-
         body{
             background:#f4f4f4;
             display:flex;
@@ -20,7 +18,6 @@
             align-items:center;
             min-height:100vh;
         }
-
         .card{
             background:#b2dfdb;
             width:420px;
@@ -29,24 +26,20 @@
             text-align:center;
             box-shadow:0 5px 15px rgba(0,0,0,.2);
         }
-
         .icono{
             font-size:60px;
             color:#2e7d32;
             margin-bottom:15px;
         }
-
         h1{
             color:#222;
             margin-bottom:15px;
         }
-
         p{
             color:#444;
             line-height:1.6;
             margin-bottom:25px;
         }
-
         button{
             background:#f5a623;
             color:white;
@@ -58,63 +51,33 @@
             font-weight:bold;
             transition:.3s;
         }
-
         button:hover{
             background:#dd9300;
         }
-
         .contador{
             margin-top:20px;
             color:#555;
             font-size:14px;
         }
-
     </style>
 </head>
 <body>
-
 <div class="card">
-
     <div class="icono">✔</div>
-
     <h1>¡Solicitud enviada correctamente!</h1>
-
     <p>
         Gracias por registrarte en el Sistema Integral Universitario de la UTSC.
         <br><br>
         Tu solicitud fue enviada con éxito.
         En breve nos pondremos en contacto contigo.
     </p>
-
-    <button onclick="window.location.href='index.html'">
+    <button id="btnInicio">
         Regresar al inicio
     </button>
-
     <div class="contador">
         Serás redirigido automáticamente en <span id="segundos">5</span> segundos...
     </div>
-
 </div>
-
-<script>
-
-let tiempo = 5;
-
-const contador = document.getElementById("segundos");
-
-const intervalo = setInterval(() => {
-
-    tiempo--;
-    contador.textContent = tiempo;
-
-    if(tiempo <= 0){
-        clearInterval(intervalo);
-        window.location.href = "index.html";
-    }
-
-},1000);
-
-</script>
-
+<script src="js/confirmacion.js"></script>
 </body>
 </html>
