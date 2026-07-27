@@ -13,6 +13,7 @@ import Models.models
 
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
+from Controllers.buzonController import buzon_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -55,6 +56,7 @@ db.init_app(app)
 # =========================================================================
 # Conectamos las rutas del controlador de autenticación a la app principal
 app.register_blueprint(auth_bp)
+app.register_blueprint(buzon_bp)
 
 # =========================================================================
 # SECCIÓN 5.5: RUTAS PARA RENDERIZAR LAS VISTAS HTML
