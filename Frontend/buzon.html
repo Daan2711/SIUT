@@ -39,12 +39,13 @@
         >
             <div class="input-group">
                 <label for="nombre">
-                    Nombre:
+                    Nombre completo:
                 </label>
                 <input
                     type="text"
                     id="nombre"
                     name="nombre"
+                    placeholder="Ej. Dante Arrieta Martinez"
                     required
                 >
             </div>
@@ -56,6 +57,7 @@
                     type="text"
                     id="grupo"
                     name="grupo"
+                    placeholder="Ej. IDGS9E"
                     required
                 >
             </div>
@@ -63,12 +65,30 @@
                 <label for="departamento">
                     Departamento o área de mejora:
                 </label>
-                <input
-                    type="text"
+                <select
                     id="departamento"
                     name="departamento"
-                    placeholder="Ej. Infraestructura de edificios"
                     required
+                >
+                    <option value="" disabled selected>
+                        Selecciona una opción
+                    </option>
+                    <option value="Sistemas">Sistemas</option>
+                    <option value="Infraestructura">Infraestructura</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Escolares">Escolares</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="input-group" id="grupoOtroDepartamento" style="display:none;">
+                <label for="otroDepartamento">
+                    Especifica el departamento o área:
+                </label>
+                <input
+                    type="text"
+                    id="otroDepartamento"
+                    name="otroDepartamento"
+                    placeholder="Ej. Biblioteca"
                 >
             </div>
             <div class="input-group">
