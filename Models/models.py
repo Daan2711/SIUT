@@ -144,7 +144,7 @@ class Sugerencia(db.Model):
     grupo_grado = db.Column(db.String(50))
     categoria_id = db.Column(db.Integer, db.ForeignKey('categorias_sugerencia.id'))
     descripcion = db.Column(db.Text, nullable=False)
-    estado = db.Column(db.String(50), default='Pendiente')
+    estado = db.Column(db.String(50), default='pendiente')
     respuesta_admin = db.Column(db.Text)
     atendida_por = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
     fecha_atencion = db.Column(db.DateTime)
@@ -201,8 +201,3 @@ class Auditoria(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
-
-
-  
-
-
