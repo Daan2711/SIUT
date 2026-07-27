@@ -35,22 +35,61 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Aquí queda disponible el valor final por si luego se envía al backend
-        // const datos = {
-        //     nombre: document.getElementById("nombre").value,
-        //     grupo: document.getElementById("grupo").value,
-        //     departamento: departamentoFinal,
-        //     descripcion: document.getElementById("descripcion").value
-        // };
+        const datos = {
+            nombre: document.getElementById("nombre").value.trim(),
+            grupo: document.getElementById("grupo").value.trim(),
+            departamento: departamentoFinal,
+            descripcion: document.getElementById("descripcion").value.trim()
+        };
 
-        Swal.fire({
-            title: "¡Envío exitoso!",
-            text: "Tu reporte ha sido procesado correctamente.",
-            icon: "success",
-            confirmButtonColor: "#ff8a00",
-            confirmButtonText: "Aceptar"
-        }).then(function () {
-            window.location.href = "confirmacion.html";
-        });
+        // Deshabilitamos el botón para evitar doble envío
+        const btnEnviar = formulario.querySelector(".btn-enviar");
+        btnEnviar.disabled = true;
+
+        fetch("/guardar-sugerencia", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin", // manda la cookie de sesión
+            body: JSON.stringify(datos)
+        })
+            .then(function (respuesta) {
+                return respuesta.json().then(function (cuerpo) {
+                    return { ok: respuesta.ok, cuerpo: cuerpo };
+                });
+            })
+            .then(function (resultado) {
+                btnEnviar.disabled = false;
+
+                if (!resultado.ok) {
+                    Swal.fire({
+                        title: "No se pudo enviar",
+                        text: resultado.cuerpo.error || "Ocurrió un error inesperado.",
+                        icon: "error",
+                        confirmButtonColor: "#ff8a00"
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: "¡Envío exitoso!",
+                    text: "Tu reporte ha sido procesado correctamente.",
+                    icon: "success",
+                    confirmButtonColor: "#ff8a00",
+                    confirmButtonText: "Aceptar"
+                }).then(function () {
+                    window.location.href = "confirmacion.html";
+                });
+            })
+            .catch(function () {
+                btnEnviar.disabled = false;
+                Swal.fire({
+                    title: "Error de conexión",
+                    text: "No se pudo contactar al servidor. Intenta de nuevo.",
+                    icon: "error",
+                    confirmButtonColor: "#ff8a00"
+                });
+            });
     });
 });
