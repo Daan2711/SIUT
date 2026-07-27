@@ -47,7 +47,11 @@ def guardar_sugerencia():
         grupo_grado=grupo_grado,
         categoria_id=categoria.id,
         descripcion=descripcion,
-        estado='Pendiente',
+        # NOTA: 'estado' se omite a propósito. La tabla tiene un CHECK
+        # constraint creado directo en Neon que rechaza 'Pendiente'.
+        # Dejamos que el DEFAULT de la columna en la base de datos
+        # decida el valor inicial, hasta confirmar qué valores acepta
+        # el constraint 'sugerencias_estado_check'.
         creado_por=session['usuario_id']
     )
 
