@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción Confirmada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background-color: #b2dfdb;
+            padding: 40px;
+            border-radius: 12px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .check-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #f5a623;
+            color: white;
+            font-size: 40px;
+            line-height: 70px;
+            margin: 0 auto 20px auto;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #222;
+        }
+        p {
+            color: #444;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        a.button {
+            display: inline-block;
+            background-color: #f5a623;
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        a.button:hover {
+            background-color: #e09400;
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+            .card {
+                width: 100%;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="check-icon">&#10003;</div>
+        <h1>¡Inscripción confirmada!</h1>
+        <p>Gracias por registrarte. Hemos recibido tus datos correctamente y en breve te contactaremos con más información.</p>
+        <a class="button" href="inscripcion.html">Volver al inicio</a>
+    </div>
+</body>
+</html>
