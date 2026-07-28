@@ -10,7 +10,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -19,7 +18,6 @@
             align-items: center;
             min-height: 100vh;
         }
-
         .card {
             background-color: #b2dfdb;
             padding: 40px;
@@ -27,36 +25,30 @@
             width: 400px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
         .logo {
             text-align: center;
             margin-bottom: 10px;
         }
-
         .logo img {
             width: 80px;
         }
-
         h1 {
             text-align: center;
             font-size: 22px;
             margin-bottom: 6px;
             color: #222;
         }
-
         p.subtitle {
             text-align: center;
             color: #555;
             margin-bottom: 24px;
         }
-
         label {
             display: block;
             font-size: 14px;
             margin-bottom: 4px;
             color: #333;
         }
-
         input {
             width: 100%;
             border: none;
@@ -67,7 +59,6 @@
             font-size: 14px;
             outline: none;
         }
-
         button {
             width: 100%;
             background-color: #f5a623;
@@ -80,16 +71,13 @@
             cursor: pointer;
             margin-top: 10px;
         }
-
         button:hover {
             background-color: #e09400;
         }
-
         @media (max-width: 480px) {
             body {
                 padding: 20px 15px;
             }
-
             .card {
                 width: 100%;
                 padding: 25px;
@@ -101,14 +89,13 @@
     <div class="card">
         <h1>Inscríbete Ahora</h1>
         <p class="subtitle">Completa el formulario</p>
-
-        <label>Nombre completo</label>
-        <input type="text" placeholder="Ingresa tu nombre" required>
-
-        <label>Correo electrónico</label>
-        <input type="email" placeholder="Ingresa tu correo" required>
-
-        <button onclick="window.location.href= 'confirmacion.html' ">Enviar</button>
+        <form action="confirmacion.html" method="get">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" placeholder="Ingresa tu nombre" required>
+            <label>Correo electrónico</label>
+            <input type="email" name="correo" placeholder="Ingresa tu correo" required>
+            <button type="submit">Enviar</button>
+        </form>
     </div>
 </body>
 </html>
