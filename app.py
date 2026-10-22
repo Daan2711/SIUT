@@ -13,6 +13,7 @@ import Models.models
 
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
+from Controllers.buzonController import buzon_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -47,8 +48,6 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-print("DATABASE_URL =", os.getenv("DATABASE_URL"))
-
 # Vinculamos la base de datos con nuestra aplicación de Flask
 db.init_app(app)
 
@@ -57,6 +56,7 @@ db.init_app(app)
 # =========================================================================
 # Conectamos las rutas del controlador de autenticación a la app principal
 app.register_blueprint(auth_bp)
+app.register_blueprint(buzon_bp)
 
 # =========================================================================
 # SECCIÓN 5.5: RUTAS PARA RENDERIZAR LAS VISTAS HTML
@@ -66,10 +66,10 @@ app.register_blueprint(auth_bp)
 def set_security_headers(response):
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; "
+        "script-src 'self' https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
         "img-src 'self' data:; "
-        "font-src 'self'; "
+        "font-src 'self' https://cdnjs.cloudflare.com; "
         "object-src 'none'; "
         "base-uri 'self';"
     )
@@ -100,20 +100,46 @@ def login_page():
     return send_from_directory('Frontend', 'login.html')
 
 
-@app.route('/index.html')
-def pagina_principal():
+def _render_con_nombre(nombre_archivo):
+    """Sirve una vista del Frontend reemplazando 'Nombre del Alumno' por el nombre real."""
     if 'usuario_id' not in session:
         return redirect('/login')
-    
+
     from Models.models import Usuario
     usuario = Usuario.query.get(session['usuario_id'])
     nombre = f"{usuario.nombre} {usuario.apellido}" if usuario else 'Nombre del Alumno'
-    
-    with open('Frontend/index.html', 'r', encoding='utf-8') as f:
+
+    with open(f'Frontend/{nombre_archivo}', 'r', encoding='utf-8') as f:
         html = f.read()
-    
+
     html = html.replace('Nombre del Alumno', nombre)
     return html
+
+
+@app.route('/index.html')
+def pagina_principal():
+    return _render_con_nombre('index.html')
+
+
+@app.route('/buzon.html')
+def buzon_page():
+    return _render_con_nombre('buzon.html')
+
+
+@app.route('/maestros.html')
+def maestros_page():
+    return _render_con_nombre('maestros.html')
+
+
+@app.route('/horario.html')
+def horario_page():
+    return _render_con_nombre('horario.html')
+
+
+@app.route('/soporte.html')
+def soporte_page():
+    return _render_con_nombre('soporte.html')
+
 
 @app.route('/.well-known/security.txt')
 def security_txt():

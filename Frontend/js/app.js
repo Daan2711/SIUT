@@ -2,9 +2,9 @@ const imagenes = [
 
 "img/2.png",
 
-"img/3.jpeg",
+"img/3.jpg",
 
-"img/4.jpeg"
+"img/4.jpg"
 
 ];
 

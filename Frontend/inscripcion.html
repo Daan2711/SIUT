@@ -84,6 +84,17 @@
         button:hover {
             background-color: #e09400;
         }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .card {
+                width: 100%;
+                padding: 25px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -91,13 +102,15 @@
         <h1>Inscríbete Ahora</h1>
         <p class="subtitle">Completa el formulario</p>
 
-        <label>Nombre completo</label>
-        <input type="text" placeholder="Ingresa tu nombre" required>
+        <form action="confirmacion.html" method="get">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" placeholder="Ingresa tu nombre" required>
 
-        <label>Correo electrónico</label>
-        <input type="email" placeholder="Ingresa tu correo" required>
+            <label>Correo electrónico</label>
+            <input type="email" name="correo" placeholder="Ingresa tu correo" required>
 
-        <button onclick="window.location.href='confirmacion.html'">Enviar</button>
+            <button type="submit">Enviar</button>
+        </form>
     </div>
 </body>
 </html>
