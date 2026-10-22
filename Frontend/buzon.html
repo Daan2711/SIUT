@@ -1,118 +1,129 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-    <title>Buzón de Sugerencias</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar empleos | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="img/logo.png" alt="Logo Institución">
-        </div>
-        <nav>
-            <a href="index.html">Inicio</a>
-            <a href="horario.html">Mi Horario</a>
-            <a href="maestros.html">Directorio de Maestros</a>
-            <a href="buzon.html" class="activo">
-                Buzón de Sugerencias
-            </a>
-            <a href="soporte.html">Soporte</a>
-        </nav>
-        <div class="perfil">
-            <img src="img/usuario.png" alt="Usuario">
-            <span id="nombreAlumno">
-                Nombre del Alumno
-            </span>
-        </div>
-    </header>
-    <main class="buzon-container">
-        <h1>Formulario de reporte</h1>
-        <hr class="buzon-divider">
-        <form
-            class="buzon-form"
-            id="formularioReporte"
-            action="#"
-            method="POST"
-        >
-            <div class="input-group">
-                <label for="nombre">
-                    Nombre completo:
-                </label>
-                <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    placeholder="Ej. Nombre Apellido Apellido"
-                    required
-                >
-            </div>
-            <div class="input-group">
-                <label for="grupo">
-                    Grupo y grado:
-                </label>
-                <input
-                    type="text"
-                    id="grupo"
-                    name="grupo"
-                    placeholder="Ej. IDGS9E"
-                    required
-                >
-            </div>
-            <div class="input-group">
-                <label for="departamento">
-                    Departamento o área de mejora:
-                </label>
-                <select
-                    id="departamento"
-                    name="departamento"
-                    required
-                >
-                    <option value="" disabled selected>
-                        Selecciona una opción
-                    </option>
-                    <option value="Sistemas">Sistemas</option>
-                    <option value="Infraestructura">Infraestructura</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                    <option value="Escolares">Escolares</option>
-                    <option value="Otro">Otro</option>
-                </select>
-            </div>
-            <div class="input-group" id="grupoOtroDepartamento" style="display:none;">
-                <label for="otroDepartamento">
-                    Especifica el departamento o área:
-                </label>
-                <input
-                    type="text"
-                    id="otroDepartamento"
-                    name="otroDepartamento"
-                    placeholder="Ej. Mantenimiento"
-                >
-            </div>
-            <div class="input-group">
-                <label for="descripcion">
-                    Descripción:
-                </label>
-                <textarea
-                    id="descripcion"
-                    name="descripcion"
-                    placeholder="Ej. Aire acondicionado averiado en salón 11, Edificio Docencia 1"
-                    required
-                ></textarea>
-            </div>
-            <button
-                type="submit"
-                class="btn-enviar"
-            >
-                Enviar
-            </button>
-        </form>
-    </main>
-    <!-- Librería SweetAlert2 (servida desde cdnjs, permitido por CSP) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
-    <!-- Script propio, externo (requerido por CSP: no permite inline) -->
-    <script src="js/buzon.js"></script>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="horario.html">Mi Horario</a>
+      <a href="maestros.html">Directorio de Maestros</a>
+      <a href="buzon.html" class="activo">Buscar empleos</a>
+      <a href="soporte.html">Soporte</a>
+    </nav>
+    <div class="perfil"><img src="img/usuario.png" alt="Usuario"><span id="nombreAlumno">Estudiante UTSC</span></div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">OPORTUNIDADES PARA LA COMUNIDAD UTSC</p>
+        <h1>Encuentra tu próximo empleo</h1>
+        <p>Explora vacantes, prácticas profesionales y oportunidades para impulsar tu carrera.</p>
+      </div>
+    </section>
+
+    <section class="empleos-search-panel" aria-label="Buscar y filtrar vacantes">
+      <label class="sr-only" for="busquedaEmpleo">Puesto, empresa o palabra clave</label>
+      <div class="empleos-search-row">
+        <input id="busquedaEmpleo" type="search" placeholder="Buscar por puesto, empresa o palabra clave…">
+        <button id="btnBuscarEmpleo" class="btn-empleo-primary" type="button">Buscar</button>
+      </div>
+      <div class="empleos-filtros">
+        <label>Área
+          <select id="filtroArea"><option value="">Todas las áreas</option><option>Tecnología</option><option>Administración</option><option>Diseño</option><option>Operaciones</option><option>Soporte técnico</option></select>
+        </label>
+        <label>Modalidad
+          <select id="filtroModalidad"><option value="">Todas</option><option>Presencial</option><option>Híbrido</option><option>Remoto</option></select>
+        </label>
+        <label>Ubicación
+          <select id="filtroUbicacion"><option value="">Todas</option><option>Santa Catarina</option><option>Monterrey</option><option>San Pedro</option><option>Remoto</option></select>
+        </label>
+        <label>Experiencia
+          <select id="filtroExperiencia"><option value="">Cualquier nivel</option><option>Prácticas</option><option>Junior</option><option>Intermedio</option></select>
+        </label>
+      </div>
+    </section>
+
+    <div class="empleos-list-heading">
+      <div><h2>Vacantes disponibles</h2><p id="contadorVacantes">Oportunidades para ti</p></div>
+      <button id="btnVerFavoritos" class="btn-empleo-outline" type="button" aria-pressed="false">♡ Mis favoritos</button>
+    </div>
+
+    <section id="listaVacantes" class="empleos-grid" aria-live="polite">
+      <article class="vacante-card" data-area="Tecnología" data-modalidad="Híbrido" data-ubicacion="Monterrey" data-experiencia="Junior" data-titulo="Desarrollador frontend" data-empresa="TecnoNova" data-descripcion="Apoya en el desarrollo y mantenimiento de interfaces web responsivas. Colabora con el equipo de diseño y desarrollo para mejorar la experiencia de usuario." data-requisitos="HTML, CSS, JavaScript y control de versiones Git." data-jornada="Tiempo completo">
+        <div class="vacante-card-top"><div class="empresa-avatar">TN</div><button class="btn-favorito" type="button" aria-label="Guardar Desarrollador Frontend" aria-pressed="false">♡</button></div>
+        <span class="vacante-area">TECNOLOGÍA</span><h3>Desarrollador Frontend</h3><p class="vacante-empresa">TecnoNova</p><p class="vacante-ubicacion">⌖ Monterrey, Nuevo León</p>
+        <div class="vacante-tags"><span>Híbrido</span><span>Junior</span><span>Tiempo completo</span></div>
+        <button class="btn-ver-vacante" type="button">Ver vacante <span>→</span></button>
+      </article>
+      <article class="vacante-card" data-area="Tecnología" data-modalidad="Presencial" data-ubicacion="Santa Catarina" data-experiencia="Prácticas" data-titulo="Practicante de TI" data-empresa="GrupoFSC" data-descripcion="Brinda apoyo al área de tecnologías de información en tareas de mantenimiento, inventario y atención de incidencias internas." data-requisitos="Estudiante de TI o carrera afín, conocimientos básicos de redes y disposición para aprender." data-jornada="Prácticas profesionales">
+        <div class="vacante-card-top"><div class="empresa-avatar avatar-orange">GF</div><button class="btn-favorito" type="button" aria-label="Guardar Practicante de TI" aria-pressed="false">♡</button></div>
+        <span class="vacante-area">TECNOLOGÍA</span><h3>Practicante de TI</h3><p class="vacante-empresa">GrupoFSC</p><p class="vacante-ubicacion">⌖ Santa Catarina, Nuevo León</p>
+        <div class="vacante-tags"><span>Presencial</span><span>Prácticas</span></div>
+        <button class="btn-ver-vacante" type="button">Ver vacante <span>→</span></button>
+      </article>
+      <article class="vacante-card" data-area="Tecnología" data-modalidad="Remoto" data-ubicacion="Remoto" data-experiencia="Junior" data-titulo="Analista de Sistemas" data-empresa="DataLytics" data-descripcion="Participa en el análisis de requerimientos, documentación de procesos y mejora de sistemas de información." data-requisitos="Lógica de programación, SQL y habilidades de análisis y comunicación." data-jornada="Tiempo completo">
+        <div class="vacante-card-top"><div class="empresa-avatar avatar-purple">DL</div><button class="btn-favorito" type="button" aria-label="Guardar Analista de Sistemas" aria-pressed="false">♡</button></div>
+        <span class="vacante-area">TECNOLOGÍA</span><h3>Analista de Sistemas</h3><p class="vacante-empresa">DataLytics</p><p class="vacante-ubicacion">⌖ Remoto</p>
+        <div class="vacante-tags"><span>Remoto</span><span>Junior</span><span>Tiempo completo</span></div>
+        <button class="btn-ver-vacante" type="button">Ver vacante <span>→</span></button>
+      </article>
+      <article class="vacante-card" data-area="Soporte técnico" data-modalidad="Presencial" data-ubicacion="Monterrey" data-experiencia="Intermedio" data-titulo="Soporte Técnico" data-empresa="ServiTech" data-descripcion="Atiende solicitudes de soporte, diagnostica fallas de equipo de cómputo y documenta las soluciones aplicadas." data-requisitos="Conocimientos de Windows, hardware, redes básicas y atención a usuarios." data-jornada="Tiempo completo">
+        <div class="vacante-card-top"><div class="empresa-avatar avatar-blue">ST</div><button class="btn-favorito" type="button" aria-label="Guardar Soporte Técnico" aria-pressed="false">♡</button></div>
+        <span class="vacante-area">SOPORTE TÉCNICO</span><h3>Soporte Técnico</h3><p class="vacante-empresa">ServiTech</p><p class="vacante-ubicacion">⌖ Monterrey, Nuevo León</p>
+        <div class="vacante-tags"><span>Presencial</span><span>Intermedio</span><span>Tiempo completo</span></div>
+        <button class="btn-ver-vacante" type="button">Ver vacante <span>→</span></button>
+      </article>
+    </section>
+    <p id="sinResultados" class="sin-resultados" hidden>No encontramos vacantes con esos criterios. Prueba cambiar los filtros.</p>
+  </main>
+
+  <dialog id="detalleVacante" class="detalle-vacante-dialog">
+    <button id="cerrarDetalle" class="cerrar-dialogo" type="button" aria-label="Cerrar detalle">×</button>
+    <p id="detalleArea" class="vacante-area"></p><h2 id="detalleTitulo"></h2><p id="detalleEmpresa" class="vacante-empresa"></p><p id="detalleUbicacion"></p><div class="vacante-tags" id="detalleTags"></div>
+    <h3>Descripción del puesto</h3><p id="detalleDescripcion"></p><h3>Requisitos y habilidades</h3><p id="detalleRequisitos"></p><h3>Tipo de jornada</h3><p id="detalleJornada"></p>
+    <button id="btnPostularme" class="btn-empleo-primary btn-postular" type="button">Continuar con mi postulación →</button>
+    <p class="nota-demo">Completa tus datos para registrar tu interés en esta vacante dentro del portal SIUT.</p>
+  </dialog>
+  <dialog id="formularioPostulacion" class="postulacion-dialog">
+    <button id="cerrarFormulario" class="cerrar-dialogo" type="button" aria-label="Cerrar formulario">×</button>
+    <div class="formulario-encabezado">
+      <span class="formulario-icono">✦</span>
+      <p class="empleos-eyebrow">POSTULACIÓN PROFESIONAL</p>
+      <h2>Completa tu solicitud</h2>
+      <p>Revisa la vacante seleccionada y comparte tus datos para registrar tu postulación.</p>
+    </div>
+    <div class="vacante-seleccionada"><span>VACANTE SELECCIONADA</span><strong id="formVacanteTitulo">Puesto</strong><small id="formVacanteEmpresa">Empresa · Ubicación</small></div>
+    <form id="formPostulacion" novalidate>
+      <div class="form-seccion-titulo"><span>01</span><div><strong>Datos personales</strong><small>Información para contactarte</small></div></div>
+      <div class="form-grid">
+        <label>Nombre completo <b>*</b><input name="nombre_completo" required maxlength="180" placeholder="Ej. Melanie Rodríguez"></label>
+        <label>Correo electrónico <b>*</b><input name="correo" type="email" required maxlength="150" placeholder="nombre@correo.com"></label>
+        <label>Teléfono <b>*</b><input name="telefono" type="tel" required maxlength="30" pattern="[0-9+() -]{8,30}" placeholder="Ej. 8112345678"></label>
+        <label>Matrícula <b>*</b><input name="matricula" required maxlength="50" placeholder="Tu matrícula UTSC"></label>
+      </div>
+      <div class="form-seccion-titulo"><span>02</span><div><strong>Perfil académico</strong><small>Tu formación actual</small></div></div>
+      <div class="form-grid">
+        <label>Carrera <b>*</b><input name="carrera" required maxlength="120" placeholder="Ej. Desarrollo de Software"></label>
+        <label>Semestre <b>*</b><select name="semestre" required><option value="">Selecciona tu semestre</option><option>1° semestre</option><option>2° semestre</option><option>3° semestre</option><option>4° semestre</option><option>5° semestre</option><option>6° semestre</option><option>Egresado(a)</option></select></label>
+      </div>
+      <div class="form-seccion-titulo"><span>03</span><div><strong>Perfil profesional</strong><small>Ayuda a la empresa a conocerte</small></div></div>
+      <label>Habilidades y conocimientos <b>*</b><textarea name="habilidades" required rows="3" maxlength="1200" placeholder="Ej. HTML, CSS, JavaScript, trabajo en equipo…"></textarea></label>
+      <label>Experiencia o proyectos <span class="opcional">Opcional</span><textarea name="experiencia" rows="3" maxlength="2000" placeholder="Prácticas, proyectos escolares o experiencia laboral"></textarea></label>
+      <label>Mensaje para la empresa <span class="opcional">Opcional</span><textarea name="mensaje" rows="3" maxlength="1500" placeholder="Cuéntanos brevemente por qué te interesa esta oportunidad"></textarea></label>
+      <p class="form-privacidad">🔒 Tus datos se registrarán en SIUT para dar seguimiento a esta postulación.</p>
+      <p id="mensajePostulacion" class="mensaje-postulacion" role="status" hidden></p>
+      <div class="form-acciones"><button id="cancelarPostulacion" class="btn-empleo-outline" type="button">Cancelar</button><button id="enviarPostulacion" class="btn-empleo-primary" type="submit">Enviar postulación</button></div>
+    </form>
+  </dialog>
+
+  <script src="js/app.js"></script>
+  <script src="js/empleos.js"></script>
 </body>
 </html>
