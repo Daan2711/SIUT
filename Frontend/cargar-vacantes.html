@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargar empleos | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <div class="titulo-header">Cargar empleos</div>
+    <div class="perfil"><img src="img/usuario.png" alt="Usuario"><span id="nombreAlumno">Nombre del Alumno</span></div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">PUBLICACIÓN DE OPORTUNIDADES</p>
+        <h1>Carga una nueva vacante</h1>
+        <p>Registra la información del puesto para que la comunidad UTSC pueda consultarla y postularse.</p>
+      </div>
+    </section>
+
+    <div class="carga-layout">
+      <section class="empleos-search-panel carga-vacante-panel" aria-label="Formulario de nueva vacante">
+        <form id="formVacante" novalidate>
+          <div class="form-seccion-titulo"><span>01</span><div><strong>Información del puesto</strong><small>Qué se ofrece y quién lo ofrece</small></div></div>
+          <div class="form-grid">
+            <label>Título del puesto <b>*</b><input name="titulo" required maxlength="150" placeholder="Ej. Desarrollador frontend"></label>
+            <label>Empresa <b>*</b><input name="empresa" required maxlength="150" placeholder="Ej. TecnoNova"></label>
+            <label>Área <b>*</b>
+              <select name="area" required><option value="">Selecciona un área</option><option>Tecnología</option><option>Administración</option><option>Diseño</option><option>Operaciones</option><option>Soporte técnico</option></select>
+            </label>
+            <label>Nivel de experiencia <b>*</b>
+              <select name="experiencia" required><option value="">Selecciona un nivel</option><option>Prácticas</option><option>Junior</option><option>Intermedio</option></select>
+            </label>
+          </div>
+
+          <div class="form-seccion-titulo"><span>02</span><div><strong>Condiciones</strong><small>Modalidad, lugar y jornada</small></div></div>
+          <div class="form-grid">
+            <label>Modalidad <b>*</b>
+              <select name="modalidad" required><option value="">Selecciona la modalidad</option><option>Presencial</option><option>Híbrido</option><option>Remoto</option></select>
+            </label>
+            <label>Ubicación <b>*</b>
+              <select name="ubicacion" required><option value="">Selecciona la ubicación</option><option>Santa Catarina</option><option>Monterrey</option><option>San Pedro</option><option>Remoto</option></select>
+            </label>
+            <label>Tipo de jornada <b>*</b>
+              <select name="jornada" required><option value="">Selecciona la jornada</option><option>Tiempo completo</option><option>Medio tiempo</option><option>Prácticas profesionales</option></select>
+            </label>
+          </div>
+
+          <div class="form-seccion-titulo"><span>03</span><div><strong>Detalle de la vacante</strong><small>Lo que verá el alumno al abrir la vacante</small></div></div>
+          <label>Descripción del puesto <b>*</b><textarea name="descripcion" required rows="4" maxlength="2000" placeholder="Actividades principales, equipo y objetivos del puesto…"></textarea></label>
+          <label>Requisitos y habilidades <b>*</b><textarea name="requisitos" required rows="3" maxlength="1500" placeholder="Ej. HTML, CSS, JavaScript y control de versiones Git."></textarea></label>
+
+          <p class="form-privacidad">🔒 La vacante quedará visible para los alumnos en la sección Buscar empleos y se registrará a tu nombre en SIUT.</p>
+          <p id="mensajeVacante" class="mensaje-postulacion" role="status" hidden></p>
+          <div class="form-acciones"><button id="limpiarVacante" class="btn-empleo-outline" type="button">Limpiar</button><button id="publicarVacante" class="btn-empleo-primary" type="submit">Publicar vacante</button></div>
+        </form>
+      </section>
+
+      <aside class="carga-preview" aria-label="Vista previa de la vacante">
+        <h2>Vista previa</h2>
+        <p>Así verán la tarjeta los alumnos.</p>
+        <article class="vacante-card" aria-hidden="true">
+          <div class="vacante-card-top"><div id="prevAvatar" class="empresa-avatar">··</div><button class="btn-favorito" type="button" tabindex="-1" disabled>♡</button></div>
+          <span id="prevArea" class="vacante-area">ÁREA</span><h3 id="prevTitulo">Título del puesto</h3><p id="prevEmpresa" class="vacante-empresa">Empresa</p><p id="prevUbicacion" class="vacante-ubicacion">⌖ Ubicación</p>
+          <div id="prevTags" class="vacante-tags"></div>
+          <button class="btn-ver-vacante" type="button" tabindex="-1" disabled>Ver vacante <span>→</span></button>
+        </article>
+      </aside>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/cargar-vacantes.js"></script>
+</body>
+</html>

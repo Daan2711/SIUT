@@ -201,3 +201,27 @@ class Auditoria(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+
+class Vacante(db.Model):
+    __tablename__ = 'vacantes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=False)
+    empresa = db.Column(db.String(150), nullable=False)
+    area = db.Column(db.String(60), nullable=False)
+    modalidad = db.Column(db.String(30), nullable=False)
+    ubicacion = db.Column(db.String(60), nullable=False)
+    experiencia = db.Column(db.String(30), nullable=False)
+    jornada = db.Column(db.String(60), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+    requisitos = db.Column(db.Text, nullable=False)
+    activo = db.Column(db.Boolean, default=True)
+
+    creado_por = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    modificado_en = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def soft_delete(self):
+        self.activo = False
+        db.session.commit()

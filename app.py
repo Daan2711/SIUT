@@ -2,6 +2,7 @@
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
 import os
+import re
 from flask import Flask, send_from_directory, request, make_response, redirect, session
 
 
@@ -14,6 +15,7 @@ import Models.models
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
+from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -57,6 +59,7 @@ db.init_app(app)
 # Conectamos las rutas del controlador de autenticación a la app principal
 app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
+app.register_blueprint(vacantes_bp)
 
 # =========================================================================
 # SECCIÓN 5.5: RUTAS PARA RENDERIZAR LAS VISTAS HTML
@@ -113,6 +116,14 @@ def _render_con_nombre(nombre_archivo):
         html = f.read()
 
     html = html.replace('Nombre del Alumno', nombre)
+
+    # Usuarios con permiso de carga ven "Cargar empleos" en lugar de "Buscar empleos"
+    if puede_cargar_vacantes():
+        html = re.sub(
+            r'<a href="buzon\.html"( class="activo")?>Buscar empleos</a>',
+            r'<a href="cargar-vacantes.html"\1>Cargar empleos</a>',
+            html
+        )
     return html
 
 
@@ -124,6 +135,24 @@ def pagina_principal():
 @app.route('/buzon.html')
 def buzon_page():
     return _render_con_nombre('buzon.html')
+
+
+@app.route('/cargar-vacantes.html')
+def cargar_vacantes_page():
+    if 'usuario_id' not in session:
+        return redirect('/login')
+    if not puede_cargar_vacantes():
+        return redirect('/index.html')
+    return _render_con_nombre('cargar-vacantes.html')
+
+
+@app.route('/vacantes-publicadas.html')
+def vacantes_publicadas_page():
+    if 'usuario_id' not in session:
+        return redirect('/login')
+    if not puede_cargar_vacantes():
+        return redirect('/index.html')
+    return _render_con_nombre('vacantes-publicadas.html')
 
 
 @app.route('/maestros.html')
