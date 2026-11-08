@@ -4,6 +4,11 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Login: mensajes de error correctos con respuestas no JSON (2026-11-08)
+
+#### Corregido
+- Si el servidor respondía algo que no era JSON (por ejemplo, una página de error HTML del proxy durante un despliegue), `response.json()` fallaba y el usuario veía "Error de conexión con el servidor". Ahora la respuesta se lee de forma segura y, si no trae un mensaje propio, se muestra uno según el código HTTP (401, 429 o 5xx). "Error de conexión" queda solo para cuando no hay respuesta. — `Frontend/js/login.js`
+
 ### Pruebas automatizadas con pytest (2026-11-08)
 
 #### Agregado
