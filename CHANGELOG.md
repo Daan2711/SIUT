@@ -4,6 +4,23 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Fase 4 — Limpieza (2026-11-08)
+
+#### Eliminado
+- `Models/user.py`: modelo `Usuario` duplicado sobre la tabla `Alumnos`, sin uso.
+- `Frontend/js/empleos copy.js`: su lógica (carga de vacantes desde la API) ya está en `empleos.js`.
+- `.gitignore_respaldo` y `Frontend/contacto.html` (página vacía).
+- `.vscode/`: configuración con la ruta personal de otra persona y una solución .NET inexistente.
+- `Frontend/security.txt`: duplicado con un contacto distinto. `/security.txt` ahora redirige (301) a `/.well-known/security.txt`. — `app.py`
+
+#### Corregido
+- `security.txt`: un solo contacto (`soporte@virtual.utsc.edu.mx`), `Expires` con formato válido (`…T00:00:00.000Z`) y `Content-Type` con `charset=utf-8`. — `Frontend/.well-known/security.txt`, `app.py`
+
+#### Cambiado
+- `.gitignore`: se reemplazó la plantilla de Visual Studio por una de Python (`__pycache__`, entornos virtuales, `.env*`, `instance/`, editores).
+- `requirements.txt`: versiones fijadas a las probadas en desarrollo (Flask 3.1.0, Werkzeug 3.1.3, Flask-SQLAlchemy 3.1.1, SQLAlchemy 2.0.37, psycopg2-binary 2.9.13, python-dotenv 1.2.4, gunicorn 26.2.0, Flask-Bcrypt 1.0.1, Flask-Limiter 3.12).
+- `Dockerfile`: el contenedor corre con un usuario sin privilegios (`appuser`, uid 10001), con permiso de escritura solo en `instance/` para los CV.
+
 ### Fase 3 — Funcionalidades: postulaciones y buzón de sugerencias (2026-11-08)
 
 #### Agregado

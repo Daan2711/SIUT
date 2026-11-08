@@ -129,7 +129,7 @@ def proteger_paginas_html():
 # =========================================================================
 # Mientras el usuario tenga primer_login=True solo puede usar estas rutas.
 RUTAS_PERMITIDAS_PRIMER_LOGIN = {
-    'index', 'login_page', 'cambiar_password_page', 'security_txt',
+    'index', 'login_page', 'cambiar_password_page', 'security_txt', 'security_txt_legado',
     'auth.login_usuario', 'auth.logout', 'auth.usuario_actual', 'auth.cambiar_password',
 }
 
@@ -273,8 +273,14 @@ def postulaciones_recibidas_page():
 @app.route('/.well-known/security.txt')
 def security_txt():
     response = make_response(send_from_directory('Frontend/.well-known', 'security.txt'))
-    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
     return response
+
+
+@app.route('/security.txt')
+def security_txt_legado():
+    # Ubicación antigua: se redirige a la estándar (RFC 9116)
+    return redirect('/.well-known/security.txt', code=301)
 
 @app.route('/cambiar-password')
 def cambiar_password_page():

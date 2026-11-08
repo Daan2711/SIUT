@@ -8,7 +8,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Usuario sin privilegios: si la app se ve comprometida, no tiene root
+RUN useradd --create-home --uid 10001 appuser
+
+COPY --chown=appuser:appuser . .
+
+# Carpeta de CV (UPLOAD_DIR por defecto) con permisos de escritura para la app
+RUN mkdir -p /app/instance/uploads/cv && chown -R appuser:appuser /app/instance
+
+USER appuser
 
 EXPOSE 5000
 
