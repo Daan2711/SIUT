@@ -100,3 +100,25 @@ Tabla 2 — Frameworks y tecnologías
 | Base de datos | SQL Server / PostgreSQL / MySQL, alojada en **Neon** | Neon es un proveedor de PostgreSQL *serverless* en la nube — evitas mantener tu propio servidor SQL Server |
 
 Punto clave para tu explicación de Neon: no es un framework ni un ORM, es un DBaaS (Database as a Service) de Postgres. Lo usaste para no pagar/mantener infraestructura de servidor SQL propia — SQLAlchemy simplemente apunta su connection string a Neon en vez de a un servidor local.
+
+
+## Pruebas automatizadas
+
+Las pruebas usan **pytest** y una base de datos SQLite temporal: no tocan Neon ni leen credenciales del `.env`, y los CV se guardan en una carpeta temporal que se borra al terminar.
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+Archivos en `tests/`:
+
+| Archivo | Qué cubre |
+|---|---|
+| `test_auth.py` | Login, cambio de contraseña obligatorio, límite de intentos, sesión |
+| `test_seguridad.py` | Cabeceras, OPTIONS, páginas protegidas, escape de HTML, `security.txt` |
+| `test_vacantes.py` | Alta y listado de vacantes, empresas, permisos de reclutador |
+| `test_buzon.py` | Buzón de sugerencias: validaciones y categorías |
+| `test_postulaciones.py` | Envío de CV, listado y descarga por el reclutador |
+
+Las fixtures comunes (usuarios, alumno, reclutador, vacante, clientes con sesión) están en `tests/conftest.py`. Cada prueba arranca con la base de datos vacía.

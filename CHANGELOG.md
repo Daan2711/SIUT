@@ -4,6 +4,15 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Pruebas automatizadas con pytest (2026-11-08)
+
+#### Agregado
+- **Suite de pytest con 84 casos** en `tests/`, a partir de las pruebas de humo usadas durante las fases 1 a 4, con algunos casos de validación nuevos (campos de vacante, CV vacío, cuenta inactiva, logout, etc.).
+  - `conftest.py`: fija las variables de entorno antes de importar la app (SQLite temporal, `UPLOAD_DIR` temporal, sin `VACANTES_EMAILS` ni `TEMP_PASSWORD`), así que nunca toca Neon ni depende del `.env`. Cada prueba arranca con la base de datos, el límite de intentos y la carpeta de CV limpios.
+  - Archivos por tema: `test_auth.py`, `test_seguridad.py`, `test_vacantes.py`, `test_buzon.py`, `test_postulaciones.py`.
+- `pytest.ini` y `requirements-dev.txt` (`pytest==8.4.2`).
+- Sección "Pruebas automatizadas" en el `README.md`.
+
 ### Fase 4 — Limpieza (2026-11-08)
 
 #### Eliminado
