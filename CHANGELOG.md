@@ -4,6 +4,22 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Restricciones UNIQUE declaradas en los modelos (2026-11-08)
+
+Un diagnóstico de solo lectura en Neon mostró que las restricciones **ya existían** en la base de datos y que no hay duplicados. No se modificó Neon; se alineó el código con ella.
+
+#### Cambiado
+- Los modelos declaran las restricciones existentes en Neon, con los mismos nombres, para que `create_all` y las pruebas las incluyan. — `Models/models.py`
+  - `usuarios`: índice único `uq_usuarios_email` sobre `lower(email)`.
+  - `alumnos`: `usuario_id` único (un registro de alumno por usuario) y `matricula` única.
+  - `postulaciones`: `uq_alumno_vacante (alumno_id, vacante_id)`.
+
+#### Corregido
+- **Dos envíos simultáneos de la misma postulación devolvían 500.** El segundo chocaba con `uq_alumno_vacante` y caía en el manejo genérico de errores. Ahora responde 409 ("Ya te postulaste a esta vacante") y borra el CV que ya se había guardado. — `Controllers/postulacionesController.py`
+
+#### Pruebas
+- `tests/test_restricciones.py`: 5 casos (correo sin distinguir mayúsculas, alumno por usuario, matrícula, postulación única y envío simultáneo → 409 sin archivo huérfano).
+
 ### Login: mensajes de error correctos con respuestas no JSON (2026-11-08)
 
 #### Corregido

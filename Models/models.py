@@ -3,6 +3,10 @@ from datetime import datetime
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
+    # Igual que en Neon: correo único sin distinguir mayúsculas
+    __table_args__ = (
+        db.Index('uq_usuarios_email', db.func.lower(db.text('email')), unique=True),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String, nullable=False)
@@ -28,8 +32,9 @@ class Alumno(db.Model):
     __tablename__ = 'alumnos'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False)
-    matricula = db.Column(db.String, nullable=False)
+    # Un registro de alumno por usuario y matrícula única (como en Neon)
+    usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False, unique=True)
+    matricula = db.Column(db.String, nullable=False, unique=True)
     carrera = db.Column(db.String, nullable=True)
     semestre = db.Column(db.String, nullable=True)
     telefono = db.Column(db.String, nullable=True)
@@ -285,6 +290,10 @@ class Empresa(db.Model):
 
 class Postulacion(db.Model):
     __tablename__ = 'postulaciones'
+    # Una postulación por alumno y vacante (como en Neon)
+    __table_args__ = (
+        db.UniqueConstraint('alumno_id', 'vacante_id', name='uq_alumno_vacante'),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     vacante_id = db.Column(db.BigInteger, db.ForeignKey('vacantes.id'), nullable=False)

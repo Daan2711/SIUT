@@ -3,6 +3,7 @@ import re
 import uuid
 
 from flask import Blueprint, request, jsonify, session, current_app, send_from_directory
+from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 
 from Models.models import Postulacion, Vacante, Alumno, Usuario, Auditoria
@@ -41,6 +42,17 @@ def _carpeta_cv():
     return carpeta
 
 
+def _ya_postulado(vacante_id, alumno_id):
+    return Postulacion.query.filter_by(vacante_id=vacante_id, alumno_id=alumno_id).first() is not None
+
+
+def _borrar_archivo(ruta):
+    try:
+        os.remove(ruta)
+    except OSError:
+        pass
+
+
 def _tamano(archivo):
     """Tamaño real del archivo recibido (no se confía en lo que diga el cliente)."""
     flujo = archivo.stream
@@ -73,7 +85,8 @@ def crear_postulacion():
     if not vacante or not vacante.activo:
         return _error('La vacante no existe o ya no está disponible', 404)
 
-    if Postulacion.query.filter_by(vacante_id=vacante.id, alumno_id=alumno.id).first():
+    # Verificación rápida; la garantía real es la restricción uq_alumno_vacante
+    if _ya_postulado(vacante.id, alumno.id):
         return _error('Ya te postulaste a esta vacante', 409)
 
     # --- Campos de texto ---------------------------------------------------
@@ -139,13 +152,16 @@ def crear_postulacion():
         db.session.commit()
         return jsonify({'ok': True, 'id': postulacion.id}), 201
 
+    except IntegrityError:
+        # Dos envíos simultáneos: el segundo choca con uq_alumno_vacante
+        db.session.rollback()
+        _borrar_archivo(ruta)
+        return _error('Ya te postulaste a esta vacante', 409)
+
     except Exception:
         db.session.rollback()
         # Sin registro en BD el archivo quedaría huérfano: se elimina
-        try:
-            os.remove(ruta)
-        except OSError:
-            pass
+        _borrar_archivo(ruta)
         return _error('No fue posible guardar tu postulación', 500)
 
 
