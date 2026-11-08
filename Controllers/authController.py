@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from flask_limiter.util import get_remote_address
-from Models.models import Usuario, Auditoria
+from Models.models import Usuario, Alumno, Auditoria
 from Database.database import db
 from sqlalchemy import func
 from extensions import limiter
@@ -123,13 +123,26 @@ def usuario_actual():
             'error': 'La cuenta no está disponible'
         }), 401
 
+    # Import local: vacantesController no debe cargarse antes que este módulo
+    from Controllers.vacantesController import puede_cargar_vacantes
+
+    alumno = Alumno.query.filter_by(usuario_id=usuario.id).first()
+
     return jsonify({
         'usuario_id': usuario.id,
         'nombre': usuario.nombre,
         'apellido': usuario.apellido,
         'email': usuario.email,
         'rol': usuario.rol,
-        'primer_login': usuario.primer_login
+        'primer_login': usuario.primer_login,
+        'puede_cargar_vacantes': puede_cargar_vacantes(),
+        # Datos para precargar el formulario de postulación
+        'alumno': {
+            'matricula': alumno.matricula,
+            'carrera': alumno.carrera,
+            'semestre': alumno.semestre,
+            'telefono': alumno.telefono,
+        } if alumno else None
     }), 200
 
 

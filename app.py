@@ -19,6 +19,7 @@ from extensions import limiter
 from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
 from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes
+from Controllers.postulacionesController import postulaciones_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -52,6 +53,13 @@ app.config['SESSION_COOKIE_SECURE'] = (
 )
 app.config['PERMANENT_SESSION_LIFETIME'] = 1800
 
+# Carga de archivos (CV en PDF de hasta 5 MB + campos del formulario).
+# Los CV se guardan fuera de 'Frontend' para que no sean públicos.
+app.config['MAX_CONTENT_LENGTH'] = 6 * 1024 * 1024
+app.config['UPLOAD_DIR'] = os.getenv('UPLOAD_DIR') or os.path.join(
+    app.instance_path, 'uploads', 'cv'
+)
+
 # =========================================================================
 # SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
 # =========================================================================
@@ -68,6 +76,14 @@ app.config['RATELIMIT_HEADERS_ENABLED'] = True
 limiter.init_app(app)
 
 
+@app.errorhandler(413)
+def archivo_demasiado_grande(_error):
+    return jsonify({
+        'ok': False,
+        'mensaje': 'El archivo es demasiado grande. El CV no puede pesar más de 5 MB.'
+    }), 413
+
+
 @app.errorhandler(429)
 def demasiados_intentos(_error):
     return jsonify({
@@ -81,6 +97,7 @@ def demasiados_intentos(_error):
 app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
 app.register_blueprint(vacantes_bp)
+app.register_blueprint(postulaciones_bp)
 
 
 # =========================================================================
@@ -89,7 +106,9 @@ app.register_blueprint(vacantes_bp)
 # Toda página .html exige sesión salvo estas. Las de reclutador exigen además
 # permiso para cargar vacantes.
 PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
-PAGINAS_RECLUTADOR = {'/cargar-vacantes.html', '/vacantes-publicadas.html'}
+PAGINAS_RECLUTADOR = {
+    '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',
+}
 
 
 @app.before_request
@@ -228,6 +247,27 @@ def horario_page():
 @app.route('/soporte.html')
 def soporte_page():
     return _render_con_nombre('soporte.html')
+
+
+@app.route('/sugerencias.html')
+def sugerencias_page():
+    return _render_con_nombre('sugerencias.html')
+
+
+# Páginas del reclutador (el permiso lo valida proteger_paginas_html)
+@app.route('/cargar-vacantes.html')
+def cargar_vacantes_page():
+    return _render_con_nombre('cargar-vacantes.html')
+
+
+@app.route('/vacantes-publicadas.html')
+def vacantes_publicadas_page():
+    return _render_con_nombre('vacantes-publicadas.html')
+
+
+@app.route('/postulaciones-recibidas.html')
+def postulaciones_recibidas_page():
+    return _render_con_nombre('postulaciones-recibidas.html')
 
 
 @app.route('/.well-known/security.txt')

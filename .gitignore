@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Archivos subidos por usuarios (CV) y datos locales de Flask
+instance/

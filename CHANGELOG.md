@@ -4,6 +4,32 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Fase 3 — Funcionalidades: postulaciones y buzón de sugerencias (2026-11-08)
+
+#### Agregado
+- **Postulación con CV.** `POST /api/postulaciones` (multipart) recibe la vacante, habilidades, experiencia, mensaje, datos de contacto y el CV. — `Controllers/postulacionesController.py` (nuevo)
+  - El CV debe ser PDF de hasta 5 MB. Además de la extensión se verifica el contenido real del archivo (que empiece con `%PDF-`).
+  - El archivo se guarda en disco como `<uuid>.pdf` en `UPLOAD_DIR` (por defecto `instance/uploads/cv/`), fuera de `Frontend/`, así que no es accesible públicamente. Si falla la base de datos, el archivo se borra.
+  - Solo pueden postularse usuarios con registro en `alumnos`. No se permite postularse dos veces a la misma vacante (409).
+  - Teléfono, carrera y semestre se actualizan en el perfil del alumno. Nombre, correo y matrícula salen de la cuenta y no se pueden editar desde el formulario.
+- **Postulaciones recibidas (reclutador).** — `Controllers/postulacionesController.py`, `Frontend/postulaciones-recibidas.html` y `Frontend/js/postulaciones-recibidas.js` (nuevos)
+  - `GET /api/postulaciones` lista solo las postulaciones de las vacantes que publicó el usuario.
+  - `GET /api/postulaciones/<id>/cv` descarga el PDF; solo el dueño de la vacante puede hacerlo y cada descarga queda en auditoría.
+  - Página con filtro por vacante, enlazada desde `vacantes-publicadas.html`.
+- **Buzón de sugerencias en página propia** (`sugerencias.html`), con el formulario original, SweetAlert2 desde cdnjs con SRI y límites de longitud iguales a los del servidor. Enlace "Buzón de sugerencias" en el menú de todas las páginas. — `Frontend/sugerencias.html` (nuevo), `Frontend/*.html`
+- **`/usuario-actual`** devuelve también los datos del alumno (o `null`) y si el usuario puede cargar vacantes. — `Controllers/authController.py`
+- Rutas que muestran el nombre real del usuario en `sugerencias.html`, `cargar-vacantes.html`, `vacantes-publicadas.html` y `postulaciones-recibidas.html`. — `app.py`
+- Estilos para las páginas de vacantes y postulaciones, que no tenían CSS. — `Frontend/css/style.css`
+
+#### Cambiado
+- **Bolsa de empleo (`buzon.html`) carga las vacantes desde la API.** Se quitaron las 4 tarjetas de ejemplo, que no existían en la base de datos. Los favoritos se identifican por id de vacante. — `Frontend/buzon.html`, `Frontend/js/empleos.js`
+- **Formulario de postulación**: datos de la cuenta precargados (solo lectura), campo de CV con validación de tipo y tamaño en el navegador, y envío como `multipart/form-data` con el `vacante_id`. — `Frontend/buzon.html`, `Frontend/js/empleos.js`
+
+#### Configuración
+- `MAX_CONTENT_LENGTH` = 6 MB; las peticiones más grandes responden 413 con mensaje JSON. — `app.py`
+- Nueva variable opcional `UPLOAD_DIR` (carpeta de los CV). `instance/` añadida a `.gitignore` y `.dockerignore`.
+- ⚠️ **Render**: el disco se borra en cada despliegue. Para conservar los CV hay que montar un *Persistent Disk* y apuntar `UPLOAD_DIR` a él. En Docker local, `docker-compose.yml` ya monta el proyecto, así que `instance/` se conserva.
+
 ### Fase 2 — Seguridad y consistencia (2026-11-08)
 
 #### Seguridad

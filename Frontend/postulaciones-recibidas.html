@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Postulaciones recibidas | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <div class="titulo-header">Postulaciones recibidas</div>
+    <div class="perfil"><img src="img/usuario.png" alt="Usuario"><span id="nombreAlumno">Nombre del Alumno</span></div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">SEGUIMIENTO DE CANDIDATOS</p>
+        <h1>Postulaciones recibidas</h1>
+        <p>Alumnos que se postularon a las vacantes que tú publicaste. Descarga su CV para revisarlo.</p>
+      </div>
+    </section>
+
+    <section class="empleos-search-panel" aria-label="Filtrar postulaciones">
+      <div class="empleos-filtros">
+        <label>Vacante
+          <select id="filtroVacante"><option value="">Todas mis vacantes</option></select>
+        </label>
+      </div>
+    </section>
+
+    <div class="empleos-list-heading">
+      <div><h2>Candidatos</h2><p id="contadorPostulaciones">Cargando…</p></div>
+    </div>
+
+    <section id="listaPostulaciones" class="empleos-grid" aria-live="polite"></section>
+    <p id="sinPostulaciones" class="sin-resultados" hidden>Aún no has recibido postulaciones.</p>
+
+    <div class="publicadas-acciones">
+      <a class="btn-empleo-outline btn-volver" href="vacantes-publicadas.html">Ver vacantes publicadas</a>
+      <a class="btn-empleo-primary btn-volver" href="cargar-vacantes.html">Cargar nueva vacante</a>
+    </div>
+  </main>
+
+  <script src="js/postulaciones-recibidas.js"></script>
+</body>
+</html>
