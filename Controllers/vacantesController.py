@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import func
+from sqlalchemy import func, true
 from Models.models import Usuario, Vacante, Empresa, Auditoria
 from Database.database import db
 
@@ -18,34 +18,73 @@ LIMITES = {
     'descripcion': 2000, 'requisitos': 1500,
 }
 
-ROLES_CARGA = {'reclutador'}
+# Perfiles con permiso para publicar vacantes. Los roles válidos en la base de
+# datos (CHECK chk_usuarios_rol) son Alumno, Profesor, Empresa y Administrador.
+PERFIL_EMPRESA = 'empresa'              # publica a nombre de su propia empresa
+PERFIL_ADMINISTRADOR = 'administrador'  # publica para cualquier empresa; ve todo
+PERFIL_CORREO = 'correo'                # correo incluido en VACANTES_EMAILS
 
 
-def puede_cargar_vacantes():
-    """True si la sesión actual puede publicar vacantes.
+def usuario_en_sesion():
+    """Usuario activo de la sesión, leído de la base de datos (o None)."""
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return None
+    usuario = db.session.get(Usuario, usuario_id)
+    return usuario if usuario and usuario.activo else None
 
-    Criterios (cualquiera): rol 'Reclutador', o correo incluido en la variable
-    de entorno VACANTES_EMAILS (separados por coma). Si la variable no está
-    definida no se autoriza a nadie por correo. Se lee en cada llamada
-    porque load_dotenv() corre después de importar este módulo.
+
+def perfil_de_carga(usuario):
+    """Perfil con el que el usuario puede publicar vacantes, o None.
 
     Rol, correo y estado se leen de la base de datos (no de la sesión) para
     que un cambio de rol o una baja surtan efecto de inmediato.
+    VACANTES_EMAILS se lee en cada llamada porque load_dotenv() corre después
+    de importar este módulo; si no está definida no se autoriza a nadie.
     """
-    usuario_id = session.get('usuario_id')
-    if not usuario_id:
-        return False
-    usuario = db.session.get(Usuario, usuario_id)
-    if not usuario or not usuario.activo:
-        return False
+    if not usuario:
+        return None
+    rol = (usuario.rol or '').strip().lower()
+    if rol == 'empresa' and usuario.empresa_id:
+        return PERFIL_EMPRESA
+    if rol == 'administrador':
+        return PERFIL_ADMINISTRADOR
     correos = {
         c.strip().lower()
         for c in os.getenv('VACANTES_EMAILS', '').split(',')
         if c.strip()
     }
-    rol = (usuario.rol or '').strip().lower()
-    email = (usuario.email or '').strip().lower()
-    return rol in ROLES_CARGA or email in correos
+    if (usuario.email or '').strip().lower() in correos:
+        return PERFIL_CORREO
+    return None
+
+
+def puede_cargar_vacantes():
+    """True si la sesión actual puede publicar vacantes y ver postulaciones."""
+    return perfil_de_carga(usuario_en_sesion()) is not None
+
+
+def filtro_vacantes_visibles(usuario, perfil):
+    """Condición SQL de las vacantes cuyas postulaciones puede ver el usuario.
+
+    - Empresa: las de su empresa (aunque las haya publicado un administrador).
+    - Administrador: todas.
+    - Correo autorizado: las que publicó.
+    """
+    if perfil == PERFIL_ADMINISTRADOR:
+        return true()
+    if perfil == PERFIL_EMPRESA:
+        return Vacante.empresa_id == usuario.empresa_id
+    return Vacante.creado_por == usuario.id
+
+
+def puede_ver_vacante(usuario, perfil, vacante):
+    """Misma regla que filtro_vacantes_visibles, para una vacante concreta."""
+    if perfil == PERFIL_ADMINISTRADOR:
+        return True
+    if perfil == PERFIL_EMPRESA:
+        return vacante.empresa_id == usuario.empresa_id
+    return vacante.creado_por == usuario.id
 
 
 def _iso(fecha):
@@ -106,14 +145,16 @@ def listar_vacantes():
 
 
 # =========================================================================
-# CARGAR VACANTE (solo reclutador / correos autorizados)
+# CARGAR VACANTE (Empresa, Administrador o correo autorizado)
 # =========================================================================
 @vacantes_bp.route('/api/vacantes', methods=['POST'])
 def crear_vacante():
     if 'usuario_id' not in session:
         return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
 
-    if not puede_cargar_vacantes():
+    usuario = usuario_en_sesion()
+    perfil = perfil_de_carga(usuario)
+    if not perfil:
         return jsonify({'ok': False, 'mensaje': 'No tienes permiso para cargar vacantes'}), 403
 
     if not request.is_json:
@@ -123,9 +164,14 @@ def crear_vacante():
     if not isinstance(data, dict):
         return jsonify({'ok': False, 'mensaje': 'No se recibieron datos'}), 400
 
+    # Una Empresa siempre publica a nombre propio: el campo 'empresa' se ignora
+    requeridos = ['titulo', 'area', 'modalidad', 'ubicacion',
+                  'experiencia', 'jornada', 'descripcion', 'requisitos']
+    if perfil != PERFIL_EMPRESA:
+        requeridos.insert(1, 'empresa')
+
     campos = {}
-    for nombre in ('titulo', 'empresa', 'area', 'modalidad', 'ubicacion',
-                   'experiencia', 'jornada', 'descripcion', 'requisitos'):
+    for nombre in requeridos:
         valor = data.get(nombre)
         valor = valor.strip() if isinstance(valor, str) else ''
         if not valor:
@@ -149,11 +195,14 @@ def crear_vacante():
             'mensaje': 'Si la ubicación es "Remoto", la modalidad debe ser "Remoto"'
         }), 400
 
-    nombre_empresa = campos.pop('empresa')
+    nombre_empresa = campos.pop('empresa', None)
 
     try:
-        empresa = _obtener_o_crear_empresa(nombre_empresa)
-        vacante = Vacante(**campos, empresa_id=empresa.id, creado_por=session['usuario_id'])
+        if perfil == PERFIL_EMPRESA:
+            empresa_id = usuario.empresa_id
+        else:
+            empresa_id = _obtener_o_crear_empresa(nombre_empresa).id
+        vacante = Vacante(**campos, empresa_id=empresa_id, creado_por=usuario.id)
         db.session.add(vacante)
         db.session.flush()  # obtiene vacante.id antes del commit
         db.session.add(Auditoria(

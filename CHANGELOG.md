@@ -4,6 +4,27 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Permisos de vacantes por roles reales de Neon (2026-11-08)
+
+#### Corregido
+- **Nadie podía publicar vacantes por rol en Neon.** El código daba permiso al rol `Reclutador`, pero la restricción `chk_usuarios_rol` de Neon solo admite `Alumno`, `Profesor`, `Empresa` y `Administrador`. Las pruebas no lo detectaban porque SQLite no tenía ese `CHECK`. — `Controllers/vacantesController.py`
+
+#### Cambiado
+- **Quién publica vacantes y cómo se asigna la empresa:** — `Controllers/vacantesController.py`
+  - `Empresa`: publica siempre a nombre de su propia empresa (`empresa_id` del usuario); el campo `empresa` del formulario se ignora y no es obligatorio.
+  - `Administrador`: publica para cualquier empresa (se busca o se crea por nombre).
+  - Correo en `VACANTES_EMAILS`: igual que el administrador.
+- **Quién ve las postulaciones y descarga los CV:** — `Controllers/postulacionesController.py`
+  - `Empresa`: las de las vacantes de su empresa, aunque las haya publicado un administrador.
+  - `Administrador`: todas.
+  - Correo autorizado: las de las vacantes que publicó.
+- `/usuario-actual` devuelve la empresa del usuario (`empresa: {id, nombre}` o `null`). — `Controllers/authController.py`
+- En `cargar-vacantes.html`, si el usuario es `Empresa`, el campo empresa se llena con la suya y queda de solo lectura (también tras "Limpiar"). — `Frontend/js/cargar-vacantes.js`
+- Los modelos declaran las restricciones de rol de Neon: `chk_usuarios_rol`, `chk_usuario_empresa` (solo `Empresa` lleva `empresa_id`, y siempre) y el índice `uq_usuario_empresa` (un usuario `Empresa` por empresa). Así las pruebas fallan si se vuelve a usar un rol que Neon no acepta. — `Models/models.py`
+
+#### Pruebas
+- `tests/test_roles.py`: 14 casos (restricciones de rol, publicación y visibilidad por rol, `/usuario-actual`). El fixture `reclutador` pasa a ser un usuario `Empresa` real y se agregan `administrador`, `crear_empresa` y `crear_usuario_empresa`. 103 casos en total. — `tests/`
+
 ### Restricciones UNIQUE declaradas en los modelos (2026-11-08)
 
 Un diagnóstico de solo lectura en Neon mostró que las restricciones **ya existían** en la base de datos y que no hay duplicados. No se modificó Neon; se alineó el código con ella.

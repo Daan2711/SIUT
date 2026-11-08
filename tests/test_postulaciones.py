@@ -86,9 +86,9 @@ def test_reclutador_ve_postulaciones_de_sus_vacantes(alumno, reclutador, vacante
     assert postulaciones[0]['vacante_titulo'] == VACANTE['titulo']
 
 
-def test_otro_reclutador_no_ve_postulaciones_ajenas(alumno, vacante_id, crear_usuario, cliente_de):
+def test_otra_empresa_no_ve_postulaciones_ajenas(alumno, vacante_id, crear_usuario_empresa, cliente_de):
     postular(alumno, vacante_id)
-    crear_usuario('rec2@x.mx', rol='Reclutador')
+    crear_usuario_empresa('rec2@x.mx', 'OtraEmpresa')
     respuesta = cliente_de('rec2@x.mx').get('/api/postulaciones')
     assert respuesta.status_code == 200
     assert respuesta.get_json()['postulaciones'] == []
@@ -112,8 +112,8 @@ def test_dueno_descarga_el_cv(reclutador, postulacion_id):
     assert respuesta.mimetype == 'application/pdf'
 
 
-def test_otro_reclutador_no_descarga(postulacion_id, crear_usuario, cliente_de):
-    crear_usuario('rec2@x.mx', rol='Reclutador')
+def test_otra_empresa_no_descarga(postulacion_id, crear_usuario_empresa, cliente_de):
+    crear_usuario_empresa('rec2@x.mx', 'OtraEmpresa')
     assert cliente_de('rec2@x.mx').get(f'/api/postulaciones/{postulacion_id}/cv').status_code == 403
 
 

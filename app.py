@@ -103,8 +103,8 @@ app.register_blueprint(postulaciones_bp)
 # =========================================================================
 # SECCIÓN 5.4: PÁGINAS HTML PROTEGIDAS
 # =========================================================================
-# Toda página .html exige sesión salvo estas. Las de reclutador exigen además
-# permiso para cargar vacantes.
+# Toda página .html exige sesión salvo estas. Las de reclutador (Empresa,
+# Administrador o correo autorizado) exigen además permiso para cargar vacantes.
 PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
 PAGINAS_RECLUTADOR = {
     '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',

@@ -3,9 +3,24 @@ from datetime import datetime
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
-    # Igual que en Neon: correo único sin distinguir mayúsculas
+    # Igual que en Neon: correo único sin distinguir mayúsculas, roles válidos,
+    # una Empresa siempre ligada a su empresa y un usuario Empresa por empresa.
     __table_args__ = (
         db.Index('uq_usuarios_email', db.func.lower(db.text('email')), unique=True),
+        db.CheckConstraint(
+            "rol IN ('Alumno', 'Profesor', 'Empresa', 'Administrador')",
+            name='chk_usuarios_rol',
+        ),
+        db.CheckConstraint(
+            "(rol = 'Empresa' AND empresa_id IS NOT NULL) "
+            "OR (rol <> 'Empresa' AND empresa_id IS NULL)",
+            name='chk_usuario_empresa',
+        ),
+        db.Index(
+            'uq_usuario_empresa', 'empresa_id', unique=True,
+            postgresql_where=db.text("rol = 'Empresa'"),
+            sqlite_where=db.text("rol = 'Empresa'"),
+        ),
     )
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)

@@ -12,9 +12,9 @@ def test_alta_de_vacante(reclutador):
     assert respuesta.get_json()['ok'] is True
 
 
-def test_empresa_se_reutiliza_sin_distinguir_mayusculas(app, reclutador):
-    reclutador.post('/api/vacantes', json=VACANTE)
-    respuesta = reclutador.post('/api/vacantes', json=dict(VACANTE, empresa='tecnonova', titulo='QA'))
+def test_empresa_se_reutiliza_sin_distinguir_mayusculas(app, administrador):
+    administrador.post('/api/vacantes', json=VACANTE)
+    respuesta = administrador.post('/api/vacantes', json=dict(VACANTE, empresa='tecnonova', titulo='QA'))
     assert respuesta.status_code == 201
     with app.app_context():
         assert Empresa.query.count() == 1
@@ -55,6 +55,7 @@ def test_permiso_se_lee_de_la_base_de_datos(app, reclutador):
     with app.app_context():
         usuario = Usuario.query.filter_by(email='rec@x.mx').first()
         usuario.rol = 'Alumno'
+        usuario.empresa_id = None   # chk_usuario_empresa: solo Empresa lleva empresa_id
         db.session.commit()
     assert reclutador.post('/api/vacantes', json=VACANTE).status_code == 403
 

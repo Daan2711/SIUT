@@ -41,7 +41,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import app as flask_app  # noqa: E402
 from Database.database import db  # noqa: E402
 from extensions import limiter  # noqa: E402
-from Models.models import Usuario, Alumno  # noqa: E402
+from Models.models import Usuario, Alumno, Empresa  # noqa: E402
 from Controllers.authController import bcrypt  # noqa: E402
 
 # Hash rápido: el costo real (12) solo hace lentas las pruebas
@@ -86,16 +86,36 @@ def anon(app):
 @pytest.fixture
 def crear_usuario(app):
     def _crear(email, rol='Alumno', primer_login=False, password=PASSWORD,
-               nombre='Usuario', apellido='Prueba', activo=True):
+               nombre='Usuario', apellido='Prueba', activo=True, empresa_id=None):
         with app.app_context():
             usuario = Usuario(
                 nombre=nombre, apellido=apellido, email=email, rol=rol,
                 password_hash=bcrypt.generate_password_hash(password).decode(),
-                primer_login=primer_login, activo=activo,
+                primer_login=primer_login, activo=activo, empresa_id=empresa_id,
             )
             db.session.add(usuario)
             db.session.commit()
             return usuario.id
+    return _crear
+
+
+@pytest.fixture
+def crear_empresa(app):
+    def _crear(nombre):
+        with app.app_context():
+            empresa = Empresa(nombre=nombre)
+            db.session.add(empresa)
+            db.session.commit()
+            return empresa.id
+    return _crear
+
+
+@pytest.fixture
+def crear_usuario_empresa(crear_usuario, crear_empresa):
+    """Crea una empresa y su usuario con rol 'Empresa'. Devuelve (usuario_id, empresa_id)."""
+    def _crear(email, nombre_empresa, nombre='Usuario'):
+        empresa_id = crear_empresa(nombre_empresa)
+        return crear_usuario(email, rol='Empresa', empresa_id=empresa_id, nombre=nombre), empresa_id
     return _crear
 
 
@@ -140,14 +160,21 @@ def alumno(crear_usuario, crear_alumno, cliente_de):
 
 
 @pytest.fixture
-def reclutador(crear_usuario, cliente_de):
-    crear_usuario('rec@x.mx', rol='Reclutador', nombre='Rec')
+def reclutador(crear_usuario_empresa, cliente_de):
+    """Usuario con rol 'Empresa' de la empresa TecnoNova (publica a su nombre)."""
+    crear_usuario_empresa('rec@x.mx', 'TecnoNova', nombre='Rec')
     return cliente_de('rec@x.mx')
 
 
 @pytest.fixture
+def administrador(crear_usuario, cliente_de):
+    crear_usuario('admin@x.mx', rol='Administrador', nombre='Admin')
+    return cliente_de('admin@x.mx')
+
+
+@pytest.fixture
 def vacante_id(reclutador):
-    """Vacante publicada por el reclutador del fixture 'reclutador'."""
+    """Vacante publicada por la empresa del fixture 'reclutador'."""
     respuesta = reclutador.post('/api/vacantes', json=VACANTE)
     assert respuesta.status_code == 201, respuesta.get_json()
     return respuesta.get_json()['id']

@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from flask_limiter.util import get_remote_address
-from Models.models import Usuario, Alumno, Auditoria
+from Models.models import Usuario, Alumno, Empresa, Auditoria
 from Database.database import db
 from sqlalchemy import func
 from extensions import limiter
@@ -124,9 +124,10 @@ def usuario_actual():
         }), 401
 
     # Import local: vacantesController no debe cargarse antes que este módulo
-    from Controllers.vacantesController import puede_cargar_vacantes
+    from Controllers.vacantesController import perfil_de_carga
 
     alumno = Alumno.query.filter_by(usuario_id=usuario.id).first()
+    empresa = db.session.get(Empresa, usuario.empresa_id) if usuario.empresa_id else None
 
     return jsonify({
         'usuario_id': usuario.id,
@@ -135,7 +136,9 @@ def usuario_actual():
         'email': usuario.email,
         'rol': usuario.rol,
         'primer_login': usuario.primer_login,
-        'puede_cargar_vacantes': puede_cargar_vacantes(),
+        'puede_cargar_vacantes': perfil_de_carga(usuario) is not None,
+        # Usuarios con rol Empresa: publican siempre a nombre de esta empresa
+        'empresa': {'id': empresa.id, 'nombre': empresa.nombre} if empresa else None,
         # Datos para precargar el formulario de postulación
         'alumno': {
             'matricula': alumno.matricula,

@@ -8,7 +8,9 @@ from werkzeug.utils import secure_filename
 
 from Models.models import Postulacion, Vacante, Alumno, Usuario, Auditoria
 from Database.database import db
-from Controllers.vacantesController import puede_cargar_vacantes, _iso
+from Controllers.vacantesController import (
+    _iso, usuario_en_sesion, perfil_de_carga, filtro_vacantes_visibles, puede_ver_vacante,
+)
 
 postulaciones_bp = Blueprint('postulaciones', __name__)
 
@@ -166,21 +168,23 @@ def crear_postulacion():
 
 
 # =========================================================================
-# POSTULACIONES RECIBIDAS (reclutador: solo de sus propias vacantes)
+# POSTULACIONES RECIBIDAS (Empresa: las de su empresa; Administrador: todas;
+# correo autorizado: las de las vacantes que publicó)
 # =========================================================================
 @postulaciones_bp.route('/api/postulaciones', methods=['GET'])
 def listar_postulaciones():
-    usuario_id = session.get('usuario_id')
-    if not usuario_id:
+    if not session.get('usuario_id'):
         return _error('No autorizado', 401)
-    if not puede_cargar_vacantes():
+    usuario = usuario_en_sesion()
+    perfil = perfil_de_carga(usuario)
+    if not perfil:
         return _error('No tienes permiso para ver postulaciones', 403)
 
     filas = (db.session.query(Postulacion, Vacante, Alumno, Usuario)
              .join(Vacante, Postulacion.vacante_id == Vacante.id)
              .join(Alumno, Postulacion.alumno_id == Alumno.id)
              .join(Usuario, Alumno.usuario_id == Usuario.id)
-             .filter(Vacante.creado_por == usuario_id)
+             .filter(filtro_vacantes_visibles(usuario, perfil))
              .order_by(Postulacion.creado_en.desc(), Postulacion.id.desc())
              .all())
 
@@ -205,22 +209,24 @@ def listar_postulaciones():
 
 
 # =========================================================================
-# DESCARGAR CV (reclutador dueño de la vacante)
+# DESCARGAR CV (mismas reglas de visibilidad que el listado)
 # =========================================================================
 @postulaciones_bp.route('/api/postulaciones/<int:postulacion_id>/cv', methods=['GET'])
 def descargar_cv(postulacion_id):
-    usuario_id = session.get('usuario_id')
-    if not usuario_id:
+    if not session.get('usuario_id'):
         return _error('No autorizado', 401)
-    if not puede_cargar_vacantes():
+    usuario = usuario_en_sesion()
+    perfil = perfil_de_carga(usuario)
+    if not perfil:
         return _error('No tienes permiso para descargar CV', 403)
+    usuario_id = usuario.id
 
     postulacion = db.session.get(Postulacion, postulacion_id)
     if not postulacion:
         return _error('Postulación no encontrada', 404)
 
     vacante = db.session.get(Vacante, postulacion.vacante_id)
-    if not vacante or vacante.creado_por != usuario_id:
+    if not vacante or not puede_ver_vacante(usuario, perfil, vacante):
         return _error('Esta postulación no pertenece a tus vacantes', 403)
 
     # La clave la genera el servidor (uuid hex); se valida por si la BD se alteró
