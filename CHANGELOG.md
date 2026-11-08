@@ -4,6 +4,17 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Docker: código de solo lectura para la app (2026-11-08)
+
+#### Corregido
+- **El usuario del contenedor podía modificar el código.** `COPY --chown=appuser` le daba la propiedad de todo `/app`, aunque la Fase 4 indicaba que solo podría escribir en `instance/`. Ahora el código queda propiedad de root; `appuser` puede leerlo pero no modificarlo ni crear archivos, y solo escribe en `instance/` (carpeta de CV). — `Dockerfile`
+
+#### Verificado (primer build real de la imagen)
+- La imagen se construye con las versiones fijadas de `requirements.txt` (incluido `gunicorn==26.2.0`) sobre `python:3.12-slim`.
+- Corre como `appuser` (uid 10001), sin `.env` dentro de la imagen; gunicorn arranca sin errores.
+- Respuestas: `/login` 200, `/.well-known/security.txt` 200, `/security.txt` 301, `/index.html` sin sesión 302 → `/login`.
+- Las 103 pruebas de pytest pasan dentro del contenedor (Linux, como `appuser`).
+
 ### Permisos de vacantes por roles reales de Neon (2026-11-08)
 
 #### Corregido
