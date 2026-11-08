@@ -19,7 +19,6 @@ os.environ.update({
     'DATABASE_URL': 'sqlite:///' + os.path.join(_TMP, 'siut.db'),
     'SECRET_KEY': 'clave-solo-para-pruebas',
     'UPLOAD_DIR': UPLOAD_DIR,
-    'VACANTES_EMAILS': '',
     'TEMP_PASSWORD': '',
     'PROXY_HOPS': '0',
     'COOKIE_SECURE': 'false',
@@ -27,7 +26,7 @@ os.environ.update({
 })
 
 # En SQLite solo INTEGER PRIMARY KEY es autoincremental; los modelos usan BigInteger
-from sqlalchemy import BigInteger  # noqa: E402
+from sqlalchemy import BigInteger, text  # noqa: E402
 from sqlalchemy.ext.compiler import compiles  # noqa: E402
 
 
@@ -62,6 +61,38 @@ def pytest_sessionfinish(session, exitstatus):
 
 
 # -------------------------------------------------------------------------
+# Réplicas en SQLite de reglas que en Neon viven en la base de datos.
+# SQLite no tiene los triggers de Neon ni respeta varchar(n); sin esto, las
+# pruebas pasaban con código que en Neon falla. Solo se usan en las pruebas.
+# -------------------------------------------------------------------------
+_CONDICION_CREADOR_INVALIDO = """
+    NOT EXISTS (SELECT 1 FROM usuarios WHERE id = NEW.creado_por)
+    OR NOT (
+        (SELECT rol FROM usuarios WHERE id = NEW.creado_por) = 'Administrador'
+        OR ((SELECT rol FROM usuarios WHERE id = NEW.creado_por) = 'Empresa'
+            AND (SELECT empresa_id FROM usuarios WHERE id = NEW.creado_por) = NEW.empresa_id)
+    )"""
+_CONDICION_AUDITORIA_LARGA = "length(NEW.accion) > 100 OR length(NEW.tabla_afectada) > 100"
+
+REPLICAS_NEON = [
+    # trg_validar_creador_vacante: solo Administrador (cualquier empresa) o Empresa (la suya)
+    f"""CREATE TRIGGER trg_validar_creador_vacante_ins BEFORE INSERT ON vacantes
+        WHEN {_CONDICION_CREADOR_INVALIDO}
+        BEGIN SELECT RAISE(ABORT, 'La cuenta no tiene permiso para publicar vacantes de esta empresa.'); END""",
+    f"""CREATE TRIGGER trg_validar_creador_vacante_upd BEFORE UPDATE OF empresa_id, creado_por ON vacantes
+        WHEN {_CONDICION_CREADOR_INVALIDO}
+        BEGIN SELECT RAISE(ABORT, 'La cuenta no tiene permiso para publicar vacantes de esta empresa.'); END""",
+    # auditoria.accion y auditoria.tabla_afectada son varchar(100) en Neon
+    f"""CREATE TRIGGER chk_auditoria_largo_ins BEFORE INSERT ON auditoria
+        WHEN {_CONDICION_AUDITORIA_LARGA}
+        BEGIN SELECT RAISE(ABORT, 'value too long for type character varying(100)'); END""",
+    f"""CREATE TRIGGER chk_auditoria_largo_upd BEFORE UPDATE ON auditoria
+        WHEN {_CONDICION_AUDITORIA_LARGA}
+        BEGIN SELECT RAISE(ABORT, 'value too long for type character varying(100)'); END""",
+]
+
+
+# -------------------------------------------------------------------------
 # Aplicación y base de datos
 # -------------------------------------------------------------------------
 @pytest.fixture
@@ -70,6 +101,9 @@ def app():
     with flask_app.app_context():
         db.drop_all()
         db.create_all()
+        for sentencia in REPLICAS_NEON:
+            db.session.execute(text(sentencia))
+        db.session.commit()
     limiter.reset()
     shutil.rmtree(UPLOAD_DIR, ignore_errors=True)
     yield flask_app

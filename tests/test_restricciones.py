@@ -1,11 +1,11 @@
-"""Restricciones UNIQUE de la base de datos (las mismas que existen en Neon)."""
+"""Restricciones de la base de datos (las mismas que existen en Neon)."""
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 import Controllers.postulacionesController as postulaciones
 from conftest import postular, archivos_cv
 from Database.database import db
-from Models.models import Alumno, Postulacion
+from Models.models import Alumno, Auditoria, Postulacion
 
 
 def test_correo_unico_sin_distinguir_mayusculas(app, crear_usuario):
@@ -54,3 +54,29 @@ def test_envio_simultaneo_devuelve_409_y_borra_el_cv(app, alumno, vacante_id, mo
     with app.app_context():
         assert Postulacion.query.count() == 1
         assert Alumno.query.count() == 1
+
+
+# --- auditoria.accion es varchar(100) en Neon --------------------------------
+def test_bd_rechaza_accion_de_auditoria_mayor_a_100(app):
+    with app.app_context():
+        db.session.add(Auditoria(accion='x' * 101))
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+        db.session.rollback()
+
+
+def test_todas_las_acciones_auditadas_caben_en_100(app, alumno, reclutador, vacante_id):
+    """Recorre los flujos que escriben en auditoria con valores al máximo permitido."""
+    largo = reclutador.post('/api/vacantes', json={
+        'titulo': 'T' * 150, 'area': 'Tecnología', 'modalidad': 'Remoto', 'ubicacion': 'Remoto',
+        'experiencia': 'Junior', 'jornada': 'Tiempo completo',
+        'descripcion': 'd', 'requisitos': 'r'}).get_json()['id']
+    postulacion = postular(alumno, largo).get_json()['id']
+    assert reclutador.get(f'/api/postulaciones/{postulacion}/cv').status_code == 200
+    assert alumno.post('/logout').status_code == 200
+
+    with app.app_context():
+        acciones = {a.accion for a in Auditoria.query.all()}
+        assert acciones == {'Inicio de sesión', 'Alta de vacante', 'Postulación a vacante',
+                            'Descarga de CV', 'Cierre de sesión'}
+        assert max(len(a) for a in acciones) <= 100

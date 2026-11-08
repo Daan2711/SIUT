@@ -3,7 +3,7 @@ import pytest
 
 from conftest import VACANTE
 from Database.database import db
-from Models.models import Empresa, Usuario
+from Models.models import Auditoria, Empresa, Usuario
 
 
 def test_alta_de_vacante(reclutador):
@@ -39,16 +39,26 @@ def test_alumno_no_puede_publicar(alumno):
     assert alumno.post('/api/vacantes', json=VACANTE).status_code == 403
 
 
-def test_sin_vacantes_emails_no_hay_correo_autorizado_por_defecto(crear_usuario, cliente_de):
-    crear_usuario('cargar_vacantes@empresa.com')
-    cliente = cliente_de('cargar_vacantes@empresa.com')
+def test_vacantes_emails_ya_no_da_permiso(crear_usuario, cliente_de, monkeypatch):
+    """VACANTES_EMAILS se eliminó: Neon solo deja publicar a Empresa o Administrador."""
+    monkeypatch.setenv('VACANTES_EMAILS', 'rh@x.mx')
+    crear_usuario('rh@x.mx', rol='Profesor')
+    cliente = cliente_de('rh@x.mx')
     assert cliente.post('/api/vacantes', json=VACANTE).status_code == 403
+    assert cliente.get('/api/postulaciones').status_code == 403
+    assert cliente.get('/usuario-actual').get_json()['puede_cargar_vacantes'] is False
 
 
-def test_correo_en_vacantes_emails_puede_publicar(crear_usuario, cliente_de, monkeypatch):
-    monkeypatch.setenv('VACANTES_EMAILS', 'rh@x.mx, otro@x.mx')
-    crear_usuario('rh@x.mx')
-    assert cliente_de('rh@x.mx').post('/api/vacantes', json=VACANTE).status_code == 201
+def test_titulo_de_150_caracteres_se_guarda_y_se_audita(app, reclutador):
+    """auditoria.accion es varchar(100) en Neon; el título va en 'descripcion'."""
+    titulo = 'T' * 150
+    respuesta = reclutador.post('/api/vacantes', json=dict(VACANTE, titulo=titulo))
+    assert respuesta.status_code == 201
+    with app.app_context():
+        registro = Auditoria.query.filter_by(tabla_afectada='vacantes').one()
+        assert registro.accion == 'Alta de vacante'
+        assert registro.descripcion == titulo
+        assert registro.registro_id == respuesta.get_json()['id']
 
 
 def test_permiso_se_lee_de_la_base_de_datos(app, reclutador):

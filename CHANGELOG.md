@@ -4,6 +4,20 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Compatibilidad con los triggers de Neon (2026-11-08)
+
+#### Eliminado
+- **`VACANTES_EMAILS`.** El trigger `trg_validar_creador_vacante` de Neon solo acepta como creador de una vacante a un `Administrador` (cualquier empresa) o a una `Empresa` (la suya). Un usuario autorizado solo por correo nunca podía publicar: Neon rechazaba el INSERT y la app respondía 500. Ahora el permiso para publicar vacantes, ver postulaciones y descargar CV depende únicamente de los roles `Empresa` y `Administrador`; cualquier otro perfil no ve ninguna postulación. — `Controllers/vacantesController.py`
+
+#### Corregido
+- **Las vacantes con títulos largos no se guardaban.** `auditoria.accion` es `varchar(100)` en Neon, pero se guardaba `"Alta de vacante #ID: <título>"` (recortado a 255). Con títulos de unos 78 caracteres o más fallaba el registro de auditoría y, con él, toda la transacción de la vacante (500). Ahora `accion` es un texto corto y fijo y el detalle va en `descripcion` (`text`). — `Controllers/vacantesController.py`
+- Mismo formato para el resto de la auditoría: `accion` = "Postulación a vacante" (con la vacante en `descripcion`) y "Descarga de CV". — `Controllers/postulacionesController.py`
+- `Auditoria.accion` y `Auditoria.tabla_afectada` se declaran como `String(100)`, igual que en Neon. — `Models/models.py`
+
+#### Pruebas
+- **Réplicas en SQLite de reglas de Neon**, solo para las pruebas: el trigger `trg_validar_creador_vacante` y el límite de 100 caracteres de `auditoria`. Comprobado: con el código anterior de auditoría, las pruebas nuevas fallan igual que fallaría Neon. — `tests/conftest.py`
+- Se reemplazaron las 3 pruebas de `VACANTES_EMAILS` y se agregaron casos de título de 150 caracteres, de que todas las acciones auditadas caben en 100 y de que la base rechaza vacantes de roles sin permiso o de una empresa ajena. 108 casos en total. — `tests/test_vacantes.py`, `tests/test_roles.py`, `tests/test_restricciones.py`
+
 ### Docker: código de solo lectura para la app (2026-11-08)
 
 #### Corregido
@@ -142,7 +156,7 @@ Un diagnóstico de solo lectura en Neon mostró que las restricciones **ya exist
 #### Configuración nueva (variables de entorno)
 | Variable | Obligatoria | Descripción |
 |---|---|---|
-| `VACANTES_EMAILS` | No | Correos (separados por coma) autorizados a publicar vacantes además del rol `Reclutador`. |
+| ~~`VACANTES_EMAILS`~~ | — | **Eliminada el 2026-11-08** (ver "Compatibilidad con los triggers de Neon"). Era: correos autorizados a publicar vacantes además del rol `Reclutador`. |
 | `TEMP_PASSWORD` | No | Contraseña temporal institucional que no podrá elegirse como nueva. |
 | `PROXY_HOPS` | No (recomendada en Render: `1`) | Proxies de confianza para leer la IP real del cliente. `0` en local. |
 | `RATELIMIT_STORAGE_URI` | No | Almacenamiento del límite de intentos. Por defecto `memory://` (por worker); usar `redis://...` para un límite global. |

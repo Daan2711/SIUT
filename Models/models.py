@@ -248,8 +248,9 @@ class Auditoria(db.Model):
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=True)
-    accion = db.Column(db.String, nullable=False)
-    tabla_afectada = db.Column(db.String, nullable=True)
+    # Largos iguales a Neon: 'accion' es un texto corto y fijo; el detalle va en 'descripcion'
+    accion = db.Column(db.String(100), nullable=False)
+    tabla_afectada = db.Column(db.String(100), nullable=True)
     registro_id = db.Column(db.BigInteger, nullable=True)
     descripcion = db.Column(db.Text, nullable=True)
     creado_en = db.Column(

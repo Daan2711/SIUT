@@ -1,6 +1,5 @@
-import os
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import func, true
+from sqlalchemy import func, true, false
 from Models.models import Usuario, Vacante, Empresa, Auditoria
 from Database.database import db
 
@@ -18,11 +17,11 @@ LIMITES = {
     'descripcion': 2000, 'requisitos': 1500,
 }
 
-# Perfiles con permiso para publicar vacantes. Los roles válidos en la base de
-# datos (CHECK chk_usuarios_rol) son Alumno, Profesor, Empresa y Administrador.
+# Perfiles con permiso para publicar vacantes. Coinciden con el trigger
+# trg_validar_creador_vacante de Neon: solo un Administrador (cualquier
+# empresa) o una Empresa (la suya) pueden crear vacantes.
 PERFIL_EMPRESA = 'empresa'              # publica a nombre de su propia empresa
 PERFIL_ADMINISTRADOR = 'administrador'  # publica para cualquier empresa; ve todo
-PERFIL_CORREO = 'correo'                # correo incluido en VACANTES_EMAILS
 
 
 def usuario_en_sesion():
@@ -37,10 +36,8 @@ def usuario_en_sesion():
 def perfil_de_carga(usuario):
     """Perfil con el que el usuario puede publicar vacantes, o None.
 
-    Rol, correo y estado se leen de la base de datos (no de la sesión) para
-    que un cambio de rol o una baja surtan efecto de inmediato.
-    VACANTES_EMAILS se lee en cada llamada porque load_dotenv() corre después
-    de importar este módulo; si no está definida no se autoriza a nadie.
+    Rol y estado se leen de la base de datos (no de la sesión) para que un
+    cambio de rol o una baja surtan efecto de inmediato.
     """
     if not usuario:
         return None
@@ -49,13 +46,6 @@ def perfil_de_carga(usuario):
         return PERFIL_EMPRESA
     if rol == 'administrador':
         return PERFIL_ADMINISTRADOR
-    correos = {
-        c.strip().lower()
-        for c in os.getenv('VACANTES_EMAILS', '').split(',')
-        if c.strip()
-    }
-    if (usuario.email or '').strip().lower() in correos:
-        return PERFIL_CORREO
     return None
 
 
@@ -69,13 +59,13 @@ def filtro_vacantes_visibles(usuario, perfil):
 
     - Empresa: las de su empresa (aunque las haya publicado un administrador).
     - Administrador: todas.
-    - Correo autorizado: las que publicó.
+    - Cualquier otro perfil: ninguna.
     """
     if perfil == PERFIL_ADMINISTRADOR:
         return true()
     if perfil == PERFIL_EMPRESA:
         return Vacante.empresa_id == usuario.empresa_id
-    return Vacante.creado_por == usuario.id
+    return false()
 
 
 def puede_ver_vacante(usuario, perfil, vacante):
@@ -84,7 +74,7 @@ def puede_ver_vacante(usuario, perfil, vacante):
         return True
     if perfil == PERFIL_EMPRESA:
         return vacante.empresa_id == usuario.empresa_id
-    return vacante.creado_por == usuario.id
+    return False
 
 
 def _iso(fecha):
@@ -205,11 +195,14 @@ def crear_vacante():
         vacante = Vacante(**campos, empresa_id=empresa_id, creado_por=usuario.id)
         db.session.add(vacante)
         db.session.flush()  # obtiene vacante.id antes del commit
+        # 'accion' es varchar(100) en Neon: texto corto y fijo; el detalle
+        # (que puede ser largo) va en 'descripcion', que es text.
         db.session.add(Auditoria(
-            usuario_id=session['usuario_id'],
-            accion=f"Alta de vacante #{vacante.id}: {campos['titulo']}"[:255],
+            usuario_id=usuario.id,
+            accion='Alta de vacante',
             tabla_afectada='vacantes',
             registro_id=vacante.id,
+            descripcion=campos['titulo'],
         ))
         db.session.commit()
         return jsonify({'ok': True, 'id': vacante.id}), 201

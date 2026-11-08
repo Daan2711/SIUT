@@ -85,19 +85,46 @@ def test_administrador_ve_y_descarga_todas(alumno, vacante_id, administrador):
     assert administrador.get(f'/api/postulaciones/{postulacion}/cv').status_code == 200
 
 
-def test_correo_autorizado_solo_ve_lo_que_publico(alumno, vacante_id, crear_usuario,
-                                                   cliente_de, monkeypatch):
-    monkeypatch.setenv('VACANTES_EMAILS', 'rh@x.mx')
-    crear_usuario('rh@x.mx', rol='Profesor')
-    rh = cliente_de('rh@x.mx')
-    postulacion_ajena = postular(alumno, vacante_id).get_json()['id']
+def test_profesor_no_ve_postulaciones_ni_descarga(alumno, vacante_id, crear_usuario, cliente_de):
+    postulacion = postular(alumno, vacante_id).get_json()['id']
+    crear_usuario('prof@x.mx', rol='Profesor')
+    profesor = cliente_de('prof@x.mx')
+    assert profesor.get('/api/postulaciones').status_code == 403
+    assert profesor.get(f'/api/postulaciones/{postulacion}/cv').status_code == 403
 
-    propia = rh.post('/api/vacantes', json=dict(VACANTE, empresa='Escuela')).get_json()['id']
-    postulacion_propia = postular(alumno, propia).get_json()['id']
 
-    lista = rh.get('/api/postulaciones').get_json()['postulaciones']
-    assert [p['id'] for p in lista] == [postulacion_propia]
-    assert rh.get(f'/api/postulaciones/{postulacion_ajena}/cv').status_code == 403
+# --- Réplica del trigger trg_validar_creador_vacante de Neon ---------------
+def _insertar_vacante(app, creado_por, empresa_id):
+    datos = {k: v for k, v in VACANTE.items() if k != 'empresa'}
+    with app.app_context():
+        db.session.add(Vacante(**datos, empresa_id=empresa_id, creado_por=creado_por))
+        try:
+            db.session.commit()
+        finally:
+            db.session.rollback()
+
+
+def test_bd_rechaza_vacante_creada_por_rol_sin_permiso(app, crear_usuario, crear_empresa):
+    empresa_id = crear_empresa('TecnoNova')
+    profesor = crear_usuario('prof@x.mx', rol='Profesor')
+    with pytest.raises(IntegrityError):
+        _insertar_vacante(app, profesor, empresa_id)
+
+
+def test_bd_rechaza_vacante_de_empresa_ajena(app, crear_usuario_empresa, crear_empresa):
+    usuario_id, _ = crear_usuario_empresa('rec@x.mx', 'TecnoNova')
+    otra = crear_empresa('OtraEmpresa')
+    with pytest.raises(IntegrityError):
+        _insertar_vacante(app, usuario_id, otra)
+
+
+def test_bd_acepta_vacante_de_admin_y_de_empresa_propia(app, crear_usuario, crear_usuario_empresa):
+    usuario_id, empresa_id = crear_usuario_empresa('rec@x.mx', 'TecnoNova')
+    admin = crear_usuario('admin@x.mx', rol='Administrador')
+    _insertar_vacante(app, usuario_id, empresa_id)
+    _insertar_vacante(app, admin, empresa_id)
+    with app.app_context():
+        assert Vacante.query.count() == 2
 
 
 def test_usuario_actual_devuelve_empresa(reclutador, administrador):

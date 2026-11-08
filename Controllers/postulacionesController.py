@@ -147,9 +147,10 @@ def crear_postulacion():
         db.session.flush()
         db.session.add(Auditoria(
             usuario_id=usuario_id,
-            accion=f'Postulación #{postulacion.id} a vacante #{vacante.id}',
+            accion='Postulación a vacante',
             tabla_afectada='postulaciones',
             registro_id=postulacion.id,
+            descripcion=f'Vacante #{vacante.id}: {vacante.titulo}',
         ))
         db.session.commit()
         return jsonify({'ok': True, 'id': postulacion.id}), 201
@@ -240,7 +241,7 @@ def descargar_cv(postulacion_id):
     try:
         db.session.add(Auditoria(
             usuario_id=usuario_id,
-            accion=f'Descarga de CV de postulación #{postulacion.id}',
+            accion='Descarga de CV',
             tabla_afectada='postulaciones',
             registro_id=postulacion.id,
         ))
