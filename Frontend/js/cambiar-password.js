@@ -18,11 +18,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (nueva_password === 'UTSC2026') {
-            alert('No puedes usar la contraseña temporal como nueva contraseña');
-            return;
-        }
-
         fetch('/cambiar-password', {
             method: 'POST',
             headers: {

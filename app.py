@@ -2,18 +2,22 @@
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
 import os
-from flask import Flask, send_from_directory, request, make_response, redirect, session
+from flask import Flask, send_from_directory, request, make_response, redirect, session, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 from dotenv import load_dotenv
 
 # Conexión con la instancia de la base de datos y carga de modelos
 from Database.database import db
-import Models.models 
+import Models.models
+from Models.models import Usuario
+from extensions import limiter
 
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
+from Controllers.vacantesController import vacantes_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -27,19 +31,25 @@ load_dotenv()
 # Configuramos 'Frontend' como la carpeta para estilos, imágenes y scripts
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
 
-@app.after_request
-def add_security_headers(response):
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-    return response
+# Detrás de un proxy (Render / Cloudflare) la IP real llega en X-Forwarded-For.
+# PROXY_HOPS = número de proxies de confianza (0 en local para que no se pueda falsear).
+_proxy_hops = int(os.getenv("PROXY_HOPS", "0"))
+if _proxy_hops > 0:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=_proxy_hops, x_proto=_proxy_hops)
 
 # Llave secreta obligatoria para encriptar y manejar las sesiones de usuario
-app.secret_key = 'una_clave_muy_secreta_para_myutsc'
+app.secret_key = os.getenv("SECRET_KEY")
+
+if not app.secret_key:
+    raise RuntimeError("Falta configurar SECRET_KEY en las variables de entorno")
 
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+app.config['SESSION_COOKIE_SECURE'] = (
+    os.getenv("COOKIE_SECURE", "false").lower() == "true"
+)
+app.config['PERMANENT_SESSION_LIFETIME'] = 1800
 
 # =========================================================================
 # SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
@@ -51,16 +61,64 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Vinculamos la base de datos con nuestra aplicación de Flask
 db.init_app(app)
 
+# Límite de intentos (login). Ver extensions.py
+app.config['RATELIMIT_STORAGE_URI'] = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+app.config['RATELIMIT_HEADERS_ENABLED'] = True
+limiter.init_app(app)
+
+
+@app.errorhandler(429)
+def demasiados_intentos(_error):
+    return jsonify({
+        'error': 'Demasiados intentos. Espera un minuto e intenta de nuevo.'
+    }), 429
+
 # =========================================================================
 # SECCIÓN 5: REGISTRO DE BLUEPRINTS (CONTROLADORES DE LAS RUTAS)
 # =========================================================================
 # Conectamos las rutas del controlador de autenticación a la app principal
 app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
+app.register_blueprint(vacantes_bp)
+
 
 # =========================================================================
-# SECCIÓN 5.5: RUTAS PARA RENDERIZAR LAS VISTAS HTML
-# SECCIÓN 5.5: SECURITY HEADERS
+# SECCIÓN 5.5: CAMBIO DE CONTRASEÑA OBLIGATORIO (validado en servidor)
+# =========================================================================
+# Mientras el usuario tenga primer_login=True solo puede usar estas rutas.
+RUTAS_PERMITIDAS_PRIMER_LOGIN = {
+    'index', 'login_page', 'cambiar_password_page', 'security_txt',
+    'auth.login_usuario', 'auth.logout', 'auth.usuario_actual', 'auth.cambiar_password',
+}
+
+
+@app.before_request
+def exigir_cambio_password():
+    usuario_id = session.get('usuario_id')
+    if not usuario_id or request.endpoint in RUTAS_PERMITIDAS_PRIMER_LOGIN:
+        return None
+
+    # CSS, JS e imágenes sí se sirven; las páginas .html no.
+    if request.endpoint == 'static' and not request.path.endswith('.html'):
+        return None
+
+    pendiente = session.get('primer_login')
+    if pendiente is None:
+        # Sesiones creadas antes de este cambio: se consulta una vez y se guarda.
+        usuario = db.session.get(Usuario, usuario_id)
+        pendiente = bool(usuario and usuario.primer_login)
+        session['primer_login'] = pendiente
+
+    if not pendiente:
+        return None
+
+    if request.path.startswith('/api/') or request.method != 'GET':
+        return jsonify({'error': 'Debes cambiar tu contraseña antes de continuar'}), 403
+    return redirect('/cambiar-password')
+
+
+# =========================================================================
+# SECCIÓN 5.6: SECURITY HEADERS
 # =========================================================================
 @app.after_request
 def set_security_headers(response):
@@ -73,21 +131,26 @@ def set_security_headers(response):
         "object-src 'none'; "
         "base-uri 'self';"
     )
-    response.headers['Referrer-Policy'] = 'no-referrer'
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    # HSTS solo tiene sentido (y solo se envía) cuando el sitio va por HTTPS
+    if app.config['SESSION_COOKIE_SECURE']:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     # Forzamos que Cloudflare NO cachee — así siempre pasa por Flask
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
 
     if request.method == 'OPTIONS':
+        # Un after_request debe devolver un objeto Response, no una tupla
+        response.status_code = 405
         response.headers['Allow'] = 'GET, POST, HEAD'
-        return response, 405
 
     return response
 
 # =========================================================================
-# SECCIÓN 5.6: RUTAS HTML
+# SECCIÓN 5.7: RUTAS HTML
 # =========================================================================
 @app.route('/')
 def index():

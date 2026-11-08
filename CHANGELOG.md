@@ -1,0 +1,31 @@
+# Changelog
+
+Todos los cambios relevantes de SIUT se documentan en este archivo.
+
+## [Sin publicar]
+
+### Fase 1 — Correcciones críticas (2026-11-08)
+
+#### Corregido
+- **Alta de vacantes fallaba siempre (500).** `POST /api/vacantes` pasaba `empresa` (texto) al modelo `Vacante`, que no tiene esa columna, y no asignaba `empresa_id` (obligatorio). Ahora la empresa se busca por nombre (sin distinguir mayúsculas) o se crea en `empresas`, y todo el alta ocurre dentro de la transacción. — `Controllers/vacantesController.py`
+- **Listado de vacantes** obtiene el nombre de la empresa con un join a `empresas`; antes leía `v.empresa`, que no existe. — `Controllers/vacantesController.py`
+- **Fecha `publicada_en`** se enviaba mal formada (`+00:00Z`) y salía de `creado_en`; ahora es ISO 8601 válida y usa `publicada_en`. — `Controllers/vacantesController.py`
+- **Peticiones `OPTIONS` devolvían 500**: el `after_request` regresaba una tupla en lugar de un objeto Response. Ahora responden 405 con cabecera `Allow`. — `app.py`
+- **Cabeceras de seguridad duplicadas**: se unificaron los dos `after_request` en uno. HSTS solo se envía cuando `COOKIE_SECURE=true` (HTTPS). — `app.py`
+
+#### Seguridad
+- **Cambio de contraseña obligatorio validado en el servidor.** Mientras `primer_login` sea verdadero, solo se permiten login, logout, `/usuario-actual`, `/cambiar-password` y archivos CSS/JS/imagen; las APIs responden 403 y las páginas redirigen a `/cambiar-password`. — `app.py`, `Controllers/authController.py`
+- **Contraseña temporal fuera del código.** Se eliminó `UTSC2026` del backend y del frontend. Se rechaza una nueva contraseña igual a la actual y, opcionalmente, igual a `TEMP_PASSWORD` (variable de entorno). — `Controllers/authController.py`, `Frontend/js/cambiar-password.js`
+- **Límite de intentos en `/login`**: 5 por minuto por IP + correo (Flask-Limiter). Al exceder responde 429 con mensaje JSON. — `extensions.py` (nuevo), `app.py`, `Controllers/authController.py`, `requirements.txt`
+- **Permiso para publicar vacantes**: se quitó el correo por defecto `cargar_vacantes@empresa.com`; sin `VACANTES_EMAILS` solo publica el rol `Reclutador`. — `Controllers/vacantesController.py`
+
+#### Configuración nueva (variables de entorno)
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `VACANTES_EMAILS` | No | Correos (separados por coma) autorizados a publicar vacantes además del rol `Reclutador`. |
+| `TEMP_PASSWORD` | No | Contraseña temporal institucional que no podrá elegirse como nueva. |
+| `PROXY_HOPS` | No (recomendada en Render: `1`) | Proxies de confianza para leer la IP real del cliente. `0` en local. |
+| `RATELIMIT_STORAGE_URI` | No | Almacenamiento del límite de intentos. Por defecto `memory://` (por worker); usar `redis://...` para un límite global. |
+
+#### Dependencias
+- Se agregó `flask-limiter`.
