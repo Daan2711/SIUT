@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import func
-from Models.models import Vacante, Empresa, Auditoria
+from Models.models import Usuario, Vacante, Empresa, Auditoria
 from Database.database import db
 
 vacantes_bp = Blueprint('vacantes', __name__)
@@ -28,16 +28,23 @@ def puede_cargar_vacantes():
     de entorno VACANTES_EMAILS (separados por coma). Si la variable no está
     definida no se autoriza a nadie por correo. Se lee en cada llamada
     porque load_dotenv() corre después de importar este módulo.
+
+    Rol, correo y estado se leen de la base de datos (no de la sesión) para
+    que un cambio de rol o una baja surtan efecto de inmediato.
     """
-    if 'usuario_id' not in session:
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return False
+    usuario = db.session.get(Usuario, usuario_id)
+    if not usuario or not usuario.activo:
         return False
     correos = {
         c.strip().lower()
         for c in os.getenv('VACANTES_EMAILS', '').split(',')
         if c.strip()
     }
-    rol = (session.get('rol') or '').strip().lower()
-    email = (session.get('email') or '').strip().lower()
+    rol = (usuario.rol or '').strip().lower()
+    email = (usuario.email or '').strip().lower()
     return rol in ROLES_CARGA or email in correos
 
 

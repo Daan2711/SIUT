@@ -4,6 +4,7 @@
 import os
 from flask import Flask, send_from_directory, request, make_response, redirect, session, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
+from markupsafe import escape
 
 
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ from extensions import limiter
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
-from Controllers.vacantesController import vacantes_bp
+from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -80,6 +81,28 @@ def demasiados_intentos(_error):
 app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
 app.register_blueprint(vacantes_bp)
+
+
+# =========================================================================
+# SECCIÓN 5.4: PÁGINAS HTML PROTEGIDAS
+# =========================================================================
+# Toda página .html exige sesión salvo estas. Las de reclutador exigen además
+# permiso para cargar vacantes.
+PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
+PAGINAS_RECLUTADOR = {'/cargar-vacantes.html', '/vacantes-publicadas.html'}
+
+
+@app.before_request
+def proteger_paginas_html():
+    # .lower(): en Windows el sistema de archivos no distingue mayúsculas
+    ruta = request.path.lower()
+    if not ruta.endswith('.html') or ruta in PAGINAS_PUBLICAS:
+        return None
+    if 'usuario_id' not in session:
+        return redirect('/login')
+    if ruta in PAGINAS_RECLUTADOR and not puede_cargar_vacantes():
+        return redirect('/index.html')
+    return None
 
 
 # =========================================================================
@@ -168,9 +191,12 @@ def _render_con_nombre(nombre_archivo):
     if 'usuario_id' not in session:
         return redirect('/login')
 
-    from Models.models import Usuario
-    usuario = Usuario.query.get(session['usuario_id'])
-    nombre = f"{usuario.nombre} {usuario.apellido}" if usuario else 'Nombre del Alumno'
+    usuario = db.session.get(Usuario, session['usuario_id'])
+    if usuario:
+        # Se escapa para que un nombre con HTML no se ejecute en la página
+        nombre = str(escape(f"{usuario.nombre} {usuario.apellido or ''}".strip()))
+    else:
+        nombre = 'Nombre del Alumno'
 
     with open(f'Frontend/{nombre_archivo}', 'r', encoding='utf-8') as f:
         html = f.read()

@@ -4,6 +4,21 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Fase 2 — Seguridad y consistencia (2026-11-08)
+
+#### Seguridad
+- **Páginas HTML protegidas.** Toda página `.html` exige sesión (redirige a `/login`), salvo `login.html` y `cambiar-password.html`. `cargar-vacantes.html` y `vacantes-publicadas.html` exigen además permiso para cargar vacantes (si no, redirigen a `/index.html`). La comprobación no distingue mayúsculas. — `app.py`
+- **Permiso de vacantes leído de la base de datos.** `puede_cargar_vacantes()` consulta rol, correo y estado `activo` del usuario en cada llamada; un cambio de rol o una baja surten efecto de inmediato. — `Controllers/vacantesController.py`
+- **Nombre escapado al insertarlo en el HTML** para evitar XSS. — `app.py`
+- **Buzón sin fuga de errores internos**: los 500 devuelven un mensaje genérico en lugar del texto de la excepción. — `Controllers/buzonController.py`
+- **SRI en html2pdf** (`integrity` + `crossorigin`), hash verificado contra el archivo de cdnjs. — `Frontend/horario.html`
+
+#### Corregido
+- **Buzón: validación de entrada.** Límites de longitud alineados con las columnas (nombre 100, grupo 50, área "Otro" 100, descripción 2000), cuerpo JSON obligatorio, y todo el guardado (incluido el `flush`) dentro de la transacción. — `Controllers/buzonController.py`
+- **Buzón: categorías controladas.** Solo existen Sistemas, Infraestructura, Mantenimiento, Escolares y Otro. El texto libre de "Otro" se guarda al inicio de la descripción (`[Área indicada: …]`) en vez de crear una categoría nueva. — `Controllers/buzonController.py`
+- **La sesión ahora expira a los 30 minutos** (`session.permanent = True`); antes `PERMANENT_SESSION_LIFETIME` no se aplicaba. — `Controllers/authController.py`
+- **Cerrar sesión maneja errores**: si el servidor falla se avisa al usuario en lugar de redirigir como si hubiera cerrado. — `Frontend/js/index.js`, `Frontend/js/usuario.js`
+
 ### Fase 1 — Correcciones críticas (2026-11-08)
 
 #### Corregido

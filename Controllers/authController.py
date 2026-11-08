@@ -66,6 +66,8 @@ def login_usuario():
     try:
         # Limpiar cualquier sesión anterior
         session.clear()
+        # Sin esto PERMANENT_SESSION_LIFETIME (30 min) no se aplica
+        session.permanent = True
 
         session['usuario_id'] = usuario.id
         session['rol'] = usuario.rol
