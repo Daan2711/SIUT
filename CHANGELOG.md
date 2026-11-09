@@ -16,6 +16,7 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 - **Lógica de alta compartida:** las validaciones, la revisión de duplicados y el alta en una sola transacción salen del comando a `preparar_cuenta()` y `guardar_cuenta()`. El comando y la web usan el mismo código; el comando conserva sus opciones y su comportamiento y, en los errores, indica la opción que hay que corregir. — `servicios/cuentas.py`, `servicios/__init__.py`, `comandos.py`
 - El modelo `Profesor` declara `usuario_id` y `num_empleado` únicos, como ya lo están en Neon (`profesores_*_key`). No cambia Neon. — `Models/models.py`
 - La documentación indica los dos caminos de alta. — `README.md`, `docs/DESPLIEGUE_RENDER.md`
+- Descripción del PR guardada en el repositorio. — `docs/PR-alta-cuentas-admin.md`
 
 #### Seguridad
 - **Desde la web no se crean administradores:** el formulario no ofrece el rol y el servidor rechaza `rol=Administrador` (o cualquier rol fuera de la lista blanca) aunque llegue en la petición. Los administradores se siguen creando solo con `flask crear-usuario`.
