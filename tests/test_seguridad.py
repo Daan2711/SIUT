@@ -118,7 +118,29 @@ def test_paginas_con_menu_tienen_boton_para_celular(alumno, pagina):
     assert 'js/nav.js' in texto
 
 
-@pytest.mark.parametrize('pagina', ['/inscripcion.html', '/confirmacion_inscripciones.html',
-                                    '/contacto.html', '/js/usuario.js'])
+@pytest.mark.parametrize('pagina', ['/contacto.html', '/js/usuario.js'])
 def test_archivos_eliminados_ya_no_existen(alumno, pagina):
     assert alumno.get(pagina).status_code == 404
+
+
+# --- Inscripción a eventos (restaurada desde la rama master) ----------------
+def test_eventos_del_inicio_llevan_a_la_inscripcion(alumno):
+    texto = alumno.get('/index.html').get_data(as_text=True)
+    assert texto.count('href="inscripcion.html" target="_blank" rel="noopener"') == 3
+    assert 'href="#"' not in texto
+
+
+@pytest.mark.parametrize('pagina', ['/inscripcion.html', '/confirmacion_inscripciones.html'])
+def test_paginas_de_inscripcion_exigen_sesion(anon, alumno, pagina):
+    assert anon.get(pagina).headers['Location'].endswith('/login')
+    assert alumno.get(pagina).status_code == 200
+
+
+def test_inscripcion_no_envia_datos_personales_en_la_url(alumno):
+    """El formulario es estático y usa GET: sin 'name', nombre y correo no viajan en la URL."""
+    texto = alumno.get('/inscripcion.html').get_data(as_text=True)
+    formulario = texto[texto.index('<form'):texto.index('</form>')]
+    assert 'action="confirmacion.html"' in formulario
+    assert 'name="' not in formulario
+    assert formulario.count('required') == 2
+    assert alumno.get('/confirmacion.html').status_code == 200

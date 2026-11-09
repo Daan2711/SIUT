@@ -4,6 +4,19 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Inscripción a eventos restaurada (2026-11-09)
+
+#### Corregido
+- **Se restauró el flujo de inscripción a eventos**, borrado por error en la Fase C. En `main` los botones "Inscríbete aquí" apuntaban a `#`, por lo que `inscripcion.html` y `confirmacion_inscripciones.html` parecían huérfanas; la rama `master` mostró que los botones debían llevar a `inscripcion.html` (commit `bd01fae`). — `Frontend/inscripcion.html`, `Frontend/confirmacion_inscripciones.html` (recuperadas del historial, idénticas a `master`)
+  - Los 3 botones de eventos de la página de inicio enlazan a `inscripcion.html`, como en `master`, con `rel="noopener"` por abrir en otra pestaña. — `Frontend/index.html`
+  - El formulario envía a `confirmacion.html`, la última decisión de su autor (commit `63dba37`); `confirmacion_inscripciones.html` se conserva tal como estaba.
+
+#### Seguridad
+- El formulario de inscripción es estático (no guarda datos) y usa GET: sus campos ya no llevan `name`, así que el nombre y el correo no viajan en la URL ni quedan en los logs de acceso del servidor. Siguen siendo obligatorios. — `Frontend/inscripcion.html`
+
+#### Pruebas
+- 3 casos nuevos en `tests/test_seguridad.py` (enlaces de eventos, sesión obligatoria y formulario sin datos personales en la URL). 167 casos en total.
+
 ### Fusión de `origin/main` en `fix/auditoria-seguridad` (2026-11-09)
 
 `main` traía 2 commits: `ac2aed9` ("Actualizacion del proyecto SIUT", la versión original de la funcionalidad de vacantes, aplicada sobre archivos anteriores a la auditoría) y `52da768` (borrado del Gantt).
