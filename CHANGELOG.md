@@ -4,6 +4,21 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Fusión de `origin/main` en `fix/auditoria-seguridad` (2026-11-09)
+
+`main` traía 2 commits: `ac2aed9` ("Actualizacion del proyecto SIUT", la versión original de la funcionalidad de vacantes, aplicada sobre archivos anteriores a la auditoría) y `52da768` (borrado del Gantt).
+
+#### Resolución de conflictos
+- **Se conservó la versión de la rama** en `Controllers/vacantesController.py`, `Models/models.py`, `app.py`, `Frontend/cargar-vacantes.html`, `Frontend/vacantes-publicadas.html`, `Frontend/js/cargar-vacantes.js` y `Frontend/js/empleos.js`: contienen la misma funcionalidad de vacantes, ya corregida y ampliada. La versión de `main`:
+  - escribía la `SECRET_KEY` en el código (`app.py`) y no tenía las correcciones de seguridad;
+  - daba 500 al publicar una vacante, usaba el rol `Reclutador` (que Neon no admite) y no tenía `Empresa`, postulaciones ni CV en sus modelos.
+- Se descartó el cambio de `main` que reemplazaba "Buscar empleos" por "Cargar empleos" en el menú del alumno: lo sustituyen la página de inicio por rol y el menú de gestión.
+- **`Frontend/css/style.css`: unión de ambas.** De `main`, el diseño original de las páginas de vacantes (columna de vista previa de 340 px, márgenes del formulario, vista previa sin animación ni cursor de enlace, estilo de la fecha de publicación y botones a lo ancho en celular). De la rama, los estilos de postulaciones, panel, sugerencias y menú en celular. `.titulo-header` ya no se usa y no se conservó.
+- **Se aceptó el borrado de `Gantt_Proyecto_Integrador_plantilla.xlsx`** hecho en `main`.
+
+#### Verificación
+- 165 pruebas pasan; el diagnóstico del frontend no encuentra referencias rotas.
+
 ### Preparación para Render — Fase C: detalles técnicos (2026-11-08)
 
 #### Agregado
