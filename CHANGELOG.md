@@ -4,6 +4,16 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Documentación del esquema de la base de datos (2026-11-08)
+
+#### Agregado
+- **`docs/ESQUEMA_BD.md`**: esquema real de Neon (PostgreSQL 18), generado leyendo el catálogo en modo solo lectura. Incluye:
+  - diagrama entidad-relación (Mermaid);
+  - las reglas de negocio que impone la base de datos (CHECK, índices únicos y triggers);
+  - el detalle de las 19 tablas: columnas, tipos, valores por defecto, llaves y restricciones.
+
+  Refleja la base de datos, no `Models/models.py`; si el esquema de Neon cambia, hay que regenerarlo. — `docs/ESQUEMA_BD.md`
+
 ### Compatibilidad con los triggers de Neon (2026-11-08)
 
 #### Eliminado
