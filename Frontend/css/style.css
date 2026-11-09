@@ -716,7 +716,9 @@ nav a.activo{
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.postulacion-dialog label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:700;color:#425451;margin-bottom:15px}.postulacion-dialog label b{display:inline;color:#e66f1a}.postulacion-dialog input,.postulacion-dialog select,.postulacion-dialog textarea{width:100%;box-sizing:border-box;border:1px solid #d9e3e0;border-radius:9px;padding:12px 13px;background:#fff;font:inherit;font-size:14px;color:#263b39;outline:none;transition:border-color .2s,box-shadow .2s}.postulacion-dialog input:focus,.postulacion-dialog select:focus,.postulacion-dialog textarea:focus{border-color:#0b9282;box-shadow:0 0 0 3px #0b92821c}.postulacion-dialog textarea{resize:vertical;min-height:76px}.opcional{font-weight:400;color:#84918e;font-size:11px}.form-privacidad{background:#f7f9f8;padding:12px;border-radius:9px;color:#63716e;font-size:12px;line-height:1.5}.form-acciones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.form-acciones button{min-height:44px}.mensaje-postulacion{padding:12px;border-radius:9px;font-size:13px}.mensaje-postulacion.error{background:#fff0ed;color:#a13725}.mensaje-postulacion.exito{background:#eaf8f1;color:#176b48}
 @media(max-width:600px){.formulario-encabezado{padding:26px 20px 20px}.formulario-encabezado h2{font-size:24px}.vacante-seleccionada{margin:18px 18px 8px}#formPostulacion{padding:10px 18px 22px}.form-grid{grid-template-columns:1fr;gap:0}.form-acciones{flex-direction:column-reverse}.form-acciones button{width:100%}}
 
-/* Carga de vacantes (reclutador) */
+/* ==========================================================================
+   Vacantes: carga (diseño original de main) y postulaciones recibidas
+   ========================================================================== */
 .carga-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
 .carga-vacante-panel{padding:6px 30px 30px}
 .carga-vacante-panel label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:700;color:#425451;margin-bottom:15px}
@@ -731,11 +733,47 @@ nav a.activo{
 .carga-preview .btn-favorito,.carga-preview .btn-ver-vacante{cursor:default}
 @media(max-width:900px){.carga-layout{grid-template-columns:1fr}.carga-preview{position:static}}
 @media(max-width:600px){.carga-vacante-panel{padding:4px 18px 22px}}
-
-/* Título en el encabezado (vistas de carga de vacantes) */
-.titulo-header{flex:1;text-align:center;font-size:clamp(24px,4vw,38px);font-weight:800;color:#163b3b;letter-spacing:.3px;cursor:default;user-select:none}
 .vacante-fecha{margin:14px 0 0;padding-top:12px;border-top:1px solid #edf0ef;color:#087e72;font-size:12px;font-weight:700}
-.publicadas-acciones{display:flex;justify-content:center;margin-top:30px}
+/* main tenía un solo botón; ahora son dos: se agregan separación y salto de línea */
+.publicadas-acciones{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}
 .btn-volver{display:inline-block;text-decoration:none;text-align:center}
-@media(max-width:600px){.titulo-header{font-size:20px}.btn-volver{width:100%;box-sizing:border-box}}
+@media(max-width:600px){.btn-volver{width:100%;box-sizing:border-box}}
+.postulacion-datos{display:grid;grid-template-columns:max-content 1fr;gap:6px 12px;margin:14px 0;font-size:13px}
+.postulacion-datos dt{font-weight:700;color:#596764}
+.postulacion-datos dd{margin:0;color:#33413f;white-space:pre-line;overflow-wrap:anywhere}
+.btn-descargar-cv{display:inline-block;text-decoration:none;font-size:14px;padding:10px 16px}
+.postulacion-dialog input[readonly]{background:#f3f6f5;color:#5d6b68;cursor:default}
+.postulacion-dialog input[type="file"]{padding:9px}
 
+/* ==========================================================================
+   Panel de administración y bandeja de sugerencias
+   ========================================================================== */
+.panel-tarjeta{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#33413f}
+.panel-cifra{font-size:40px;line-height:1.1;color:#163b3b}
+.panel-nota{margin-top:24px}
+.panel-nota h2{font-size:18px;margin:0 0 8px;color:#243a38}
+.panel-nota p{margin:0;color:#526866;line-height:1.6}
+.panel-nota code{background:#f3f6f5;padding:2px 6px;border-radius:5px}
+.sugerencia-descripcion{white-space:pre-line;overflow-wrap:anywhere;color:#33413f;line-height:1.5}
+.sugerencia-form{display:flex;flex-direction:column;gap:10px;margin-top:14px;border-top:1px solid #e7eae9;padding-top:14px}
+.sugerencia-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#425451}
+.sugerencia-form select,.sugerencia-form textarea{width:100%;box-sizing:border-box;border:1px solid #d9e3e0;border-radius:9px;padding:10px 12px;font:inherit;font-size:14px;color:#263b39;background:#fff}
+.sugerencia-form textarea{resize:vertical;min-height:70px}
+.sugerencia-form button{align-self:flex-start}
+
+/* ==========================================================================
+   Menú del encabezado en pantallas pequeñas (botón ☰, ver js/nav.js)
+   ========================================================================== */
+[hidden]{display:none !important}
+.menu-toggle{display:none;background:transparent;border:1px solid #6b9e98;border-radius:8px;font-size:22px;line-height:1;padding:6px 11px;cursor:pointer;color:#163b3b}
+.menu-toggle:focus-visible{outline:2px solid #087e72;outline-offset:2px}
+@media (max-width:900px){
+    header{flex-wrap:wrap;padding:12px 16px;gap:10px}
+    .logo img{width:96px}
+    .perfil{order:1;margin-left:auto}
+    .menu-toggle{display:block;order:2}
+    header nav{display:none;order:3;width:100%;flex-direction:column;gap:0}
+    header nav.abierto{display:flex}
+    header nav a{padding:11px 4px;border-top:1px solid #b5ddd8}
+    header nav a.activo{border-bottom:none;font-weight:800}
+}

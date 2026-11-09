@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buzón de Sugerencias | SIUT</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="img/logo.png" alt="Logo UTSC">
+        </div>
+        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal">&#9776;</button>
+        <nav id="menuPrincipal">
+            <a href="index.html">Inicio</a>
+            <a href="horario.html">Mi Horario</a>
+            <a href="maestros.html">Directorio de Maestros</a>
+            <a href="buzon.html">Buscar empleos</a>
+            <a href="sugerencias.html" class="activo">Buzón de sugerencias</a>
+            <a href="soporte.html">Soporte</a>
+        </nav>
+        <div class="perfil">
+            <img src="img/usuario.png" alt="Usuario">
+            <span id="nombreAlumno">Nombre del Alumno</span>
+        </div>
+    </header>
+
+    <main class="buzon-container">
+        <h1>Formulario de reporte</h1>
+        <hr class="buzon-divider">
+        <form class="buzon-form" id="formularioReporte" action="#" method="POST">
+            <div class="input-group">
+                <label for="nombre">Nombre completo:</label>
+                <input type="text" id="nombre" name="nombre" maxlength="100"
+                       placeholder="Ej. Nombre Apellido Apellido" required>
+            </div>
+            <div class="input-group">
+                <label for="grupo">Grupo y grado:</label>
+                <input type="text" id="grupo" name="grupo" maxlength="50"
+                       placeholder="Ej. IDGS9E" required>
+            </div>
+            <div class="input-group">
+                <label for="departamento">Departamento o área de mejora:</label>
+                <select id="departamento" name="departamento" required>
+                    <option value="" disabled selected>Selecciona una opción</option>
+                    <option value="Sistemas">Sistemas</option>
+                    <option value="Infraestructura">Infraestructura</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Escolares">Escolares</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="input-group" id="grupoOtroDepartamento" style="display:none;">
+                <label for="otroDepartamento">Especifica el departamento o área:</label>
+                <input type="text" id="otroDepartamento" name="otroDepartamento" maxlength="100"
+                       placeholder="Ej. Cafetería">
+            </div>
+            <div class="input-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" maxlength="2000"
+                          placeholder="Ej. Aire acondicionado averiado en salón 11, Edificio Docencia 1"
+                          required></textarea>
+            </div>
+            <button type="submit" class="btn-enviar">Enviar</button>
+        </form>
+    </main>
+
+    <!-- SweetAlert2 desde cdnjs (permitido por la CSP), con SRI verificado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"
+            integrity="sha512-cAiOMQ6IleoiPyH2UGR2k9OCclUh6tFL6RMnFsH26pntGnKyNtjwFpD7CodlP/TvYz+F7vLoBJQmIgSvScdzQA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="js/buzon.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

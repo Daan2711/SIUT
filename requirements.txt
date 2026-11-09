@@ -1,6 +1,11 @@
-flask
-flask-sqlalchemy
-psycopg2-binary
-python-dotenv
-gunicorn
-flask-bcrypt
+# Versiones fijadas: son las probadas en desarrollo. Actualizar de forma
+# deliberada (y volver a probar) en lugar de recibir cambios sin aviso.
+flask==3.1.0
+werkzeug==3.1.3
+flask-sqlalchemy==3.1.1
+sqlalchemy==2.0.37
+psycopg2-binary==2.9.13
+python-dotenv==1.2.4
+gunicorn==26.2.0
+flask-bcrypt==1.0.1
+flask-limiter==3.12

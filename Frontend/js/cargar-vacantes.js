@@ -47,11 +47,38 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('input', updatePreview);
   form.addEventListener('change', updatePreview);
 
+  // Un usuario con rol Empresa publica siempre a nombre de su empresa:
+  // el campo se llena con ella y no se puede editar (el servidor lo ignora).
+  const empresaInput = form.elements.empresa;
+  let empresaPropia = null;
+  const aplicarEmpresaPropia = () => {
+    if (!empresaPropia) return;
+    empresaInput.value = empresaPropia;
+    empresaInput.readOnly = true;
+    empresaInput.title = 'Las vacantes se publican a nombre de tu empresa';
+  };
+
   clearButton.addEventListener('click', () => {
     form.reset();
+    aplicarEmpresaPropia();
     message.hidden = true;
     updatePreview();
   });
+
+  (async () => {
+    try {
+      const response = await fetch('/usuario-actual', { credentials: 'same-origin' });
+      if (!response.ok) return;
+      const perfil = await response.json();
+      if (perfil.rol === 'Empresa' && perfil.empresa) {
+        empresaPropia = perfil.empresa.nombre;
+        aplicarEmpresaPropia();
+        updatePreview();
+      }
+    } catch {
+      // Sin perfil el formulario sigue funcionando; el servidor aplica la regla
+    }
+  })();
 
   form.addEventListener('submit', async event => {
     event.preventDefault();

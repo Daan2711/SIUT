@@ -1,102 +1,131 @@
-Arquitectura del Proyecto
-👥 Capa de Usuario (Roles)
-Alumno: Acceso a quejas, horarios, eventos y consulta de profesores.
+# SIUT — Sistema Integral de la UTSC
 
-Profesor: Acceso a quejas y gestión de su horario propio.
+Portal web para la comunidad de la UTSC: bolsa de empleo con postulación y CV, buzón de sugerencias, horario, directorio de maestros y soporte.
 
-Admin: Encargado de subir horarios, gestionar eventos y administrar profesores.
+- **Producción:** Render (plan gratis) + Neon (PostgreSQL). Guía: [`docs/DESPLIEGUE_RENDER.md`](docs/DESPLIEGUE_RENDER.md)
+- **Esquema de la base de datos:** [`docs/ESQUEMA_BD.md`](docs/ESQUEMA_BD.md)
+- **Historial de cambios:** [`CHANGELOG.md`](CHANGELOG.md)
 
-🎨 Frontend a
-Tecnologías: HTML + CSS + JS puro (Sin frameworks JS).
+## Roles
 
-Framework de estilos: Bootstrap para el diseño responsivo.
-
-Renderizado: Archivos .html servidos directamente por Flask desde la carpeta /templates, utilizando Jinja2 para renderizar los datos dinámicos en las páginas.
-
-Comunicación: Uso de fetch() para realizar llamadas AJAX asíncronas donde sea necesario.
-
-⚙️ Backend
-Tecnología Principal: Flask (Python)
-
-Módulos / Servicios:
-
-Auth: Gestión de Login, sesiones y control de roles.
-
-Quejas: Funcionalidades para crear, listar y ver el historial.
-
-Horarios: Visualización y exportación a PDF (utilizando WeasyPrint).
-
-Eventos / Prof.: Listar y crear (módulo exclusivo para el administrador).
-
-🗄️ Base de Datos
-Motores Soportados: SQL Server / PostgreSQL / MySQL.
-
-Mapeo del Modelo: SQLAlchemy ORM — Los modelos se definen directamente en Python y las tablas se generan de forma automática.
-
-Tablas principales:
-
-usuarios
-
-quejas
-
-horarios
-
-eventos
-
-profesores
-
-materias
-
-grupos
-
-horario_detalle (campos: hora, día, aula)
-
-
-
-##EXPLICACION DE ARQUITECTURA Y PREGUNTAS TECNICAS DEL PROYECTO
-
-1. Modelo-Vista-Controlador (MVC)
-
-Un matiz importante para tu explicación: Flask no impone MVC "puro", sino algo que se suele llamar MVT (Model-View-Template), igual que Django. La diferencia de nombres confunde mucho, así que aclara esto si te preguntan:
-
-Tabla 1 — Mapeo MVC
-
-| Concepto clásico MVC | En tu proyecto Flask | Dónde vive |
+| Rol | Qué puede hacer | Página de inicio |
 |---|---|---|
-| **Modelo** | Clases SQLAlchemy (`Usuario`, `Queja`, `Horario`, `Evento`, `Profesor`, `Materia`, `Grupo`, `HorarioDetalle`) | Definen estructura de datos y reglas de negocio básicas (validaciones, relaciones) |
-| **Controlador** | Funciones de ruta de Flask (`@app.route(...)` o Blueprints de Auth/Quejas/Horarios/Eventos) | Reciben la request, consultan/modifican el Modelo, deciden qué Vista renderizar |
-| **Vista** | Archivos `.html` en `/templates` renderizados con Jinja2 | Solo presentan los datos que el Controlador les pasa |
+| **Alumno** | Buscar vacantes y postularse con su CV (PDF), enviar sugerencias, ver horario, maestros y soporte | `index.html` |
+| **Empresa** | Publicar vacantes a nombre de su empresa, ver las postulaciones y descargar los CV | `vacantes-publicadas.html` |
+| **Administrador** (máx. 4) | Todo lo de Empresa para cualquier empresa, ver todas las postulaciones y atender el buzón de sugerencias | `panel-admin.html` |
+| **Profesor** | Existe en la base de datos; aún sin funciones propias en la web | `index.html` |
 
-En Flask, a lo que la mayoría llama "view function" (la función decorada con @app.route) en realidad cumple el rol de Controlador del MVC clásico; el verdadero "View" es la plantilla Jinja2. Explicar esta distinción de nomenclatura suele ganar puntos porque muestra que entiendes el patrón más allá de la terminología de Flask.
+No hay registro público: las cuentas se crean con `flask crear-usuario` (ver la guía de despliegue). Toda cuenta nueva debe cambiar su contraseña en el primer inicio de sesión.
 
-Flujo típico (ejemplo con Quejas):
-1. Alumno llena formulario → petición POST a /quejas/crear (Controlador)
-2. Controlador valida datos, crea instancia del Modelo Queja, la guarda vía SQLAlchemy
-3. Controlador redirige o renderiza una plantilla (Vista) con render_template(), pasándole el contexto (ej. lista de quejas)
-4. Jinja2 inyecta esos datos en el HTML y Flask lo devuelve al navegador
+## Arquitectura
 
-2. Patrones de diseño usados
+```
+Navegador ──HTML/CSS/JS──▶ Flask (app.py) ──SQLAlchemy──▶ Neon (PostgreSQL)
+            ◀──JSON (fetch)──   Controllers/                  tablas, triggers y CV (PDF)
+```
 
-- MVC/MVT — patrón arquitectónico general, ya explicado arriba.
-- ORM (Data Mapper) — SQLAlchemy separa el objeto Python (Modelo) de su representación en la tabla SQL, mapeando ambos mundos sin que el Modelo "sepa" cómo se guarda. Esto es distinto al patrón Active Record (como en Rails), donde el propio objeto sabe guardarse/consultarse a sí mismo.
-- Blueprint / Modularización — Flask usa Blueprints para separar Auth, Quejas, Horarios y Eventos en módulos independientes; conceptualmente es una aplicación del principio de separ
-- Decorator — Python/Flask usan decoradores extensivamente: @app.route, y muy probablemente algo como @login_required o @role_required('admin') para controlar acceso por rol. Esto es literalmente el patrón de diseño Decorator aplicado a funciones.
-- Factory Pattern — si tu app.py usa una función create_app() que instancia y configura la app Flask (común en proyectos con múltiples entornos: dev/prod), eso es el patrón Factory.
-- Strategy Pattern — el control de acceso por rol (Alumno/Profesor/Admin viendo distintas vistas o teniendo distintos permisos sobre el mismo recurso, ej. "quejas") puede explicarse como una aplicación conceptual de Strategy: el comportamiento del sistema cambia según el "rol" activo.
-- Singleton (implícito) — la instancia de db = SQLAlchemy() se crea una sola vez y se comparte en toda la app.
-
-3. Frameworks y tecnologías usadas
-
-Tabla 2 — Frameworks y tecnologías
-
-| Capa | Tecnología | Rol |
+| Capa | Tecnología | Dónde |
 |---|---|---|
-| Backend | **Flask** (Python) | Micro-framework web: enrutamiento, manejo de sesiones/requests |
-| Templating | **Jinja2** | Motor de plantillas incluido en Flask, renderiza HTML dinámico |
-| ORM | **SQLAlchemy** | Mapea clases Python a tablas SQL, evita escribir SQL manual |
-| Frontend CSS | **Bootstrap** | Framework de estilos para diseño responsivo |
-| Frontend JS | JS puro + `fetch()` | Sin framework (no React/Vue/Angular); AJAX nativo para llamadas asíncronas |
-| PDF | **WeasyPrint** | Librería (no framework) que convierte HTML/CSS a PDF, usada para exportar horarios |
-| Base de datos | SQL Server / PostgreSQL / MySQL, alojada en **Neon** | Neon es un proveedor de PostgreSQL *serverless* en la nube — evitas mantener tu propio servidor SQL Server |
+| Frontend | HTML + CSS + JavaScript puro (sin frameworks); llamadas `fetch()` a la API JSON | `Frontend/` |
+| Backend | **Flask** con Blueprints; gunicorn en producción | `app.py`, `Controllers/` |
+| Datos | **SQLAlchemy** (ORM) sobre **PostgreSQL** en **Neon** | `Models/models.py`, `Database/database.py` |
+| Esquema | Scripts SQL versionados (la app no crea tablas en Neon) | `migrations/` |
+| Seguridad | bcrypt, sesión con cookie segura, límite de intentos (Flask-Limiter), CSP y cabeceras, SRI en scripts de cdnjs | `app.py`, `extensions.py` |
+| Despliegue | Docker (usuario sin privilegios), Blueprint de Render, health check `/healthz` | `Dockerfile`, `render.yaml` |
+| Pruebas | **pytest** contra SQLite temporal | `tests/` |
 
-Punto clave para tu explicación de Neon: no es un framework ni un ORM, es un DBaaS (Database as a Service) de Postgres. Lo usaste para no pagar/mantener infraestructura de servidor SQL propia — SQLAlchemy simplemente apunta su connection string a Neon en vez de a un servidor local.
+Librerías de cdnjs (con SRI): **html2pdf** (descarga del horario en PDF) y **SweetAlert2** (mensajes del buzón).
+
+### Estructura
+
+```
+app.py                  Configuración, seguridad, páginas protegidas, /healthz
+comandos.py             Comando `flask crear-usuario`
+extensions.py           Límite de intentos (Flask-Limiter)
+Controllers/
+  authController.py     Login, logout, cambio de contraseña, /usuario-actual
+  vacantesController.py Vacantes y permisos por rol (Empresa / Administrador)
+  postulacionesController.py  Postulaciones y CV (guardados en la base de datos)
+  buzonController.py    Buzón de sugerencias y bandeja del administrador
+Models/models.py        Modelos SQLAlchemy (con las restricciones de Neon)
+Frontend/               Páginas HTML, css/, js/, img/
+migrations/             Cambios de esquema en Neon (con su script para revertir)
+docs/                   Despliegue, esquema de la base de datos, descripción del PR
+tests/                  Pruebas automatizadas
+```
+
+## Desarrollo local
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Crea un archivo `.env` (no se sube a git):
+
+```env
+DATABASE_URL=postgresql://...      # Neon, o sqlite:///siut_local.db para una base local
+SECRET_KEY=una-clave-larga-y-aleatoria
+# Solo con una base local nueva: crea las tablas al arrancar
+# AUTO_CREATE_TABLES=true
+```
+
+```bash
+python app.py        # http://127.0.0.1:5000
+```
+
+> **Cuidado:** si `DATABASE_URL` apunta a Neon, lo que hagas en local (incluido `flask crear-usuario`) escribe en la base de datos real.
+
+## Pruebas automatizadas
+
+Usan **pytest** y una base SQLite temporal: no tocan Neon ni leen el `.env`. Además de los modelos, replican en SQLite reglas que en Neon viven en la base de datos (el trigger de creadores de vacantes y el largo de la auditoría).
+
+```bash
+python -m pytest
+```
+
+| Archivo | Qué cubre |
+|---|---|
+| `test_auth.py` | Login, cambio de contraseña obligatorio, límite de intentos, sesión |
+| `test_seguridad.py` | Cabeceras, OPTIONS, páginas protegidas, escape de HTML, `security.txt` |
+| `test_vacantes.py` | Alta y listado de vacantes, empresas, auditoría |
+| `test_roles.py` | Roles de Neon, permisos de Empresa y Administrador |
+| `test_postulaciones.py` | Envío de CV, listado y descarga |
+| `test_buzon.py` | Buzón de sugerencias: validaciones y categorías |
+| `test_admin.py` | Health check, página de inicio por rol, panel y bandeja de sugerencias, logs |
+| `test_restricciones.py` | Restricciones UNIQUE y CHECK de la base de datos |
+| `test_comandos.py` | Comando `flask crear-usuario` |
+
+Las fixtures comunes (usuarios por rol, vacante, clientes con sesión) están en `tests/conftest.py`. Cada prueba arranca con la base de datos vacía.
+
+## Explicación de la arquitectura (para presentar el proyecto)
+
+### Modelo–Vista–Controlador
+
+Flask no impone un MVC "puro". En SIUT las piezas se reparten así:
+
+| Concepto MVC | En SIUT | Dónde vive |
+|---|---|---|
+| **Modelo** | Clases SQLAlchemy (`Usuario`, `Alumno`, `Empresa`, `Vacante`, `Postulacion`, `PostulacionCV`, `Sugerencia`, `Auditoria`…) | `Models/models.py` |
+| **Controlador** | Funciones de ruta de los Blueprints (`@vacantes_bp.route(...)`): reciben la petición, validan, usan el Modelo y responden | `Controllers/` |
+| **Vista** | Páginas HTML estáticas + JavaScript que pide los datos a la API (`fetch`) y construye la página en el navegador | `Frontend/` |
+
+SIUT **no** usa plantillas Jinja2: el servidor entrega HTML estático (solo reemplaza el nombre del usuario) y los datos viajan como JSON. Es una arquitectura de "API + frontend", donde la Vista vive en el navegador.
+
+Flujo típico (postularse a una vacante):
+1. El alumno llena el formulario; `empleos.js` envía un `POST /api/postulaciones` con el PDF.
+2. El controlador valida sesión, rol, campos y que el archivo sea un PDF real de hasta 5 MB.
+3. Crea la `Postulacion` y su `PostulacionCV` (el PDF) en una sola transacción y registra la auditoría.
+4. Responde JSON; el navegador muestra el folio.
+
+### Patrones de diseño
+
+- **MVC** (adaptado a API + frontend), explicado arriba.
+- **ORM / Data Mapper:** SQLAlchemy separa el objeto Python de su tabla; el modelo no sabe cómo se guarda.
+- **Blueprints (modularización):** cada área (auth, vacantes, postulaciones, buzón) es un módulo independiente.
+- **Decorator:** `@app.route`, `@app.before_request` (protección de páginas y cambio de contraseña obligatorio) y `@limiter.limit` (límite de intentos).
+- **Singleton (implícito):** una sola instancia de `db = SQLAlchemy()` compartida por toda la app.
+- **Control de acceso por rol:** el comportamiento cambia según el rol (Empresa ve las postulaciones de su empresa; Administrador, todas), y la base de datos lo refuerza con triggers y restricciones.
+
+### ¿Qué es Neon?
+
+Neon no es un framework ni un ORM: es un servicio de PostgreSQL en la nube (*Database as a Service*). SQLAlchemy solo apunta su cadena de conexión a Neon. Además de las tablas, Neon guarda reglas de negocio (roles válidos, máximo de administradores, quién puede publicar vacantes) y, en SIUT, también los CV en PDF.

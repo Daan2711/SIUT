@@ -1,0 +1,32 @@
+# Blueprint de Render para SIUT (ver docs/DESPLIEGUE_RENDER.md).
+# Render lo lee al crear el servicio desde "New > Blueprint".
+services:
+  - type: web
+    name: siut
+    runtime: docker
+    plan: free
+    # Misma región que la base de datos de Neon (AWS us-east-2, Ohio)
+    region: ohio
+    branch: main
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    # Ruta que comprueba la app y la conexión con la base de datos
+    healthCheckPath: /healthz
+    envVars:
+      # Cadena de conexión de Neon: se captura a mano en el panel (secreto)
+      - key: DATABASE_URL
+        sync: false
+      # Render genera una clave aleatoria la primera vez
+      - key: SECRET_KEY
+        generateValue: true
+      # Render sirve por HTTPS: cookie de sesión segura y HSTS
+      - key: COOKIE_SECURE
+        value: "true"
+      # Render está detrás de un proxy: la IP real del cliente para el límite de intentos
+      - key: PROXY_HOPS
+        value: "1"
+      - key: LOG_LEVEL
+        value: INFO
+      # Opcional: contraseña temporal institucional que no podrá reutilizarse
+      - key: TEMP_PASSWORD
+        sync: false
