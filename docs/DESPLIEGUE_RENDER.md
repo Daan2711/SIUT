@@ -79,7 +79,7 @@ En Windows la contraseña se escribe de forma oculta: ejecuta el comando en una 
 
 ## 4. Después del primer despliegue
 
-- [ ] Actualizar `Canonical` en `Frontend/.well-known/security.txt` con la URL real del servicio (hoy dice `siut.onrender.com`).
+- [x] Actualizar `Canonical` en `Frontend/.well-known/security.txt` con la URL real del servicio: `https://siut-shap.onrender.com` (hecho el 2026-11-09).
 - [ ] Prueba manual completa: login → cambio de contraseña → (Empresa) publicar vacante → (Alumno) postularse con PDF → (Empresa) descargar CV → (Administrador) atender una sugerencia.
 - [ ] Probar la descarga del horario en PDF en el navegador (usa html2pdf desde cdnjs con la CSP actual).
 

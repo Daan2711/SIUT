@@ -4,6 +4,12 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### URL real de Render en `security.txt` (2026-11-09)
+
+#### Cambiado
+- La línea `Canonical` de `security.txt` pasa a la URL real del despliegue: `https://siut-shap.onrender.com/.well-known/security.txt`. Antes apuntaba a `siut.onrender.com`, que es otro servicio con una versión antigua de SIUT. — `Frontend/.well-known/security.txt`
+- Se marca como hecho ese paso de la lista posterior al despliegue. — `docs/DESPLIEGUE_RENDER.md`
+
 ### Alta de cuentas desde el panel de administrador (2026-11-09)
 
 #### Agregado
