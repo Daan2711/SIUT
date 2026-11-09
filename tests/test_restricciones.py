@@ -80,3 +80,20 @@ def test_todas_las_acciones_auditadas_caben_en_100(app, alumno, reclutador, vaca
         assert acciones == {'Inicio de sesión', 'Alta de vacante', 'Postulación a vacante',
                             'Descarga de CV', 'Cierre de sesión'}
         assert max(len(a) for a in acciones) <= 100
+
+
+# --- Función validar_perfiles_usuario() de Neon (migración 2026-11-09) -----
+def test_funcion_de_perfiles_no_lee_old_usuario_id_fuera_de_alumnos_y_profesores():
+    """Regresión: el trigger corre también sobre 'usuarios' (sin usuario_id).
+    Con OLD.usuario_id en la misma condición que TG_TABLE_NAME, PL/pgSQL lo
+    resolvía siempre y todo INSERT/UPDATE en usuarios fallaba en Neon."""
+    import os
+    import re
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sql = open(os.path.join(raiz, 'migrations', '2026-11-09_corregir_validar_perfiles_usuario.sql'),
+               encoding='utf-8').read()
+    cuerpo = re.sub(r'--[^\n]*', '', re.search(r'\$function\$(.*?)\$function\$', sql, re.S).group(1))
+    # OLD.usuario_id solo puede aparecer dentro del IF anidado (o en el CASE de alumnos/profesores)
+    assert not re.search(r"TG_OP\s*=\s*'UPDATE'\s*AND\s+OLD\.usuario_id", cuerpo)
+    assert re.search(r"TG_OP\s*=\s*'UPDATE'\s+THEN\s+IF\s+OLD\.usuario_id\s+IS\s+DISTINCT\s+FROM\s+NEW\.usuario_id",
+                     cuerpo)

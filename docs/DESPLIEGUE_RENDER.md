@@ -13,6 +13,7 @@ Guía para publicar SIUT en Render usando la base de datos de Neon.
 1. **Fusionar el PR en `main`.** Render despliega desde la rama `main` (`render.yaml` → `branch: main`).
 2. **Migraciones aplicadas en Neon.** Las tablas de Neon las controlan los scripts de `migrations/`, no la app.
    - `2026-11-08_postulacion_cv.sql` — **ya aplicada** el 2026-11-08 (tabla de CV).
+   - `2026-11-09_corregir_validar_perfiles_usuario.sql` — **ya aplicada** el 2026-11-09 (sin ella no se pueden crear cuentas ni cambiar contraseñas).
 3. **Cadena de conexión de Neon** a la mano (Neon → *Connection Details*). Usa la del endpoint con *pooler* (el host contiene `-pooler`) y con `sslmode=require`.
 
 ## 1. Crear el servicio
@@ -48,8 +49,9 @@ No definas `AUTO_CREATE_TABLES` en Render: la app no debe crear tablas en Neon.
 No hay registro público. Las cuentas se crean con el comando `flask crear-usuario`, **desde tu equipo**, porque el plan gratis de Render no tiene consola. El comando usa el `DATABASE_URL` del `.env` local, que debe apuntar a Neon.
 
 ```bash
-# Desde la raíz del proyecto (con las dependencias instaladas)
-flask --app app crear-usuario --rol Administrador --email admin@utsc.edu.mx --nombre "Nombre" --apellido "Apellido"
+# Desde la raíz del proyecto (con las dependencias instaladas).
+# Se usa "python -m flask" porque en Windows "flask" suele no estar en el PATH.
+python -m flask --app app crear-usuario --rol Administrador --email admin@utsc.edu.mx --nombre "Nombre" --apellido "Apellido"
 ```
 
 Antes de escribir, el comando muestra la base de datos destino (debe decir `neondb`) y pide confirmación. La contraseña se pide oculta y la cuenta queda con **cambio obligatorio** en el primer inicio de sesión.
@@ -68,7 +70,9 @@ Reglas que impone Neon (el comando las valida antes):
 - Correo único (sin distinguir mayúsculas) y matrícula / número de empleado únicos.
 - Las cuentas no se borran: se desactivan (`activo = false`).
 
-`flask crear-usuario --help` muestra todas las opciones.
+`python -m flask --app app crear-usuario --help` muestra todas las opciones.
+
+En Windows la contraseña se escribe de forma oculta: ejecuta el comando en una terminal (PowerShell o CMD), no desde un script ni una tubería.
 
 ## 4. Después del primer despliegue
 

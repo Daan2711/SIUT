@@ -1,12 +1,13 @@
 """Comandos de administración de SIUT (Flask CLI).
 
-Uso (desde la raíz del proyecto, con DATABASE_URL apuntando a la base deseada):
+Uso (desde la raíz del proyecto, con DATABASE_URL apuntando a la base deseada;
+en Windows se usa "python -m flask" porque "flask" suele no estar en el PATH):
 
-    flask crear-usuario --rol Administrador --email admin@utsc.edu.mx --nombre Ana
-    flask crear-usuario --rol Alumno --email a@utsc.edu.mx --nombre Luis \
+    python -m flask --app app crear-usuario --rol Administrador --email admin@utsc.edu.mx --nombre Ana
+    python -m flask --app app crear-usuario --rol Alumno --email a@utsc.edu.mx --nombre Luis \
         --matricula UTSC-001 --carrera "Desarrollo de Software" --semestre "3° semestre"
-    flask crear-usuario --rol Profesor --email p@utsc.edu.mx --nombre Eva --num-empleado E-01
-    flask crear-usuario --rol Empresa --email rh@tecnonova.mx --nombre Carla --empresa TecnoNova
+    python -m flask --app app crear-usuario --rol Profesor --email p@utsc.edu.mx --nombre Eva --num-empleado E-01
+    python -m flask --app app crear-usuario --rol Empresa --email rh@tecnonova.mx --nombre Carla --empresa TecnoNova
 
 La contraseña se pide de forma oculta (con confirmación) y la cuenta queda con
 cambio de contraseña obligatorio en el primer inicio de sesión.

@@ -4,6 +4,21 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Corrección de la función `validar_perfiles_usuario()` en Neon (2026-11-09)
+
+#### Corregido
+- **No se podían crear cuentas ni cambiar contraseñas en Neon.** `flask crear-usuario` fallaba con `record "old" has no field "usuario_id"`. La función `validar_perfiles_usuario()` la comparten 3 triggers (en `usuarios`, `alumnos` y `profesores`), y en la condición `TG_TABLE_NAME IN ('alumnos','profesores') AND TG_OP = 'UPDATE' AND OLD.usuario_id IS DISTINCT FROM NEW.usuario_id` PL/pgSQL resolvía `OLD.usuario_id` también cuando el trigger corría sobre `usuarios`, que no tiene esa columna. Todo INSERT o UPDATE en `usuarios` fallaba al confirmar la transacción (incluido `/cambiar-password`).
+  - La comparación pasa a un `IF` anidado que solo se evalúa en UPDATE de `alumnos`/`profesores`; el resto de la función no cambia.
+  - La función se había creado directamente en Neon (no estaba en el repositorio ni en el historial de git); ahora queda versionada. — `migrations/2026-11-09_corregir_validar_perfiles_usuario.sql` y su script para revertir (con la definición original copiada de Neon).
+  - **Aplicada en Neon** el 2026-11-09: ensayo con rollback, aplicación y verificación en solo lectura (la definición en Neon es idéntica a la del archivo; los 3 triggers siguen activos; no cambió ningún otro objeto ni dato).
+  - Verificada antes en un PostgreSQL 18.6 local con las definiciones exactas de Neon: con la función original fallaban crear un administrador, actualizar un usuario y crear un alumno con su perfil; con la corrección funcionan, y las reglas de perfiles siguen rechazando alumnos sin perfil, empresas sin empresa y mover un perfil dejando a su dueño sin él.
+
+#### Cambiado
+- Los ejemplos del comando usan `python -m flask --app app crear-usuario`: en Windows `flask` suele no estar en el PATH. Nota sobre ejecutarlo en una terminal (la contraseña oculta no funciona por tubería en Windows). — `docs/DESPLIEGUE_RENDER.md`, `comandos.py`
+
+#### Pruebas
+- Prueba de regresión que revisa la migración: `OLD.usuario_id` solo se compara dentro del `IF` anidado. 168 casos en total. — `tests/test_restricciones.py`
+
 ### Inscripción a eventos restaurada (2026-11-09)
 
 #### Corregido
