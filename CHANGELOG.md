@@ -4,6 +4,29 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Preparación para Render — Fase C: detalles técnicos (2026-11-08)
+
+#### Agregado
+- **Menú en celulares.** Botón ☰ en las 11 páginas con menú; en pantallas de hasta 900 px el menú se despliega debajo del encabezado. `nav.js` (que ninguna página cargaba) ahora se usa y anuncia el estado a lectores de pantalla (`aria-expanded`); se cierra al elegir una opción o con Escape. — `Frontend/*.html`, `Frontend/js/nav.js`, `Frontend/css/style.css`
+
+#### Cambiado
+- **Caché de 1 hora para CSS, JS e imágenes** (`public, max-age=3600`); antes se descargaban en cada página. HTML y API siguen sin caché porque dependen de la sesión. — `app.py`
+- **SQLite local funciona sin ajustes**: la conversión de `BigInteger` a `INTEGER` (necesaria para el autoincremento en SQLite) pasó de las pruebas a `Database/database.py`. No afecta a PostgreSQL. — `Database/database.py`, `tests/conftest.py`
+- **`README.md` reescrito** con la arquitectura real (API JSON + HTML estático, sin Jinja2, Bootstrap ni WeasyPrint), roles, estructura, desarrollo local, pruebas y la explicación para presentar el proyecto, corregida.
+- `docs/DESPLIEGUE_RENDER.md`: nota sobre la caché tras un despliegue.
+
+#### Corregido
+- `index.html` no cerraba la etiqueta `<body>`.
+- `soporte.html` cargaba `usuario.js`, que fallaba porque la página no tiene los elementos que busca (el nombre ya lo pone el servidor).
+
+#### Eliminado
+- Páginas huérfanas sin ningún enlace: `inscripcion.html` y `confirmacion_inscripciones.html`.
+- `Frontend/js/usuario.js` (solo lo usaba `soporte.html`).
+- El carrusel `app.js` en las páginas que no lo tienen (`buzon.html`, `cargar-vacantes.html`, `vacantes-publicadas.html`).
+
+#### Pruebas
+- 14 casos nuevos en `tests/test_seguridad.py` (caché, botón del menú en celular y archivos eliminados). 165 casos en total.
+
 ### Preparación para Render — Fase B: importantes (2026-11-08)
 
 #### Agregado

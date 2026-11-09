@@ -23,7 +23,7 @@ def test_cabeceras_de_seguridad_unificadas(anon):
 
 # --- Páginas protegidas (Fase 2) -------------------------------------------
 @pytest.mark.parametrize('pagina', [
-    '/buzon.html', '/cargar-vacantes.html', '/inscripcion.html',
+    '/buzon.html', '/cargar-vacantes.html', '/sugerencias.html',
     '/CARGAR-VACANTES.HTML',  # en Windows el sistema de archivos ignora mayúsculas
 ])
 def test_paginas_sin_sesion_redirigen_a_login(anon, pagina):
@@ -91,3 +91,34 @@ def test_security_txt_legado_redirige(anon):
     respuesta = anon.get('/security.txt')
     assert respuesta.status_code == 301
     assert respuesta.headers['Location'].endswith('/.well-known/security.txt')
+
+
+# --- Fase C: caché, menú en celular y limpieza ------------------------------
+@pytest.mark.parametrize('recurso', ['/css/style.css', '/js/nav.js', '/img/logo.png'])
+def test_recursos_estaticos_se_guardan_en_cache(anon, recurso):
+    respuesta = anon.get(recurso)
+    assert respuesta.status_code == 200
+    assert respuesta.headers['Cache-Control'] == 'public, max-age=3600'
+
+
+def test_html_y_api_nunca_se_guardan_en_cache(alumno):
+    for ruta in ('/login', '/index.html', '/api/vacantes', '/usuario-actual'):
+        assert 'no-store' in alumno.get(ruta).headers['Cache-Control'], ruta
+
+
+PAGINAS_CON_MENU = ['/index.html', '/horario.html', '/maestros.html', '/soporte.html',
+                    '/buzon.html', '/sugerencias.html']
+
+
+@pytest.mark.parametrize('pagina', PAGINAS_CON_MENU)
+def test_paginas_con_menu_tienen_boton_para_celular(alumno, pagina):
+    texto = alumno.get(pagina).get_data(as_text=True)
+    assert 'id="menuToggle"' in texto and 'aria-controls="menuPrincipal"' in texto
+    assert '<nav id="menuPrincipal"' in texto
+    assert 'js/nav.js' in texto
+
+
+@pytest.mark.parametrize('pagina', ['/inscripcion.html', '/confirmacion_inscripciones.html',
+                                    '/contacto.html', '/js/usuario.js'])
+def test_archivos_eliminados_ya_no_existen(alumno, pagina):
+    assert alumno.get(pagina).status_code == 404

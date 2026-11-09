@@ -755,3 +755,20 @@ nav a.activo{
 .sugerencia-form select,.sugerencia-form textarea{width:100%;box-sizing:border-box;border:1px solid #d9e3e0;border-radius:9px;padding:10px 12px;font:inherit;font-size:14px;color:#263b39;background:#fff}
 .sugerencia-form textarea{resize:vertical;min-height:70px}
 .sugerencia-form button{align-self:flex-start}
+
+/* ==========================================================================
+   Menú del encabezado en pantallas pequeñas (botón ☰, ver js/nav.js)
+   ========================================================================== */
+[hidden]{display:none !important}
+.menu-toggle{display:none;background:transparent;border:1px solid #6b9e98;border-radius:8px;font-size:22px;line-height:1;padding:6px 11px;cursor:pointer;color:#163b3b}
+.menu-toggle:focus-visible{outline:2px solid #087e72;outline-offset:2px}
+@media (max-width:900px){
+    header{flex-wrap:wrap;padding:12px 16px;gap:10px}
+    .logo img{width:96px}
+    .perfil{order:1;margin-left:auto}
+    .menu-toggle{display:block;order:2}
+    header nav{display:none;order:3;width:100%;flex-direction:column;gap:0}
+    header nav.abierto{display:flex}
+    header nav a{padding:11px 4px;border-top:1px solid #b5ddd8}
+    header nav a.activo{border-bottom:none;font-weight:800}
+}

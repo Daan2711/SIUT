@@ -198,9 +198,20 @@ def set_security_headers(response):
     # HSTS solo tiene sentido (y solo se envía) cuando el sitio va por HTTPS
     if app.config['SESSION_COOKIE_SECURE']:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    # Forzamos que Cloudflare NO cachee — así siempre pasa por Flask
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
+    es_recurso_estatico = (
+        request.endpoint == 'static'
+        and not request.path.lower().endswith('.html')
+        and response.status_code == 200
+    )
+    if es_recurso_estatico:
+        # CSS, JS e imágenes: iguales para todos, se guardan 1 hora en el
+        # navegador (el plan gratis de Render es lento; evita descargarlos
+        # en cada página).
+        response.headers['Cache-Control'] = 'public, max-age=3600'
+    else:
+        # HTML y API dependen de la sesión: nunca se guardan en caché
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
 
     if request.method == 'OPTIONS':
         # Un after_request debe devolver un objeto Response, no una tupla

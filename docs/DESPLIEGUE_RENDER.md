@@ -81,6 +81,7 @@ Reglas que impone Neon (el comando las valida antes):
 - **El servicio se duerme** tras 15 minutos sin visitas; la siguiente visita tarda unos 30–60 s en responder mientras arranca (estimación según la documentación de Render).
 - **Neon también se suspende** tras unos minutos sin uso; la app reconecta sola (`pool_pre_ping`), pero la primera consulta tarda un poco más.
 - **Sin disco persistente**: por eso los CV se guardan en Neon (tabla `postulacion_cv`). El plan gratis de Neon tiene 0.5 GB en total.
+- **Caché de 1 hora en CSS, JS e imágenes**: hace la app más rápida, pero tras un despliegue un navegador puede seguir usando la versión anterior de esos archivos hasta 1 hora (o hasta recargar con Ctrl+F5). El HTML y la API nunca se guardan en caché.
 - **Límite de intentos de login por worker**: con 2 workers de gunicorn cada uno lleva su propio conteo (5 por minuto cada uno). Para un límite global haría falta Redis (`RATELIMIT_STORAGE_URI`).
 
 ## Si algo falla

@@ -23,14 +23,8 @@ os.environ.update({
     'RATELIMIT_STORAGE_URI': 'memory://',
 })
 
-# En SQLite solo INTEGER PRIMARY KEY es autoincremental; los modelos usan BigInteger
-from sqlalchemy import BigInteger, text  # noqa: E402
-from sqlalchemy.ext.compiler import compiles  # noqa: E402
-
-
-@compiles(BigInteger, 'sqlite')
-def _biginteger_sqlite(_type, _compiler, **_kw):
-    return 'INTEGER'
+# BigInteger → INTEGER en SQLite: lo resuelve Database/database.py
+from sqlalchemy import text  # noqa: E402
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
