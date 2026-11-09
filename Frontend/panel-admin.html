@@ -16,6 +16,7 @@
       <a href="cargar-vacantes.html">Cargar vacante</a>
       <a href="postulaciones-recibidas.html">Postulaciones</a>
       <a href="sugerencias-admin.html" data-solo-admin hidden>Sugerencias</a>
+      <a href="nueva-cuenta.html" data-solo-admin hidden>Nueva cuenta</a>
     </nav>
     <div class="perfil">
       <img src="img/usuario.png" alt="Usuario">
@@ -56,14 +57,20 @@
         <strong class="panel-cifra">+</strong>
         <span>cargar una nueva vacante</span>
       </a>
+      <a class="vacante-card panel-tarjeta" href="nueva-cuenta.html">
+        <span class="vacante-area">CUENTAS</span>
+        <strong class="panel-cifra">+</strong>
+        <span>dar de alta a un alumno, profesor o empresa</span>
+      </a>
     </section>
 
     <p id="avisoPanel" class="sin-resultados" hidden></p>
 
     <section class="empleos-search-panel panel-nota">
       <h2>Alta de cuentas</h2>
-      <p>Las cuentas de alumnos, profesores, empresas y administradores se crean con el comando
-        <code>flask crear-usuario</code> (ver <code>docs/DESPLIEGUE_RENDER.md</code>).
+      <p>Las cuentas de alumnos, profesores y empresas se crean en <a href="nueva-cuenta.html">Nueva cuenta</a>.
+        Los administradores solo se crean con el comando <code>flask crear-usuario</code>
+        (ver <code>docs/DESPLIEGUE_RENDER.md</code>).
         Cada cuenta nueva debe cambiar su contraseña en el primer inicio de sesión.</p>
     </section>
   </main>

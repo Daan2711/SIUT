@@ -15,7 +15,7 @@ Portal web para la comunidad de la UTSC: bolsa de empleo con postulación y CV, 
 | **Administrador** (máx. 4) | Todo lo de Empresa para cualquier empresa, ver todas las postulaciones y atender el buzón de sugerencias | `panel-admin.html` |
 | **Profesor** | Existe en la base de datos; aún sin funciones propias en la web | `index.html` |
 
-No hay registro público: las cuentas se crean con `flask crear-usuario` (ver la guía de despliegue). Toda cuenta nueva debe cambiar su contraseña en el primer inicio de sesión.
+No hay registro público. Un administrador crea las cuentas de alumnos, profesores y empresas desde el panel (**Nueva cuenta**); los administradores solo se crean con `flask crear-usuario` (ver la guía de despliegue). Toda cuenta nueva debe cambiar su contraseña en el primer inicio de sesión.
 
 ## Arquitectura
 
@@ -42,11 +42,14 @@ Librerías de cdnjs (con SRI): **html2pdf** (descarga del horario en PDF) y **Sw
 app.py                  Configuración, seguridad, páginas protegidas, /healthz
 comandos.py             Comando `flask crear-usuario`
 extensions.py           Límite de intentos (Flask-Limiter)
+csrf.py                 Token CSRF por sesión (cabecera X-CSRF-Token)
+servicios/cuentas.py    Alta de cuentas (compartida por el comando y la web)
 Controllers/
   authController.py     Login, logout, cambio de contraseña, /usuario-actual
   vacantesController.py Vacantes y permisos por rol (Empresa / Administrador)
   postulacionesController.py  Postulaciones y CV (guardados en la base de datos)
   buzonController.py    Buzón de sugerencias y bandeja del administrador
+  cuentasController.py  Alta de cuentas desde el panel (solo Administrador)
 Models/models.py        Modelos SQLAlchemy (con las restricciones de Neon)
 Frontend/               Páginas HTML, css/, js/, img/
 migrations/             Cambios de esquema en Neon (con su script para revertir)
@@ -94,6 +97,7 @@ python -m pytest
 | `test_admin.py` | Health check, página de inicio por rol, panel y bandeja de sugerencias, logs |
 | `test_restricciones.py` | Restricciones UNIQUE y CHECK de la base de datos |
 | `test_comandos.py` | Comando `flask crear-usuario` |
+| `test_cuentas_admin.py` | Alta de cuentas desde la web: por rol, duplicados, acceso, CSRF, sin administradores |
 
 Las fixtures comunes (usuarios por rol, vacante, clientes con sesión) están en `tests/conftest.py`. Cada prueba arranca con la base de datos vacía.
 

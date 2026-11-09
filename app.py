@@ -22,6 +22,7 @@ from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
 from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes, es_administrador
 from Controllers.postulacionesController import postulaciones_bp
+from Controllers.cuentasController import cuentas_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -108,6 +109,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
 app.register_blueprint(vacantes_bp)
 app.register_blueprint(postulaciones_bp)
+app.register_blueprint(cuentas_bp)
 
 # Comandos de administración: `flask crear-usuario` (ver comandos.py)
 from comandos import crear_usuario  # noqa: E402
@@ -123,7 +125,7 @@ PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
 PAGINAS_RECLUTADOR = {
     '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',
 }
-PAGINAS_ADMINISTRADOR = {'/panel-admin.html', '/sugerencias-admin.html'}
+PAGINAS_ADMINISTRADOR = {'/panel-admin.html', '/sugerencias-admin.html', '/nueva-cuenta.html'}
 
 
 @app.before_request
@@ -308,6 +310,11 @@ def panel_admin_page():
 @app.route('/sugerencias-admin.html')
 def sugerencias_admin_page():
     return _render_con_nombre('sugerencias-admin.html')
+
+
+@app.route('/nueva-cuenta.html')
+def nueva_cuenta_page():
+    return _render_con_nombre('nueva-cuenta.html')
 
 
 # =========================================================================

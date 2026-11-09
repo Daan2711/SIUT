@@ -4,6 +4,36 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Alta de cuentas desde el panel de administrador (2026-11-09)
+
+#### Agregado
+- **Página «Nueva cuenta»** en la sección de administrador. Tiene un selector de rol limitado a Alumno, Profesor y Empresa y muestra solo los campos de cada rol, igual que las opciones del comando. Los campos de los otros roles quedan deshabilitados y no se envían. La contraseña temporal se escribe dos veces y la cuenta queda con cambio obligatorio en el primer inicio de sesión. — `Frontend/nueva-cuenta.html`, `Frontend/js/nueva-cuenta.js`
+  - Enlace «Nueva cuenta» (solo visible para administradores) en el menú de las páginas de gestión, una tarjeta en el panel y el texto del panel actualizado. — `Frontend/panel-admin.html`, `Frontend/cargar-vacantes.html`, `Frontend/vacantes-publicadas.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/sugerencias-admin.html`, `Frontend/css/style.css`
+- **API de alta** (solo para un Administrador activo, leído de la base): `GET /api/admin/cuentas/formulario` (token CSRF, roles y semestres) y `POST /api/admin/cuentas` (límite de 20 por minuto). Responde 401 sin sesión, 403 a otros roles o sin CSRF, 400 en validaciones y 409 en duplicados. — `Controllers/cuentasController.py`, `app.py` (blueprint, ruta de la página y `PAGINAS_ADMINISTRADOR`)
+- **Protección CSRF** con un token por sesión que viaja en la cabecera `X-CSRF-Token` y se compara en tiempo constante, sin dependencias nuevas. Por ahora la usa solo este formulario. — `csrf.py`
+
+#### Cambiado
+- **Lógica de alta compartida:** las validaciones, la revisión de duplicados y el alta en una sola transacción salen del comando a `preparar_cuenta()` y `guardar_cuenta()`. El comando y la web usan el mismo código; el comando conserva sus opciones y su comportamiento y, en los errores, indica la opción que hay que corregir. — `servicios/cuentas.py`, `servicios/__init__.py`, `comandos.py`
+- El modelo `Profesor` declara `usuario_id` y `num_empleado` únicos, como ya lo están en Neon (`profesores_*_key`). No cambia Neon. — `Models/models.py`
+- La documentación indica los dos caminos de alta. — `README.md`, `docs/DESPLIEGUE_RENDER.md`
+
+#### Seguridad
+- **Desde la web no se crean administradores:** el formulario no ofrece el rol y el servidor rechaza `rol=Administrador` (o cualquier rol fuera de la lista blanca) aunque llegue en la petición. Los administradores se siguen creando solo con `flask crear-usuario`.
+- **Duplicados de correo, matrícula, número de empleado o empresa:** se responden con mensajes amigables, también si dos envíos simultáneos llegan a la restricción UNIQUE de la base. El texto de PostgreSQL solo se escribe en el log.
+- **Registro:** el log de la app indica qué administrador creó qué cuenta (ids, rol y correos, sin la contraseña) y la auditoría guarda `Alta de usuario (web)` con el id del administrador; `usuarios.creado_por` también lo registra.
+
+#### Pruebas
+- 44 casos nuevos:
+  - alta por rol y perfil creado;
+  - duplicados, incluidos los que llegan a la base;
+  - validaciones por rol y contraseñas distintas;
+  - acceso sin sesión, de Alumno, de Empresa y de un administrador desactivado;
+  - intento de crear un Administrador o un rol desconocido;
+  - CSRF ausente, falso o de otra sesión;
+  - log sin la contraseña.
+
+  En total son 212 casos. — `tests/test_cuentas_admin.py`
+
 ### Corrección de la función `validar_perfiles_usuario()` en Neon (2026-11-09)
 
 #### Corregido

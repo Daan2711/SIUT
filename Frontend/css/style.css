@@ -726,6 +726,7 @@ nav a.activo{
 .carga-vacante-panel input,.carga-vacante-panel select,.carga-vacante-panel textarea{width:100%;box-sizing:border-box;border:1px solid #d9e3e0;border-radius:9px;padding:12px 13px;background:#fff;font:inherit;font-size:14px;color:#263b39;outline:none;transition:border-color .2s,box-shadow .2s}
 .carga-vacante-panel input:focus,.carga-vacante-panel select:focus,.carga-vacante-panel textarea:focus{border-color:#0b9282;box-shadow:0 0 0 3px #0b92821c}
 .carga-vacante-panel textarea{resize:vertical;min-height:76px}
+.carga-vacante-panel [aria-invalid="true"]{border-color:#c0392b;box-shadow:0 0 0 3px #c0392b1c}
 .carga-preview{position:sticky;top:20px}
 .carga-preview h2{font-size:15px;margin:4px 0 4px;color:#243a38}
 .carga-preview>p{margin:0 0 12px;color:#75817f;font-size:13px}
