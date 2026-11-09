@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva cuenta | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal">&#9776;</button>
+    <nav id="menuPrincipal" aria-label="Gestión">
+      <a href="panel-admin.html" data-solo-admin hidden>Panel</a>
+      <a href="vacantes-publicadas.html">Vacantes publicadas</a>
+      <a href="cargar-vacantes.html">Cargar vacante</a>
+      <a href="postulaciones-recibidas.html">Postulaciones</a>
+      <a href="sugerencias-admin.html" data-solo-admin hidden>Sugerencias</a>
+      <a class="activo" href="nueva-cuenta.html" aria-current="page" data-solo-admin hidden>Nueva cuenta</a>
+    </nav>
+    <div class="perfil">
+      <img src="img/usuario.png" alt="Usuario">
+      <div class="perfil-info">
+        <span id="nombreAlumno">Nombre del Alumno</span>
+        <button id="cerrarSesion" class="btn-logout" type="button">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">ADMINISTRACIÓN SIUT</p>
+        <h1>Nueva cuenta</h1>
+        <p>Da de alta a un alumno, profesor o empresa. La cuenta deberá cambiar su contraseña en el primer inicio de sesión.</p>
+      </div>
+    </section>
+
+    <section class="empleos-search-panel carga-vacante-panel" aria-label="Formulario de nueva cuenta">
+      <form id="formCuenta" novalidate>
+        <div class="form-seccion-titulo"><span>01</span><div><strong>Tipo de cuenta</strong><small>Los administradores solo se crean con el comando flask crear-usuario</small></div></div>
+        <label>Rol <b>*</b>
+          <select name="rol" required>
+            <option value="">Selecciona un rol</option>
+            <option>Alumno</option>
+            <option>Profesor</option>
+            <option>Empresa</option>
+          </select>
+        </label>
+
+        <div class="form-seccion-titulo"><span>02</span><div><strong>Datos de la persona</strong><small>El correo será su usuario para iniciar sesión</small></div></div>
+        <div class="form-grid">
+          <label>Correo <b>*</b><input name="email" type="email" required maxlength="255" autocomplete="off"></label>
+          <label>Nombre <b>*</b><input name="nombre" required maxlength="100" autocomplete="off"></label>
+          <label>Apellido <span class="opcional">(opcional)</span><input name="apellido" maxlength="100" autocomplete="off"></label>
+        </div>
+
+        <div class="form-grid" data-rol="Alumno" hidden>
+          <label>Matrícula <b>*</b><input name="matricula" required maxlength="50" autocomplete="off"></label>
+          <label>Carrera <span class="opcional">(opcional)</span><input name="carrera" maxlength="120" autocomplete="off"></label>
+          <label>Semestre <span class="opcional">(opcional)</span>
+            <select name="semestre" id="semestre"><option value="">Sin especificar</option></select>
+          </label>
+          <label>Teléfono <span class="opcional">(opcional)</span><input name="telefono" type="tel" maxlength="30" pattern="[0-9+() \-]{8,30}" autocomplete="off"></label>
+        </div>
+
+        <div class="form-grid" data-rol="Profesor" hidden>
+          <label>Número de empleado <b>*</b><input name="num_empleado" required maxlength="50" autocomplete="off"></label>
+          <label>Departamento <span class="opcional">(opcional)</span><input name="departamento" maxlength="120" autocomplete="off"></label>
+          <label>Especialidad <span class="opcional">(opcional)</span><input name="especialidad" maxlength="150" autocomplete="off"></label>
+        </div>
+
+        <div class="form-grid" data-rol="Empresa" hidden>
+          <label>Empresa <b>*</b><input name="empresa" required maxlength="150" autocomplete="off" placeholder="Se crea si no existe"></label>
+        </div>
+
+        <div class="form-seccion-titulo"><span>03</span><div><strong>Contraseña temporal</strong><small>Mínimo 8 caracteres; compártela por un canal seguro</small></div></div>
+        <div class="form-grid">
+          <label>Contraseña temporal <b>*</b><input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
+          <label>Repite la contraseña <b>*</b><input name="password_confirmacion" type="password" required minlength="8" autocomplete="new-password"></label>
+        </div>
+
+        <p id="mensajeCuenta" class="mensaje-postulacion" role="status" hidden></p>
+        <div class="form-acciones"><button id="limpiarCuenta" class="btn-empleo-outline" type="button">Limpiar</button><button id="crearCuenta" class="btn-empleo-primary" type="submit" disabled>Crear cuenta</button></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/gestion.js"></script>
+  <script src="js/nueva-cuenta.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

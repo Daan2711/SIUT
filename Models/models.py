@@ -66,8 +66,9 @@ class Profesor(db.Model):
     __tablename__ = 'profesores'
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False)
-    num_empleado = db.Column(db.String, nullable=False)
+    # Un registro de profesor por usuario y número de empleado único (como en Neon)
+    usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False, unique=True)
+    num_empleado = db.Column(db.String, nullable=False, unique=True)
     departamento = db.Column(db.String, nullable=True)
     especialidad = db.Column(db.String, nullable=True)
     activo = db.Column(db.Boolean, nullable=False, default=True)

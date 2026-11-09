@@ -6,6 +6,7 @@ from Models.models import Usuario, Alumno, Empresa, Auditoria
 from Database.database import db
 from sqlalchemy import func
 from extensions import limiter
+from csrf import nuevo_token_csrf
 
 bcrypt = Bcrypt()
 auth_bp = Blueprint('auth', __name__)
@@ -74,6 +75,10 @@ def login_usuario():
         session['nombre'] = usuario.nombre
         session['email'] = usuario.email
         session['primer_login'] = bool(usuario.primer_login)
+        # El token CSRF se crea aquí y no al abrir el formulario: las peticiones
+        # simultáneas de una página (p. ej. /usuario-actual) reescriben la cookie
+        # de sesión y podían borrar un token creado a medio camino.
+        nuevo_token_csrf()
 
         # Registrar inicio de sesión
         nuevo_log = Auditoria(

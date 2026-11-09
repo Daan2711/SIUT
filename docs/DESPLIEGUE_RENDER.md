@@ -46,7 +46,10 @@ No definas `AUTO_CREATE_TABLES` en Render: la app no debe crear tablas en Neon.
 
 ## 3. Crear las cuentas
 
-No hay registro público. Las cuentas se crean con el comando `flask crear-usuario`, **desde tu equipo**, porque el plan gratis de Render no tiene consola. El comando usa el `DATABASE_URL` del `.env` local, que debe apuntar a Neon.
+No hay registro público. Hay dos caminos, que usan la misma lógica (`servicios/cuentas.py`):
+
+- **Administradores:** solo con el comando `flask crear-usuario`, **desde tu equipo**, porque el plan gratis de Render no tiene consola. El comando usa el `DATABASE_URL` del `.env` local, que debe apuntar a Neon.
+- **Alumnos, profesores y empresas:** un administrador los crea desde la web, en **Panel → Nueva cuenta** (`/nueva-cuenta.html`). El formulario no ofrece el rol Administrador y el servidor lo rechaza aunque llegue en la petición. El comando también puede crearlos.
 
 ```bash
 # Desde la raíz del proyecto (con las dependencias instaladas).
