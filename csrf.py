@@ -18,13 +18,19 @@ CLAVE_SESION = '_csrf_token'
 CABECERA = 'X-CSRF-Token'
 
 
-def token_csrf():
-    """Token CSRF de la sesión actual (se crea la primera vez)."""
-    token = session.get(CLAVE_SESION)
-    if not token:
-        token = secrets.token_urlsafe(32)
-        session[CLAVE_SESION] = token
+def nuevo_token_csrf():
+    """Crea un token nuevo para la sesión. Se llama al iniciar sesión: así el
+    token ya viaja en la cookie desde la primera página y ninguna petición
+    simultánea (que reescribe la cookie) puede perderlo."""
+    token = secrets.token_urlsafe(32)
+    session[CLAVE_SESION] = token
     return token
+
+
+def token_csrf():
+    """Token CSRF de la sesión actual. Si falta (sesiones abiertas antes de
+    este cambio) se crea aquí."""
+    return session.get(CLAVE_SESION) or nuevo_token_csrf()
 
 
 def csrf_valido():

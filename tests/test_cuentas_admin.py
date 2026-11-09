@@ -306,3 +306,24 @@ def test_token_de_otra_sesion_no_sirve(app, administrador, crear_usuario, client
 
 def test_el_token_se_reutiliza_en_la_misma_sesion(administrador):
     assert token(administrador) == token(administrador)
+
+
+def test_peticion_simultanea_no_borra_el_token(app, administrador):
+    """Regresión: al abrir la página, /usuario-actual y /formulario van a la vez.
+    Si la respuesta de /usuario-actual llegaba después, reescribía la cookie de
+    sesión SIN el token y el primer envío fallaba con 403. El token se crea al
+    iniciar sesión, así que la cookie previa ya lo trae."""
+    cookie_previa = administrador.get_cookie('session').value   # la que usa /usuario-actual
+    csrf = token(administrador)                                 # /formulario responde primero
+    administrador.set_cookie('session', cookie_previa)          # /usuario-actual responde después
+    respuesta = enviar(administrador, ALUMNO, csrf=csrf)
+    assert respuesta.status_code == 201, respuesta.get_json()
+
+
+def test_el_login_renueva_el_token(app, crear_usuario, cliente_de):
+    """Cada inicio de sesión recibe un token nuevo (no se arrastra el de otra sesión)."""
+    crear_usuario('admin@x.mx', rol='Administrador')
+    cliente = cliente_de('admin@x.mx')
+    primero = token(cliente)
+    hacer_login(cliente, 'admin@x.mx')
+    assert token(cliente) != primero

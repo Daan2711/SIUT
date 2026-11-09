@@ -22,7 +22,11 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 - **Duplicados de correo, matrícula, número de empleado o empresa:** se responden con mensajes amigables, también si dos envíos simultáneos llegan a la restricción UNIQUE de la base. El texto de PostgreSQL solo se escribe en el log.
 - **Registro:** el log de la app indica qué administrador creó qué cuenta (ids, rol y correos, sin la contraseña) y la auditoría guarda `Alta de usuario (web)` con el id del administrador; `usuarios.creado_por` también lo registra.
 
+#### Corregido
+- **El primer envío de «Nueva cuenta» podía fallar con 403** («La sesión del formulario expiró»). Se detectó en la prueba manual. Al abrir la página se piden a la vez `/api/admin/cuentas/formulario`, que guardaba el token CSRF en la cookie de sesión, y `/usuario-actual`, que también reescribe esa cookie porque la sesión se renueva en cada petición. Si la segunda respuesta llegaba al final, la cookie quedaba sin el token. Ahora el token se crea al iniciar sesión, así que ya viaja en la cookie desde la primera página. `token_csrf()` lo sigue creando si falta, para las sesiones abiertas antes del cambio. — `csrf.py`, `Controllers/authController.py`
+
 #### Pruebas
+- Prueba de regresión que simula la respuesta simultánea (reponer la cookie previa al pedir el token); falla sin la corrección. Otra prueba comprueba que cada inicio de sesión recibe un token nuevo. — `tests/test_cuentas_admin.py`
 - 44 casos nuevos:
   - alta por rol y perfil creado;
   - duplicados, incluidos los que llegan a la base;
@@ -32,7 +36,7 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
   - CSRF ausente, falso o de otra sesión;
   - log sin la contraseña.
 
-  En total son 212 casos. — `tests/test_cuentas_admin.py`
+  En total son 214 casos (46 de ellos en este archivo). — `tests/test_cuentas_admin.py`
 
 ### Corrección de la función `validar_perfiles_usuario()` en Neon (2026-11-09)
 
