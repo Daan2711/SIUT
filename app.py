@@ -54,11 +54,8 @@ app.config['SESSION_COOKIE_SECURE'] = (
 app.config['PERMANENT_SESSION_LIFETIME'] = 1800
 
 # Carga de archivos (CV en PDF de hasta 5 MB + campos del formulario).
-# Los CV se guardan fuera de 'Frontend' para que no sean públicos.
+# Los CV se guardan en la base de datos (tabla postulacion_cv), no en disco.
 app.config['MAX_CONTENT_LENGTH'] = 6 * 1024 * 1024
-app.config['UPLOAD_DIR'] = os.getenv('UPLOAD_DIR') or os.path.join(
-    app.instance_path, 'uploads', 'cv'
-)
 
 # =========================================================================
 # SECCIÓN 4: CONFIGURACIÓN Y ENLACE DE LA BASE DE DATOS (ORM)
@@ -66,6 +63,13 @@ app.config['UPLOAD_DIR'] = os.getenv('UPLOAD_DIR') or os.path.join(
 # Configuramos la conexión a Neon leyendo la variable de entorno
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Neon suspende la base tras unos minutos sin uso y cierra las conexiones:
+# pool_pre_ping revisa cada conexión antes de usarla (y la reemplaza si murió)
+# y pool_recycle las renueva antes de que Neon las corte.
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 280,
+}
 
 # Vinculamos la base de datos con nuestra aplicación de Flask
 db.init_app(app)
@@ -98,6 +102,10 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(buzon_bp)
 app.register_blueprint(vacantes_bp)
 app.register_blueprint(postulaciones_bp)
+
+# Comandos de administración: `flask crear-usuario` (ver comandos.py)
+from comandos import crear_usuario  # noqa: E402
+app.cli.add_command(crear_usuario)
 
 
 # =========================================================================

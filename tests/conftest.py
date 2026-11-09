@@ -13,12 +13,10 @@ import tempfile
 import pytest
 
 _TMP = tempfile.mkdtemp(prefix='siut-tests-')
-UPLOAD_DIR = os.path.join(_TMP, 'cv')
 
 os.environ.update({
     'DATABASE_URL': 'sqlite:///' + os.path.join(_TMP, 'siut.db'),
     'SECRET_KEY': 'clave-solo-para-pruebas',
-    'UPLOAD_DIR': UPLOAD_DIR,
     'TEMP_PASSWORD': '',
     'PROXY_HOPS': '0',
     'COOKIE_SECURE': 'false',
@@ -40,7 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import app as flask_app  # noqa: E402
 from Database.database import db  # noqa: E402
 from extensions import limiter  # noqa: E402
-from Models.models import Usuario, Alumno, Empresa  # noqa: E402
+from Models.models import Usuario, Alumno, Empresa, PostulacionCV  # noqa: E402
 from Controllers.authController import bcrypt  # noqa: E402
 
 # Hash rápido: el costo real (12) solo hace lentas las pruebas
@@ -97,7 +95,7 @@ REPLICAS_NEON = [
 # -------------------------------------------------------------------------
 @pytest.fixture
 def app():
-    """Base de datos, límite de intentos y carpeta de CV limpios en cada prueba."""
+    """Base de datos y límite de intentos limpios en cada prueba."""
     with flask_app.app_context():
         db.drop_all()
         db.create_all()
@@ -105,7 +103,6 @@ def app():
             db.session.execute(text(sentencia))
         db.session.commit()
     limiter.reset()
-    shutil.rmtree(UPLOAD_DIR, ignore_errors=True)
     yield flask_app
     with flask_app.app_context():
         db.session.remove()
@@ -236,5 +233,7 @@ def postular(cliente, vacante, cv=(PDF, 'Mi CV.pdf'), **extra):
     return cliente.post('/api/postulaciones', data=datos, content_type='multipart/form-data')
 
 
-def archivos_cv():
-    return os.listdir(UPLOAD_DIR) if os.path.isdir(UPLOAD_DIR) else []
+def cvs_guardados():
+    """Cantidad de CV guardados en la base de datos (tabla postulacion_cv)."""
+    with flask_app.app_context():
+        return PostulacionCV.query.count()

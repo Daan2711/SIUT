@@ -1,12 +1,13 @@
+import io
 import os
 import re
 import uuid
 
-from flask import Blueprint, request, jsonify, session, current_app, send_from_directory
+from flask import Blueprint, request, jsonify, session, send_file
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 
-from Models.models import Postulacion, Vacante, Alumno, Usuario, Auditoria
+from Models.models import Postulacion, PostulacionCV, Vacante, Alumno, Usuario, Auditoria
 from Database.database import db
 from Controllers.vacantesController import (
     _iso, usuario_en_sesion, perfil_de_carga, filtro_vacantes_visibles, puede_ver_vacante,
@@ -38,21 +39,8 @@ def _texto(campo):
     return valor.strip() if isinstance(valor, str) else ''
 
 
-def _carpeta_cv():
-    carpeta = current_app.config['UPLOAD_DIR']
-    os.makedirs(carpeta, exist_ok=True)
-    return carpeta
-
-
 def _ya_postulado(vacante_id, alumno_id):
     return Postulacion.query.filter_by(vacante_id=vacante_id, alumno_id=alumno_id).first() is not None
-
-
-def _borrar_archivo(ruta):
-    try:
-        os.remove(ruta)
-    except OSError:
-        pass
 
 
 def _tamano(archivo):
@@ -117,14 +105,10 @@ def crear_postulacion():
         return _error('El archivo del CV está vacío', 400)
     if tamano > MAX_CV_BYTES:
         return _error('El CV no puede pesar más de 5 MB', 413)
-    if cv.stream.read(len(FIRMA_PDF)) != FIRMA_PDF:
+    contenido = cv.stream.read()
+    if not contenido.startswith(FIRMA_PDF):
         # La extensión no basta: se valida el contenido real del archivo
         return _error('El archivo no es un PDF válido', 400)
-    cv.stream.seek(0)
-
-    clave = uuid.uuid4().hex
-    ruta = os.path.join(_carpeta_cv(), f'{clave}.pdf')
-    cv.save(ruta)
 
     try:
         # Datos editables del alumno (los de identidad no se tocan)
@@ -138,13 +122,17 @@ def crear_postulacion():
             habilidades=campos['habilidades'],
             experiencia=campos['experiencia'] or None,
             mensaje=campos['mensaje'] or None,
-            cv_storage_key=clave,
+            # Identificador único del CV (el contenido vive en postulacion_cv)
+            cv_storage_key=uuid.uuid4().hex,
             cv_nombre=(secure_filename(cv.filename) or 'cv.pdf')[:255],
             cv_content_type='application/pdf',
             cv_tamano_bytes=tamano,
         )
         db.session.add(postulacion)
         db.session.flush()
+        # El PDF se guarda en Neon en la misma transacción: si algo falla,
+        # no queda ni la postulación ni el archivo (no hay disco en Render gratis)
+        db.session.add(PostulacionCV(postulacion_id=postulacion.id, contenido=contenido))
         db.session.add(Auditoria(
             usuario_id=usuario_id,
             accion='Postulación a vacante',
@@ -158,19 +146,15 @@ def crear_postulacion():
     except IntegrityError:
         # Dos envíos simultáneos: el segundo choca con uq_alumno_vacante
         db.session.rollback()
-        _borrar_archivo(ruta)
         return _error('Ya te postulaste a esta vacante', 409)
 
     except Exception:
         db.session.rollback()
-        # Sin registro en BD el archivo quedaría huérfano: se elimina
-        _borrar_archivo(ruta)
         return _error('No fue posible guardar tu postulación', 500)
 
 
 # =========================================================================
-# POSTULACIONES RECIBIDAS (Empresa: las de su empresa; Administrador: todas;
-# correo autorizado: las de las vacantes que publicó)
+# POSTULACIONES RECIBIDAS (Empresa: las de su empresa; Administrador: todas)
 # =========================================================================
 @postulaciones_bp.route('/api/postulaciones', methods=['GET'])
 def listar_postulaciones():
@@ -230,13 +214,10 @@ def descargar_cv(postulacion_id):
     if not vacante or not puede_ver_vacante(usuario, perfil, vacante):
         return _error('Esta postulación no pertenece a tus vacantes', 403)
 
-    # La clave la genera el servidor (uuid hex); se valida por si la BD se alteró
-    if not re.fullmatch(r'[0-9a-f]{32}', postulacion.cv_storage_key or ''):
-        return _error('Archivo no disponible', 404)
-
-    carpeta = current_app.config['UPLOAD_DIR']
-    if not os.path.isfile(os.path.join(carpeta, f'{postulacion.cv_storage_key}.pdf')):
-        return _error('El archivo del CV ya no está disponible en el servidor', 404)
+    archivo = db.session.get(PostulacionCV, postulacion.id)
+    if not archivo:
+        return _error('El CV de esta postulación no está disponible', 404)
+    contenido = archivo.contenido
 
     try:
         db.session.add(Auditoria(
@@ -249,8 +230,8 @@ def descargar_cv(postulacion_id):
     except Exception:
         db.session.rollback()
 
-    return send_from_directory(
-        carpeta, f'{postulacion.cv_storage_key}.pdf',
+    return send_file(
+        io.BytesIO(contenido),
         as_attachment=True,
         download_name=postulacion.cv_nombre or 'cv.pdf',
         mimetype='application/pdf',

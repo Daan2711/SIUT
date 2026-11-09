@@ -11,11 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Usuario sin privilegios: si la app se ve comprometida, no tiene root
 RUN useradd --create-home --uid 10001 appuser
 
-# El código queda propiedad de root: appuser puede leerlo pero no modificarlo
+# El código queda propiedad de root: appuser puede leerlo pero no modificarlo.
+# La app no escribe en disco: los CV se guardan en la base de datos.
 COPY . .
-
-# Carpeta de CV (UPLOAD_DIR por defecto): lo único que la app puede escribir
-RUN mkdir -p /app/instance/uploads/cv && chown -R appuser:appuser /app/instance
 
 USER appuser
 

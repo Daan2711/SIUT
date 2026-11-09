@@ -331,6 +331,26 @@ class Postulacion(db.Model):
     )
 
 
+class PostulacionCV(db.Model):
+    """Contenido del CV (PDF) de una postulación, guardado en la base de datos.
+
+    Va en una tabla aparte para que listar postulaciones no cargue los PDF.
+    Creada por migrations/2026-11-08_postulacion_cv.sql.
+    """
+    __tablename__ = 'postulacion_cv'
+    __table_args__ = (
+        # length() de bytea/blob = bytes, tanto en PostgreSQL como en SQLite
+        db.CheckConstraint(
+            'length(contenido) > 0 AND length(contenido) <= 5242880',
+            name='chk_postulacion_cv_tamano',
+        ),
+    )
+
+    postulacion_id = db.Column(db.BigInteger, db.ForeignKey('postulaciones.id'), primary_key=True)
+    contenido = db.Column(db.LargeBinary, nullable=False)
+    creado_en = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
+
+
 class Notificacion(db.Model):
     __tablename__ = 'notificaciones'
 

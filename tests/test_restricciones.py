@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 import Controllers.postulacionesController as postulaciones
-from conftest import postular, archivos_cv
+from conftest import postular, cvs_guardados
 from Database.database import db
 from Models.models import Alumno, Auditoria, Postulacion
 
@@ -41,7 +41,7 @@ def test_postulacion_unica_por_alumno_y_vacante(app, alumno, vacante_id):
         db.session.rollback()
 
 
-def test_envio_simultaneo_devuelve_409_y_borra_el_cv(app, alumno, vacante_id, monkeypatch):
+def test_envio_simultaneo_devuelve_409_sin_guardar_el_cv(app, alumno, vacante_id, monkeypatch):
     """Simula la carrera: la verificación previa no ve la primera postulación,
     así que el segundo envío llega hasta la restricción de la base de datos."""
     assert postular(alumno, vacante_id).status_code == 201
@@ -50,7 +50,7 @@ def test_envio_simultaneo_devuelve_409_y_borra_el_cv(app, alumno, vacante_id, mo
     respuesta = postular(alumno, vacante_id)
 
     assert respuesta.status_code == 409
-    assert len(archivos_cv()) == 1          # el CV del segundo envío se borró
+    assert cvs_guardados() == 1             # el CV del segundo envío no se guardó
     with app.app_context():
         assert Postulacion.query.count() == 1
         assert Alumno.query.count() == 1

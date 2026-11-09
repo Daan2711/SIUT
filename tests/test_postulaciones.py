@@ -1,9 +1,11 @@
 """Postulaciones con CV: envío (alumno), listado y descarga (reclutador)."""
 import pytest
 
-from conftest import PDF, VACANTE, postular, archivos_cv
+import os
+
+from conftest import PDF, VACANTE, postular, cvs_guardados
 from Database.database import db
-from Models.models import Alumno, Postulacion
+from Models.models import Alumno, Postulacion, PostulacionCV
 
 UN_MB = 1024 * 1024
 
@@ -12,7 +14,7 @@ UN_MB = 1024 * 1024
 def test_postulacion_valida(app, alumno, vacante_id):
     respuesta = postular(alumno, vacante_id)
     assert respuesta.status_code == 201
-    assert len(archivos_cv()) == 1
+    assert cvs_guardados() == 1
 
     with app.app_context():
         postulacion = db.session.get(Postulacion, respuesta.get_json()['id'])
@@ -40,7 +42,7 @@ def test_requiere_sesion(anon):
 ])
 def test_validacion_del_cv(alumno, vacante_id, cv, codigo):
     assert postular(alumno, vacante_id, cv=cv).status_code == codigo
-    assert archivos_cv() == []
+    assert cvs_guardados() == 0
 
 
 def test_peticion_mayor_a_6_mb_devuelve_413_json(alumno, vacante_id):
@@ -58,7 +60,7 @@ def test_peticion_mayor_a_6_mb_devuelve_413_json(alumno, vacante_id):
 ])
 def test_validacion_de_campos(alumno, vacante_id, extra):
     assert postular(alumno, vacante_id, **extra).status_code == 400
-    assert archivos_cv() == []
+    assert cvs_guardados() == 0
 
 
 def test_vacante_inexistente(alumno):
@@ -74,7 +76,7 @@ def test_error_de_bd_no_deja_archivo_huerfano(alumno, vacante_id, falla_commit):
     falla_commit()
     respuesta = postular(alumno, vacante_id)
     assert respuesta.status_code == 500
-    assert archivos_cv() == []
+    assert cvs_guardados() == 0
 
 
 # --- Listado (reclutador) ----------------------------------------------------
@@ -125,10 +127,26 @@ def test_sin_sesion_no_descarga(anon, postulacion_id):
     assert anon.get(f'/api/postulaciones/{postulacion_id}/cv').status_code == 401
 
 
-def test_cv_no_es_accesible_como_archivo_estatico(anon, postulacion_id):
-    nombre = archivos_cv()[0]
-    assert anon.get(f'/instance/uploads/cv/{nombre}').status_code == 404
-    assert anon.get(f'/{nombre}').status_code == 404
+def test_cv_se_guarda_en_la_base_de_datos_y_no_en_disco(app, postulacion_id):
+    with app.app_context():
+        archivo = db.session.get(PostulacionCV, postulacion_id)
+        assert archivo is not None
+        assert archivo.contenido == PDF            # el mismo PDF, byte por byte
+    # La app ya no crea la carpeta de CV en disco (Render gratis no la conserva)
+    assert not os.path.exists(os.path.join(app.instance_path, 'uploads'))
+
+
+def test_descarga_devuelve_el_pdf_original(reclutador, postulacion_id):
+    respuesta = reclutador.get(f'/api/postulaciones/{postulacion_id}/cv')
+    assert respuesta.data == PDF
+    assert 'Mi_CV.pdf' in respuesta.headers['Content-Disposition']
+
+
+def test_postulacion_sin_cv_guardado_devuelve_404(app, reclutador, postulacion_id):
+    with app.app_context():
+        db.session.delete(db.session.get(PostulacionCV, postulacion_id))
+        db.session.commit()
+    assert reclutador.get(f'/api/postulaciones/{postulacion_id}/cv').status_code == 404
 
 
 def test_postulacion_inexistente(reclutador):

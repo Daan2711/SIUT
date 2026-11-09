@@ -4,6 +4,26 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Preparación para Render — Fase A: bloqueantes (2026-11-08)
+
+#### Cambiado
+- **Los CV se guardan en Neon, no en disco.** El plan gratis de Render no tiene disco persistente, así que los CV guardados en el servidor se perdían en cada despliegue o reinicio.
+  - El PDF va en la tabla nueva `postulacion_cv` (una fila por postulación, máximo 5 MB), en la misma transacción que la postulación: si algo falla no queda nada a medias. La descarga lo lee de la base de datos. — `Models/models.py`, `Controllers/postulacionesController.py`
+  - Se eliminó la escritura en disco y la variable `UPLOAD_DIR`; el contenedor ya no crea `instance/uploads/`. — `app.py`, `Dockerfile`
+  - Migración SQL versionada, idempotente y solo aditiva (crea una tabla), con su script para revertir. — `migrations/2026-11-08_postulacion_cv.sql`, `migrations/2026-11-08_postulacion_cv_revertir.sql`
+- **Conexión estable con Neon.** `pool_pre_ping` y `pool_recycle`: Neon suspende la base tras unos minutos sin uso y cierra las conexiones, lo que provocaba un 500 en la primera petición después de la pausa. — `app.py`
+
+#### Agregado
+- **Comando `flask crear-usuario`** para dar de alta cuentas en producción (no había forma de crearlas: el registro público está deshabilitado y Neon tenía 0 usuarios). — `comandos.py`, `app.py`
+  - Crea en una sola transacción la cuenta y lo que su rol exige en Neon: perfil de alumno o de profesor, empresa (nueva o existente) o nada para administradores.
+  - Valida correo, largos de columna, duplicados (correo, matrícula, número de empleado, una cuenta Empresa por empresa) y contraseña de al menos 8 caracteres; la contraseña se pide oculta y con confirmación.
+  - Muestra la base de datos destino (sin credenciales) y pide confirmación antes de escribir. La cuenta queda con cambio de contraseña obligatorio.
+  - Se ejecuta desde un equipo local con el `DATABASE_URL` de Neon, porque el plan gratis de Render no tiene consola.
+
+#### Pruebas
+- Las pruebas de postulaciones verifican que el PDF se guarda en la base de datos byte por byte y que la descarga devuelve el mismo archivo. — `tests/test_postulaciones.py`, `tests/test_restricciones.py`, `tests/conftest.py`
+- `tests/test_comandos.py`: 19 casos del comando, incluido que sus mensajes se puedan mostrar en la consola de Windows (cp1252), error encontrado al probar el comando real. 129 casos en total.
+
 ### Documentación del esquema de la base de datos (2026-11-08)
 
 #### Agregado
