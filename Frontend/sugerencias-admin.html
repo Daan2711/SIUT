@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sugerencias recibidas | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <nav aria-label="Gestión">
+      <a href="panel-admin.html" data-solo-admin hidden>Panel</a>
+      <a href="vacantes-publicadas.html">Vacantes publicadas</a>
+      <a href="cargar-vacantes.html">Cargar vacante</a>
+      <a href="postulaciones-recibidas.html">Postulaciones</a>
+      <a class="activo" href="sugerencias-admin.html" aria-current="page" data-solo-admin hidden>Sugerencias</a>
+    </nav>
+    <div class="perfil">
+      <img src="img/usuario.png" alt="Usuario">
+      <div class="perfil-info">
+        <span id="nombreAlumno">Nombre del Alumno</span>
+        <button id="cerrarSesion" class="btn-logout" type="button">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">BUZÓN DE SUGERENCIAS</p>
+        <h1>Sugerencias recibidas</h1>
+        <p>Revisa los reportes de la comunidad, cambia su estado y deja una respuesta.</p>
+      </div>
+    </section>
+
+    <section class="empleos-search-panel" aria-label="Filtrar sugerencias">
+      <div class="empleos-filtros">
+        <label>Estado
+          <select id="filtroEstado">
+            <option value="">Todos los estados</option>
+            <option>Recibida</option>
+            <option>En revisión</option>
+            <option>Atendida</option>
+            <option>Rechazada</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <div class="empleos-list-heading">
+      <div><h2>Sugerencias</h2><p id="contadorSugerencias">Cargando…</p></div>
+    </div>
+
+    <section id="listaSugerencias" class="empleos-grid" aria-live="polite"></section>
+    <p id="sinSugerencias" class="sin-resultados" hidden>No hay sugerencias con ese estado.</p>
+  </main>
+
+  <script src="js/gestion.js"></script>
+  <script src="js/sugerencias-admin.js"></script>
+</body>
+</html>

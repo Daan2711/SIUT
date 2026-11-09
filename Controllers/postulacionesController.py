@@ -3,7 +3,7 @@ import os
 import re
 import uuid
 
-from flask import Blueprint, request, jsonify, session, send_file
+from flask import Blueprint, request, jsonify, session, send_file, current_app
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 
@@ -150,6 +150,7 @@ def crear_postulacion():
 
     except Exception:
         db.session.rollback()
+        current_app.logger.exception('Error al guardar una postulación (usuario %s)', usuario_id)
         return _error('No fue posible guardar tu postulación', 500)
 
 
@@ -228,7 +229,9 @@ def descargar_cv(postulacion_id):
         ))
         db.session.commit()
     except Exception:
+        # La descarga continúa aunque no se pueda auditar, pero queda en el log
         db.session.rollback()
+        current_app.logger.exception('No se pudo auditar la descarga del CV %s', postulacion.id)
 
     return send_file(
         io.BytesIO(contenido),

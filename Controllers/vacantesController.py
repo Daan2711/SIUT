@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from sqlalchemy import func, true, false
 from Models.models import Usuario, Vacante, Empresa, Auditoria
 from Database.database import db
@@ -52,6 +52,21 @@ def perfil_de_carga(usuario):
 def puede_cargar_vacantes():
     """True si la sesión actual puede publicar vacantes y ver postulaciones."""
     return perfil_de_carga(usuario_en_sesion()) is not None
+
+
+def es_administrador():
+    """True si la sesión actual es de un Administrador activo (leído de la BD)."""
+    return perfil_de_carga(usuario_en_sesion()) == PERFIL_ADMINISTRADOR
+
+
+def pagina_inicio(usuario):
+    """Página a la que se envía a cada rol después de iniciar sesión."""
+    perfil = perfil_de_carga(usuario)
+    if perfil == PERFIL_ADMINISTRADOR:
+        return '/panel-admin.html'
+    if perfil == PERFIL_EMPRESA:
+        return '/vacantes-publicadas.html'
+    return '/index.html'
 
 
 def filtro_vacantes_visibles(usuario, perfil):
@@ -208,4 +223,5 @@ def crear_vacante():
         return jsonify({'ok': True, 'id': vacante.id}), 201
     except Exception:
         db.session.rollback()
+        current_app.logger.exception('Error al guardar una vacante (usuario %s)', usuario.id)
         return jsonify({'ok': False, 'mensaje': 'No fue posible guardar la vacante'}), 500

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administración | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <nav aria-label="Gestión">
+      <a class="activo" href="panel-admin.html" aria-current="page" data-solo-admin hidden>Panel</a>
+      <a href="vacantes-publicadas.html">Vacantes publicadas</a>
+      <a href="cargar-vacantes.html">Cargar vacante</a>
+      <a href="postulaciones-recibidas.html">Postulaciones</a>
+      <a href="sugerencias-admin.html" data-solo-admin hidden>Sugerencias</a>
+    </nav>
+    <div class="perfil">
+      <img src="img/usuario.png" alt="Usuario">
+      <div class="perfil-info">
+        <span id="nombreAlumno">Nombre del Alumno</span>
+        <button id="cerrarSesion" class="btn-logout" type="button">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">ADMINISTRACIÓN SIUT</p>
+        <h1>Panel de administración</h1>
+        <p>Resumen de la bolsa de empleo y del buzón de sugerencias.</p>
+      </div>
+    </section>
+
+    <section class="empleos-grid panel-resumen" aria-label="Resumen">
+      <a class="vacante-card panel-tarjeta" href="vacantes-publicadas.html">
+        <span class="vacante-area">BOLSA DE EMPLEO</span>
+        <strong id="totalVacantes" class="panel-cifra">…</strong>
+        <span>vacantes activas</span>
+      </a>
+      <a class="vacante-card panel-tarjeta" href="postulaciones-recibidas.html">
+        <span class="vacante-area">CANDIDATOS</span>
+        <strong id="totalPostulaciones" class="panel-cifra">…</strong>
+        <span>postulaciones recibidas</span>
+      </a>
+      <a class="vacante-card panel-tarjeta" href="sugerencias-admin.html">
+        <span class="vacante-area">BUZÓN</span>
+        <strong id="totalPendientes" class="panel-cifra">…</strong>
+        <span>sugerencias por atender (recibidas o en revisión)</span>
+      </a>
+      <a class="vacante-card panel-tarjeta" href="cargar-vacantes.html">
+        <span class="vacante-area">PUBLICAR</span>
+        <strong class="panel-cifra">+</strong>
+        <span>cargar una nueva vacante</span>
+      </a>
+    </section>
+
+    <p id="avisoPanel" class="sin-resultados" hidden></p>
+
+    <section class="empleos-search-panel panel-nota">
+      <h2>Alta de cuentas</h2>
+      <p>Las cuentas de alumnos, profesores, empresas y administradores se crean con el comando
+        <code>flask crear-usuario</code> (ver <code>docs/DESPLIEGUE_RENDER.md</code>).
+        Cada cuenta nueva debe cambiar su contraseña en el primer inicio de sesión.</p>
+    </section>
+  </main>
+
+  <script src="js/gestion.js"></script>
+  <script src="js/panel-admin.js"></script>
+</body>
+</html>

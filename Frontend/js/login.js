@@ -48,7 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.forzar_cambio) {
                     window.location.href = '/cambiar-password';
                 } else {
-                    window.location.href = '/index.html';
+                    // El servidor indica la página de inicio según el rol
+                    // (alumno: index; empresa: sus vacantes; administrador: panel)
+                    window.location.href = data.destino || '/index.html';
                 }
             } else {
                 alert('No fue posible iniciar sesión');

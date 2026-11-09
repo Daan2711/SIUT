@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from flask_bcrypt import Bcrypt
 from flask_limiter.util import get_remote_address
 from Models.models import Usuario, Alumno, Empresa, Auditoria
@@ -84,18 +84,24 @@ def login_usuario():
         db.session.add(nuevo_log)
         db.session.commit()
 
+        # Import local: vacantesController no debe cargarse antes que este módulo
+        from Controllers.vacantesController import pagina_inicio
+
         return jsonify({
             'mensaje': 'Login exitoso',
             'nombre': usuario.nombre,
             'apellido': usuario.apellido,
             'email': usuario.email,
             'rol': usuario.rol,
-            'forzar_cambio': usuario.primer_login
+            'forzar_cambio': usuario.primer_login,
+            # Página de inicio según el rol (alumno, empresa o administrador)
+            'destino': pagina_inicio(usuario),
         }), 200
 
     except Exception:
         db.session.rollback()
         session.clear()
+        current_app.logger.exception('Error al iniciar sesión')
 
         return jsonify({
             'error': 'No fue posible iniciar sesión. Intenta nuevamente.'
@@ -178,6 +184,7 @@ def logout():
 
     except Exception:
         db.session.rollback()
+        current_app.logger.exception('Error al cerrar sesión (usuario %s)', usuario_id)
 
         return jsonify({
             'error': 'No fue posible cerrar la sesión'
@@ -249,6 +256,7 @@ def cambiar_password():
 
     except Exception:
         db.session.rollback()
+        current_app.logger.exception('Error al cambiar la contraseña (usuario %s)', session.get('usuario_id'))
 
         return jsonify({
             'error': 'No fue posible actualizar la contraseña'

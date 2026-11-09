@@ -196,6 +196,13 @@ class CategoriaSugerencia(db.Model):
 
 class Sugerencia(db.Model):
     __tablename__ = 'sugerencias'
+    # Igual que en Neon
+    __table_args__ = (
+        db.CheckConstraint(
+            "estado IN ('Recibida', 'En revisión', 'Atendida', 'Rechazada')",
+            name='chk_sugerencia_estado',
+        ),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False)

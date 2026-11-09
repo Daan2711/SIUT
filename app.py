@@ -1,10 +1,12 @@
 # =========================================================================
 # SECCIÓN 1: IMPORTACIONES DE LIBRERÍAS Y MÓDULOS CENTRALES
 # =========================================================================
+import logging
 import os
 from flask import Flask, send_from_directory, request, make_response, redirect, session, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
 from markupsafe import escape
+from sqlalchemy import text
 
 
 from dotenv import load_dotenv
@@ -18,7 +20,7 @@ from extensions import limiter
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
 from Controllers.buzonController import buzon_bp
-from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes
+from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes, es_administrador
 from Controllers.postulacionesController import postulaciones_bp
 
 # =========================================================================
@@ -32,6 +34,10 @@ load_dotenv()
 # =========================================================================
 # Configuramos 'Frontend' como la carpeta para estilos, imágenes y scripts
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
+
+# Logs: Flask escribe en stderr, que Render muestra en su panel de logs.
+# Los errores capturados se registran con app.logger.exception (con traza).
+app.logger.setLevel(getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper(), logging.INFO))
 
 # Detrás de un proxy (Render / Cloudflare) la IP real llega en X-Forwarded-For.
 # PROXY_HOPS = número de proxies de confianza (0 en local para que no se pueda falsear).
@@ -111,12 +117,13 @@ app.cli.add_command(crear_usuario)
 # =========================================================================
 # SECCIÓN 5.4: PÁGINAS HTML PROTEGIDAS
 # =========================================================================
-# Toda página .html exige sesión salvo estas. Las de reclutador (Empresa,
-# Administrador o correo autorizado) exigen además permiso para cargar vacantes.
+# Toda página .html exige sesión salvo estas. Las de reclutador exigen ser
+# Empresa o Administrador; las de administración, ser Administrador.
 PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
 PAGINAS_RECLUTADOR = {
     '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',
 }
+PAGINAS_ADMINISTRADOR = {'/panel-admin.html', '/sugerencias-admin.html'}
 
 
 @app.before_request
@@ -129,6 +136,8 @@ def proteger_paginas_html():
         return redirect('/login')
     if ruta in PAGINAS_RECLUTADOR and not puede_cargar_vacantes():
         return redirect('/index.html')
+    if ruta in PAGINAS_ADMINISTRADOR and not es_administrador():
+        return redirect('/index.html')
     return None
 
 
@@ -138,6 +147,7 @@ def proteger_paginas_html():
 # Mientras el usuario tenga primer_login=True solo puede usar estas rutas.
 RUTAS_PERMITIDAS_PRIMER_LOGIN = {
     'index', 'login_page', 'cambiar_password_page', 'security_txt', 'security_txt_legado',
+    'healthz',
     'auth.login_usuario', 'auth.logout', 'auth.usuario_actual', 'auth.cambiar_password',
 }
 
@@ -278,6 +288,36 @@ def postulaciones_recibidas_page():
     return _render_con_nombre('postulaciones-recibidas.html')
 
 
+# Páginas del administrador (el permiso lo valida proteger_paginas_html)
+@app.route('/panel-admin.html')
+def panel_admin_page():
+    return _render_con_nombre('panel-admin.html')
+
+
+@app.route('/sugerencias-admin.html')
+def sugerencias_admin_page():
+    return _render_con_nombre('sugerencias-admin.html')
+
+
+# =========================================================================
+# SECCIÓN 5.8: HEALTH CHECK (Render)
+# =========================================================================
+@app.route('/healthz')
+def healthz():
+    """Render consulta esta ruta para saber si el servicio está sano.
+
+    Comprueba también la conexión con la base de datos. No requiere sesión
+    y no expone detalles del error (quedan en el log).
+    """
+    try:
+        db.session.execute(text('SELECT 1'))
+        return jsonify({'ok': True}), 200
+    except Exception:
+        db.session.rollback()
+        app.logger.exception('Health check: la base de datos no responde')
+        return jsonify({'ok': False}), 503
+
+
 @app.route('/.well-known/security.txt')
 def security_txt():
     response = make_response(send_from_directory('Frontend/.well-known', 'security.txt'))
@@ -296,11 +336,14 @@ def cambiar_password_page():
     return response
 
 # =========================================================================
-# SECCIÓN 6: VERIFICACIÓN E INICIALIZACIÓN DE TABLAS EN NEON
+# SECCIÓN 6: CREACIÓN DE TABLAS (solo bajo demanda)
 # =========================================================================
-# Esto crea todas las tablas en Neon automáticamente si es que aún no existen
-with app.app_context():
-    db.create_all()
+# En Neon el esquema lo controlan los scripts de migrations/ (con sus
+# triggers y restricciones). create_all() solo se usa en bases locales de
+# desarrollo y únicamente si se pide con AUTO_CREATE_TABLES=true.
+if os.getenv('AUTO_CREATE_TABLES', 'false').lower() == 'true':
+    with app.app_context():
+        db.create_all()
 
 # =========================================================================
 # SECCIÓN 7: ARRANQUE DEL SERVIDOR DE DESARROLLO

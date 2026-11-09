@@ -739,3 +739,19 @@ nav a.activo{
 .postulacion-dialog input[readonly]{background:#f3f6f5;color:#5d6b68;cursor:default}
 .postulacion-dialog input[type="file"]{padding:9px}
 @media (max-width:900px){.carga-layout{grid-template-columns:1fr}.carga-preview{position:static}}
+
+/* ==========================================================================
+   Panel de administración y bandeja de sugerencias
+   ========================================================================== */
+.panel-tarjeta{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#33413f}
+.panel-cifra{font-size:40px;line-height:1.1;color:#163b3b}
+.panel-nota{margin-top:24px}
+.panel-nota h2{font-size:18px;margin:0 0 8px;color:#243a38}
+.panel-nota p{margin:0;color:#526866;line-height:1.6}
+.panel-nota code{background:#f3f6f5;padding:2px 6px;border-radius:5px}
+.sugerencia-descripcion{white-space:pre-line;overflow-wrap:anywhere;color:#33413f;line-height:1.5}
+.sugerencia-form{display:flex;flex-direction:column;gap:10px;margin-top:14px;border-top:1px solid #e7eae9;padding-top:14px}
+.sugerencia-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#425451}
+.sugerencia-form select,.sugerencia-form textarea{width:100%;box-sizing:border-box;border:1px solid #d9e3e0;border-radius:9px;padding:10px 12px;font:inherit;font-size:14px;color:#263b39;background:#fff}
+.sugerencia-form textarea{resize:vertical;min-height:70px}
+.sugerencia-form button{align-self:flex-start}

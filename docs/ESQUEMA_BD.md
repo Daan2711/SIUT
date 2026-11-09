@@ -1,9 +1,10 @@
 # Esquema de la base de datos SIUT (Neon / PostgreSQL 18)
 
-Generado el 2026-11-08 leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
+Generado el 2026-11-08 (actualizado tras la migración del CV) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
 
-- 19 tablas en el esquema `public` (17 de la app, `siut_control_admin` de control y `playing_with_neon`, tabla de ejemplo de Neon).
-- Todos los `id` son `bigint GENERATED ALWAYS AS IDENTITY`.
+- 20 tablas en el esquema `public` (18 de la app, `siut_control_admin` de control y `playing_with_neon`, tabla de ejemplo de Neon).
+- Todos los `id` son `bigint GENERATED ALWAYS AS IDENTITY` (salvo `postulacion_cv`, cuya llave es la de su postulación).
+- Cambios de esquema: scripts versionados en `migrations/`.
 - Todas las llaves foráneas usan `ON DELETE RESTRICT`.
 - Todas las fechas son `timestamptz` con `DEFAULT now()`.
 
@@ -26,6 +27,7 @@ erDiagram
     empresas ||--o{ vacantes : "ofrece"
     usuarios ||--o{ vacantes : "publica"
     vacantes ||--o{ postulaciones : "recibe"
+    postulaciones ||--o| postulacion_cv : "PDF del CV"
     alumnos ||--o{ postulaciones : "envía"
     usuarios ||--o{ notificaciones : "recibe"
     postulaciones |o--o{ notificaciones : "sobre"
@@ -138,6 +140,11 @@ erDiagram
         bigint cv_tamano_bytes "máx. 5 MB"
         varchar estado "Recibida|En revisión|Aceptada|Rechazada"
     }
+    postulacion_cv {
+        bigint postulacion_id PK,FK
+        bytea contenido "PDF, máx. 5 MB"
+        timestamptz creado_en
+    }
     notificaciones {
         bigint id PK
         bigint usuario_id FK
@@ -183,7 +190,7 @@ erDiagram
 | Prohibido borrar usuarios: solo se desactivan (`activo = false`) | trigger `trg_impedir_borrado_usuario` |
 | Solo `Administrador` (cualquier empresa) o `Empresa` (la suya) pueden crear o reasignar vacantes | trigger `trg_validar_creador_vacante` |
 | Catálogos de vacantes (área, modalidad, ubicación, experiencia, jornada) y "ubicación Remoto ⇒ modalidad Remoto" | CHECK `chk_vacante_*` |
-| CV: solo `application/pdf`, de 1 byte a 5 MB; una postulación por alumno y vacante | CHECK `chk_postulacion_pdf`, `chk_cv_tamano`; UNIQUE `uq_alumno_vacante` |
+| CV: solo `application/pdf`, de 1 byte a 5 MB; una postulación por alumno y vacante. El PDF se guarda en `postulacion_cv` | CHECK `chk_postulacion_pdf`, `chk_cv_tamano`, `chk_postulacion_cv_tamano`; UNIQUE `uq_alumno_vacante` |
 | Estados válidos de postulación, sugerencia e inscripción a evento | CHECK `chk_postulacion_estado`, `chk_sugerencia_estado`, `chk_estado_evento` |
 | Horarios: día Lunes–Domingo y `hora_fin > hora_inicio` | CHECK `chk_dia_semana`, `chk_horario` |
 | Un alumno solo puede tener un grupo activo a la vez | índice único parcial `uq_alumno_un_grupo_activo` |
@@ -488,6 +495,20 @@ erDiagram
 - UNIQUE `uq_alumno_vacante`: `UNIQUE (alumno_id, vacante_id)`
 - ÍNDICE `idx_postulaciones_alumno`: `btree (alumno_id)`
 - ÍNDICE `idx_postulaciones_vacante`: `btree (vacante_id)`
+
+### `postulacion_cv`
+
+| Columna | Tipo | Nulo | Por defecto |
+|---|---|---|---|
+| `postulacion_id` | bigint | no |  |
+| `contenido` | bytea | no |  |
+| `creado_en` | timestamptz | no | `now()` |
+
+**Restricciones e índices:**
+
+- CHECK `chk_postulacion_cv_tamano`: `CHECK (((length(contenido) > 0) AND (length(contenido) <= 5242880)))`
+- FK `postulacion_cv_postulacion_id_fkey`: `FOREIGN KEY (postulacion_id) REFERENCES postulaciones(id) ON DELETE RESTRICT`
+- PK `postulacion_cv_pkey`: `PRIMARY KEY (postulacion_id)`
 
 ### `notificaciones`
 

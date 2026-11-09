@@ -4,6 +4,26 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Preparación para Render — Fase B: importantes (2026-11-08)
+
+#### Agregado
+- **Navegación por rol.** El login devuelve la página de inicio del rol (`destino`): `Alumno` → `index.html`, `Empresa` → `vacantes-publicadas.html`, `Administrador` → `panel-admin.html`. — `Controllers/vacantesController.py` (`pagina_inicio`), `Controllers/authController.py`, `Frontend/js/login.js`
+- **Menú y cierre de sesión en las páginas de gestión** (cargar vacante, vacantes publicadas, postulaciones, panel y sugerencias). Los enlaces exclusivos del administrador se muestran solo a ese rol; el servidor los bloquea igualmente a los demás. — `Frontend/*.html`, `Frontend/js/gestion.js` (nuevo)
+- **Panel de administración** con el total de vacantes activas, postulaciones y sugerencias por atender. — `Frontend/panel-admin.html`, `Frontend/js/panel-admin.js` (nuevos)
+- **Bandeja de sugerencias para el administrador**: lista con filtro por estado, cambio de estado (Recibida, En revisión, Atendida, Rechazada) y respuesta; registra quién y cuándo la atendió, y lo audita. — `GET /api/sugerencias`, `POST /api/sugerencias/<id>` en `Controllers/buzonController.py`; `Frontend/sugerencias-admin.html`, `Frontend/js/sugerencias-admin.js` (nuevos)
+- **`/healthz`**: health check para Render; comprueba también la conexión con la base de datos (503 si falla, sin detalles al cliente). — `app.py`
+- **`render.yaml`** (Blueprint: Docker, plan gratis, región Ohio como Neon, health check y variables de entorno) y **`docs/DESPLIEGUE_RENDER.md`** (guía paso a paso, alta de cuentas y limitaciones del plan gratis).
+
+#### Cambiado
+- **Los errores se registran en el log.** Los 7 bloques que devolvían 500 ahora llaman a `logger.exception` (con la traza completa); el cliente sigue sin ver detalles internos. Nivel configurable con `LOG_LEVEL`. — `app.py`, `Controllers/*.py`
+- **`db.create_all()` solo bajo demanda** (`AUTO_CREATE_TABLES=true`, para bases locales). La app ya no intenta crear tablas en Neon al arrancar; el esquema lo controlan los scripts de `migrations/`. — `app.py`
+- **gunicorn**: 2 workers (`WEB_CONCURRENCY`), timeout de 60 s y logs de acceso y error a la salida estándar. — `Dockerfile`
+- El modelo `Sugerencia` declara el CHECK `chk_sugerencia_estado` de Neon. — `Models/models.py`
+- `docs/ESQUEMA_BD.md` regenerado desde Neon (solo lectura): 20 tablas, con `postulacion_cv`.
+
+#### Pruebas
+- `tests/test_admin.py`: 22 casos (health check, página de inicio por rol, acceso a páginas de administrador, menú de gestión, bandeja de sugerencias y que los errores 500 queden en el log sin llegar al cliente). 151 casos en total.
+
 ### Preparación para Render — Fase A: bloqueantes (2026-11-08)
 
 #### Cambiado
