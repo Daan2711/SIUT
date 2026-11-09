@@ -13,6 +13,7 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
   - el detalle de las 19 tablas: columnas, tipos, valores por defecto, llaves y restricciones.
 
   Refleja la base de datos, no `Models/models.py`; si el esquema de Neon cambia, hay que regenerarlo. — `docs/ESQUEMA_BD.md`
+- **`docs/PR-14-auditoria-seguridad.md`**: descripción del PR #14 (resumen de cambios por fase, pruebas y lista de pasos antes de desplegar). — `docs/PR-14-auditoria-seguridad.md`
 
 ### Compatibilidad con los triggers de Neon (2026-11-08)
 
