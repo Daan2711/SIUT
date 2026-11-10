@@ -63,7 +63,7 @@ Antes de escribir, el comando muestra la base de datos destino (debe decir `neon
 |---|---|---|
 | `Administrador` | — | `--rol Administrador --email admin@utsc.edu.mx --nombre Ana` |
 | `Empresa` | `--empresa` | `--rol Empresa --email rh@tecnonova.mx --nombre Carla --empresa TecnoNova` |
-| `Alumno` | `--matricula` | `--rol Alumno --email luis@utsc.edu.mx --nombre Luis --matricula UTSC-001 --carrera "Desarrollo de Software" --semestre "3° semestre"` |
+| `Alumno` | `--matricula` | `--rol Alumno --email luis@utsc.edu.mx --nombre Luis --matricula UTSC-001 --carrera "Desarrollo de Software" --cuatrimestre "3° cuatrimestre"` |
 | `Profesor` | `--num-empleado` | `--rol Profesor --email eva@utsc.edu.mx --nombre Eva --num-empleado E-01` |
 
 Reglas que impone Neon (el comando las valida antes):

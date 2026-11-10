@@ -18,10 +18,9 @@ postulaciones_bp = Blueprint('postulaciones', __name__)
 MAX_CV_BYTES = 5 * 1024 * 1024  # 5 MB
 FIRMA_PDF = b'%PDF-'
 
-SEMESTRES = {
-    '1° semestre', '2° semestre', '3° semestre', '4° semestre',
-    '5° semestre', '6° semestre', 'Egresado(a)',
-}
+# Cuatrimestres válidos, en el orden en que se muestran. El nombre interno
+# sigue siendo "semestre" (columna alumnos.semestre en Neon) por compatibilidad.
+SEMESTRES = tuple(f'{n}° cuatrimestre' for n in range(1, 12)) + ('Egresado(a)',)
 TELEFONO_RE = re.compile(r'^[0-9+() -]{8,30}$')
 
 LIMITES = {
@@ -91,7 +90,7 @@ def crear_postulacion():
     if not TELEFONO_RE.match(campos['telefono']):
         return _error('Teléfono no válido', 400)
     if campos['semestre'] not in SEMESTRES:
-        return _error('Semestre no válido', 400)
+        return _error('Cuatrimestre no válido', 400)
 
     # --- CV (PDF, máx. 5 MB) -----------------------------------------------
     cv = request.files.get('cv')

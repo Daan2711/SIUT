@@ -778,3 +778,10 @@ nav a.activo{
     header nav a{padding:11px 4px;border-top:1px solid #b5ddd8}
     header nav a.activo{border-bottom:none;font-weight:800}
 }
+/* Botón «ojito» para mostrar u ocultar la contraseña (js/mostrar-password.js) */
+.campo-password{position:relative;display:block;width:100%}
+.campo-password input{width:100%;box-sizing:border-box;padding-right:44px}
+.ver-password{position:absolute;top:50%;right:4px;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:none;border-radius:8px;background:transparent;color:#5f706d;cursor:pointer}
+.ver-password:hover{color:#0b9282;background:#0b92820f}
+.ver-password:focus-visible{outline:2px solid #0b9282;outline-offset:1px}
+.ver-password svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}

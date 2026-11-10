@@ -12,7 +12,7 @@ URL = '/api/admin/cuentas'
 URL_FORMULARIO = '/api/admin/cuentas/formulario'
 
 ALUMNO = {'rol': 'Alumno', 'email': 'Luis@UTSC.edu.mx', 'nombre': 'Luis', 'apellido': 'Pérez',
-          'matricula': 'UTSC-001', 'carrera': 'Redes', 'semestre': '3° semestre',
+          'matricula': 'UTSC-001', 'carrera': 'Redes', 'semestre': '3° cuatrimestre',
           'telefono': '8112345678'}
 PROFESOR = {'rol': 'Profesor', 'email': 'eva@utsc.edu.mx', 'nombre': 'Eva',
             'num_empleado': 'E-01', 'departamento': 'Sistemas', 'especialidad': 'Bases de datos'}
@@ -58,7 +58,7 @@ def test_crea_alumno_con_su_perfil(app, administrador):
         assert usuario.creado_por == admin.id and usuario.empresa_id is None
         perfil = Alumno.query.filter_by(usuario_id=usuario.id).one()
         assert (perfil.matricula, perfil.semestre, perfil.telefono) == \
-            ('UTSC-001', '3° semestre', '8112345678')
+            ('UTSC-001', '3° cuatrimestre', '8112345678')
         auditoria = Auditoria.query.filter_by(accion='Alta de usuario (web)').one()
         assert auditoria.usuario_id == admin.id and auditoria.registro_id == usuario.id
 
@@ -191,7 +191,8 @@ def test_duplicado_que_llega_a_la_base_tambien_es_amigable(
     (dict(ALUMNO, email='no-es-correo'), 'email'),
     (dict(ALUMNO, nombre='   '), 'nombre'),
     (dict(ALUMNO, nombre='x' * 101), 'nombre'),
-    (dict(ALUMNO, semestre='9° semestre'), 'semestre'),
+    (dict(ALUMNO, semestre='12° cuatrimestre'), 'semestre'),
+    (dict(ALUMNO, semestre='1° semestre'), 'semestre'),   # valor anterior al cambio
     (dict(ALUMNO, telefono='abc'), 'telefono'),
 ])
 def test_validaciones_por_rol(app, administrador, datos, campo):
@@ -236,6 +237,12 @@ def test_el_formulario_no_ofrece_administrador(administrador):
     pagina = administrador.get('/nueva-cuenta.html').get_data(as_text=True)
     assert '<option>Administrador</option>' not in pagina
     assert 'value="Administrador"' not in pagina
+
+
+def test_el_formulario_ofrece_cuatrimestres_en_orden(administrador):
+    assert administrador.get(URL_FORMULARIO).get_json()['semestres'] == [f'{n}° cuatrimestre' for n in range(1, 12)] + ['Egresado(a)']
+    pagina = administrador.get('/nueva-cuenta.html').get_data(as_text=True)
+    assert 'Cuatrimestre' in pagina and 'Semestre' not in pagina
 
 
 # --- Acceso --------------------------------------------------------------------

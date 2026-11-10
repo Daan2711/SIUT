@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarCamposDelRol();
   });
 
-  // Token CSRF y semestres válidos
+  // Token CSRF y cuatrimestres válidos (campo interno: semestre)
   (async () => {
     try {
       const response = await fetch('/api/admin/cuentas/formulario', { credentials: 'same-origin' });

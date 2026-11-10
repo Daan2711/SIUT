@@ -168,3 +168,21 @@ def test_inscripcion_no_envia_datos_personales_en_la_url(alumno):
     assert 'name="' not in formulario
     assert formulario.count('required') == 2
     assert alumno.get('/confirmacion.html').status_code == 200
+
+
+# --- Botón para mostrar la contraseña ------------------------------------------
+@pytest.mark.parametrize('cliente, pagina, campos', [
+    ('anon', '/login', 1),
+    ('alumno', '/cambiar-password', 2),
+    ('administrador', '/nueva-cuenta.html', 2),
+])
+def test_paginas_con_contrasena_cargan_el_ojito(request, cliente, pagina, campos):
+    html = request.getfixturevalue(cliente).get(pagina).get_data(as_text=True)
+    assert html.count('type="password"') == campos
+    assert '<script src="js/mostrar-password.js"></script>' in html
+
+
+def test_script_del_ojito_se_sirve(anon):
+    respuesta = anon.get('/js/mostrar-password.js')
+    assert respuesta.status_code == 200
+    assert 'aria-pressed' in respuesta.get_data(as_text=True)

@@ -39,7 +39,7 @@ def datos_formulario():
         'ok': True,
         'csrf_token': token_csrf(),
         'roles': list(ROLES_WEB),
-        'semestres': sorted(SEMESTRES),
+        'semestres': list(SEMESTRES),  # en orden: 1° … 11°, Egresado(a)
     })
 
 
