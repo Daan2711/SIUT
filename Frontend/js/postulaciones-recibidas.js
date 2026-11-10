@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dl = el('dl', 'postulacion-datos');
     dato(dl, 'Correo', p.correo);
     dato(dl, 'Teléfono', p.telefono);
-    dato(dl, 'Semestre', p.semestre);
+    dato(dl, 'Cuatrimestre', p.semestre);
     dato(dl, 'Habilidades', p.habilidades);
     dato(dl, 'Experiencia', p.experiencia);
     dato(dl, 'Mensaje', p.mensaje);

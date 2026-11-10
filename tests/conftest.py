@@ -147,7 +147,7 @@ def crear_usuario_empresa(crear_usuario, crear_empresa):
 @pytest.fixture
 def crear_alumno(app):
     def _crear(usuario_id, matricula='A123', carrera='TI',
-               semestre='3° semestre', telefono='8110000000'):
+               semestre='3° cuatrimestre', telefono='8110000000'):
         with app.app_context():
             alumno = Alumno(usuario_id=usuario_id, matricula=matricula,
                             carrera=carrera, semestre=semestre, telefono=telefono)
@@ -219,7 +219,7 @@ def postular(cliente, vacante, cv=(PDF, 'Mi CV.pdf'), **extra):
     datos = {
         'vacante_id': str(vacante), 'habilidades': 'Python',
         'telefono': '8112345678', 'carrera': 'Desarrollo de Software',
-        'semestre': '5° semestre',
+        'semestre': '5° cuatrimestre',
     }
     datos.update(extra)
     if cv is not None:

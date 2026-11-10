@@ -4,6 +4,20 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Cuatrimestres en lugar de semestres y botón para mostrar la contraseña (2026-11-10)
+
+#### Cambiado
+- **De «Semestre» a «Cuatrimestre»:** las opciones válidas pasan a «1° cuatrimestre» … «11° cuatrimestre» y «Egresado(a)», en ese orden. Antes eran 1° a 6° semestre, ordenadas alfabéticamente: con 11 opciones habría quedado «10°, 11°, 1°…». Los mensajes de error dicen «Cuatrimestre no válido». — `Controllers/postulacionesController.py`, `servicios/cuentas.py`, `Controllers/cuentasController.py`
+  - En el formulario «Nueva cuenta» del administrador y en el formulario de postulación del alumno cambian la etiqueta y las opciones; en el detalle de las postulaciones recibidas, la etiqueta. — `Frontend/nueva-cuenta.html`, `Frontend/js/nueva-cuenta.js`, `Frontend/buzon.html`, `Frontend/js/postulaciones-recibidas.js`
+  - El comando `flask crear-usuario` acepta `--cuatrimestre` y conserva `--semestre` por compatibilidad. — `comandos.py`, `docs/DESPLIEGUE_RENDER.md`
+  - Por dentro, la columna sigue siendo `alumnos.semestre`; **no hay cambios en Neon**. Los alumnos ya guardados con un semestre (en Neon, uno con «1° semestre» y otro con «6° semestre») conservan ese valor hasta su próxima postulación, en la que deben elegir su cuatrimestre.
+
+#### Agregado
+- **Botón para mostrar u ocultar la contraseña («ojito»)** en todos los campos de contraseña: inicio de sesión, cambio de contraseña obligatorio y contraseña temporal de «Nueva cuenta». El botón indica a los lectores de pantalla si la contraseña está visible («Mostrar / Ocultar contraseña»). Al enviar o limpiar el formulario, la contraseña vuelve a ocultarse. Es un archivo propio, sin JavaScript dentro del HTML, así que cumple la CSP. — `Frontend/js/mostrar-password.js`, `Frontend/css/style.css`, `Frontend/login.html`, `Frontend/cambiar-password.html`, `Frontend/nueva-cuenta.html`
+
+#### Pruebas
+- Cuatrimestres en orden en ambos formularios; postulación con 1°, 11° y Egresado(a); rechazo de valores anteriores («1° semestre») y de «12° cuatrimestre»; opción `--semestre` del comando por compatibilidad; las tres páginas con contraseña cargan el ojito. — `tests/conftest.py`, `tests/test_cuentas_admin.py`, `tests/test_postulaciones.py`, `tests/test_comandos.py`, `tests/test_seguridad.py`
+
 ### JS y CSS nuevos sin esperar 1 hora tras un despliegue (2026-11-09)
 
 #### Corregido

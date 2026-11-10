@@ -22,7 +22,7 @@ def test_postulacion_valida(app, alumno, vacante_id):
         assert postulacion.cv_nombre == 'Mi_CV.pdf'          # nombre saneado
         assert postulacion.cv_tamano_bytes == len(PDF)
         assert datos_alumno.carrera == 'Desarrollo de Software'
-        assert datos_alumno.semestre == '5° semestre'
+        assert datos_alumno.semestre == '5° cuatrimestre'
 
 
 def test_sin_registro_de_alumno_no_puede_postularse(reclutador, vacante_id):
@@ -52,7 +52,8 @@ def test_peticion_mayor_a_6_mb_devuelve_413_json(alumno, vacante_id):
 
 
 @pytest.mark.parametrize('extra', [
-    {'semestre': '9° semestre'},
+    {'semestre': '12° cuatrimestre'},
+    {'semestre': '1° semestre'},          # valor anterior al cambio a cuatrimestres
     {'telefono': 'abc'},
     {'habilidades': ''},
     {'carrera': 'x' * 121},
@@ -151,3 +152,19 @@ def test_postulacion_sin_cv_guardado_devuelve_404(app, reclutador, postulacion_i
 
 def test_postulacion_inexistente(reclutador):
     assert reclutador.get('/api/postulaciones/999/cv').status_code == 404
+
+
+# --- Cuatrimestres ---------------------------------------------------------------
+def test_formulario_de_postulacion_ofrece_cuatrimestres_en_orden(alumno):
+    import re
+    pagina = alumno.get('/buzon.html').get_data(as_text=True)
+    select = re.search(r'<select id="postSemestre".*?</select>', pagina, re.S).group(0)
+    assert re.findall(r'<option>([^<]+)</option>', select) == [f'{n}° cuatrimestre' for n in range(1, 12)] + ['Egresado(a)']
+    assert 'semestre' not in re.sub(r'(id|name)="[^"]*"', '', select).lower()
+
+
+@pytest.mark.parametrize('valor', ['1° cuatrimestre', '11° cuatrimestre', 'Egresado(a)'])
+def test_postulacion_acepta_cuatrimestres(app, alumno, vacante_id, valor):
+    assert postular(alumno, vacante_id, semestre=valor).status_code == 201
+    with app.app_context():
+        assert Alumno.query.filter_by(matricula='A123').one().semestre == valor

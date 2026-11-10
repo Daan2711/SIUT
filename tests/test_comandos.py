@@ -27,13 +27,27 @@ def _usuario(app, email):
 # --- Alta por rol ------------------------------------------------------------
 def test_crea_alumno_con_su_perfil(app, ejecutar):
     resultado = ejecutar('--rol', 'Alumno', '--email', 'Luis@UTSC.edu.mx', '--nombre', 'Luis',
-                         '--matricula', 'UTSC-001', '--carrera', 'Redes', '--semestre', '3° semestre')
+                         '--matricula', 'UTSC-001', '--carrera', 'Redes', '--cuatrimestre', '3° cuatrimestre')
     assert resultado.exit_code == 0, resultado.output
     with app.app_context():
         usuario = Usuario.query.filter_by(email='luis@utsc.edu.mx').one()   # correo en minúsculas
         assert usuario.rol == 'Alumno' and usuario.primer_login is True
         perfil = Alumno.query.filter_by(usuario_id=usuario.id).one()
-        assert perfil.matricula == 'UTSC-001' and perfil.semestre == '3° semestre'
+        assert perfil.matricula == 'UTSC-001' and perfil.semestre == '3° cuatrimestre'
+
+
+def test_acepta_la_opcion_semestre_por_compatibilidad(app, ejecutar):
+    resultado = ejecutar('--rol', 'Alumno', '--email', 'ana@utsc.edu.mx', '--nombre', 'Ana',
+                         '--matricula', 'UTSC-002', '--semestre', '11° cuatrimestre')
+    assert resultado.exit_code == 0, resultado.output
+    with app.app_context():
+        assert Alumno.query.filter_by(matricula='UTSC-002').one().semestre == '11° cuatrimestre'
+
+
+def test_rechaza_valores_de_semestre_anteriores(ejecutar):
+    resultado = ejecutar('--rol', 'Alumno', '--email', 'beto@utsc.edu.mx', '--nombre', 'Beto',
+                         '--matricula', 'UTSC-003', '--cuatrimestre', '3° semestre')
+    assert resultado.exit_code != 0
 
 
 def test_crea_profesor_con_su_perfil(app, ejecutar):

@@ -5,7 +5,7 @@ en Windows se usa "python -m flask" porque "flask" suele no estar en el PATH):
 
     python -m flask --app app crear-usuario --rol Administrador --email admin@utsc.edu.mx --nombre Ana
     python -m flask --app app crear-usuario --rol Alumno --email a@utsc.edu.mx --nombre Luis \
-        --matricula UTSC-001 --carrera "Desarrollo de Software" --semestre "3° semestre"
+        --matricula UTSC-001 --carrera "Desarrollo de Software" --cuatrimestre "3° cuatrimestre"
     python -m flask --app app crear-usuario --rol Profesor --email p@utsc.edu.mx --nombre Eva --num-empleado E-01
     python -m flask --app app crear-usuario --rol Empresa --email rh@tecnonova.mx --nombre Carla --empresa TecnoNova
 
@@ -53,7 +53,8 @@ def _fallar(error):
 @click.option('--apellido', default='')
 @click.option('--matricula', help='Alumno: matrícula (obligatoria, única).')
 @click.option('--carrera', help='Alumno: carrera.')
-@click.option('--semestre', type=click.Choice(sorted(SEMESTRES)), help='Alumno: semestre.')
+@click.option('--cuatrimestre', '--semestre', 'semestre', type=click.Choice(SEMESTRES),
+              help='Alumno: cuatrimestre (--semestre se acepta por compatibilidad).')
 @click.option('--telefono', help='Alumno: teléfono.')
 @click.option('--num-empleado', 'num_empleado', help='Profesor: número de empleado (obligatorio, único).')
 @click.option('--departamento', help='Profesor: departamento.')

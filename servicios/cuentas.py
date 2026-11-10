@@ -127,7 +127,7 @@ def preparar_cuenta(rol, datos, password, roles_permitidos=ROLES, password_confi
         if datos['telefono'] and not TELEFONO_RE.match(datos['telefono']):
             raise ErrorCuenta('Teléfono no válido.', 'telefono')
         if datos['semestre'] and datos['semestre'] not in SEMESTRES:
-            raise ErrorCuenta('Semestre no válido.', 'semestre')
+            raise ErrorCuenta('Cuatrimestre no válido.', 'semestre')
     if rol == 'Profesor' and not datos['num_empleado']:
         raise ErrorCuenta('El número de empleado es obligatorio para un Profesor.', 'num_empleado')
     if rol == 'Empresa' and not datos['empresa']:
