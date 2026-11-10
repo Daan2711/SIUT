@@ -18,9 +18,31 @@ function mensajePorEstado(status) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
+    const boton = loginForm.querySelector('button[type="submit"]');
+    const textoBoton = boton.textContent;
+    // En Render verificar la contraseña tarda unos segundos; sin este candado
+    // un segundo clic (o Enter) mandaba otro inicio de sesión: dos registros en
+    // la auditoría y una sesión nueva que reemplazaba a la primera.
+    let enviando = false;
+
+    function liberar() {
+        enviando = false;
+        boton.disabled = false;
+        boton.textContent = textoBoton;
+    }
+
+    // Al volver con «Atrás» el navegador puede restaurar la página con el
+    // botón aún bloqueado.
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) liberar();
+    });
 
     loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
+        if (enviando) return;
+        enviando = true;
+        boton.disabled = true;
+        boton.textContent = 'Entrando…';
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
@@ -40,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await leerJson(response);
 
             if (!response.ok) {
+                liberar();
                 alert(data.error || mensajePorEstado(response.status));
                 return;
             }
@@ -52,13 +75,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     // (alumno: index; empresa: sus vacantes; administrador: panel)
                     window.location.href = data.destino || '/index.html';
                 }
+                // El botón sigue bloqueado mientras el navegador cambia de página
             } else {
+                liberar();
                 alert('No fue posible iniciar sesión');
             }
 
         } catch (error) {
             // Solo llega aquí si no hubo respuesta (sin red, servidor caído, etc.)
             console.error('Error:', error);
+            liberar();
             alert('Error de conexión con el servidor');
         }
     });
