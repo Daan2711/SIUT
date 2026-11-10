@@ -4,6 +4,13 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Inicio de sesión registrado dos veces (2026-11-09)
+
+#### Corregido
+- **Doble envío del inicio de sesión:** en Render, verificar la contraseña tarda unos 2 segundos y el botón ENTRAR seguía activo sin indicar que se estaba procesando. Un segundo clic o Enter mandaba otro `POST /login`, así que la auditoría registraba dos «Inicio de sesión» separados unos 2 segundos. Además, la segunda sesión reemplazaba a la primera con un token CSRF nuevo, lo que podía provocar un 403 en «Nueva cuenta», y cada doble clic gastaba dos de los 5 intentos por minuto. Ahora se ignoran los envíos mientras hay uno en curso y el botón queda deshabilitado con el texto «Entrando…». Se vuelve a habilitar si hay un error o si el usuario regresa a la página con «Atrás». — `Frontend/js/login.js`
+- **Doble envío del cambio de contraseña obligatorio:** se aplica el mismo bloqueo, con el texto «Guardando…». Un segundo envío respondía «debe ser distinta a la actual» aunque el cambio ya se hubiera guardado. También se toleran respuestas que no son JSON. — `Frontend/js/cambiar-password.js`
+- Sin cambios en el servidor ni en Neon.
+
 ### URL real de Render en `security.txt` (2026-11-09)
 
 #### Cambiado
