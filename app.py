@@ -200,14 +200,23 @@ def set_security_headers(response):
     # HSTS solo tiene sentido (y solo se envía) cuando el sitio va por HTTPS
     if app.config['SESSION_COOKIE_SECURE']:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    ruta = request.path.lower()
+    # 304 = el navegador ya tiene la versión vigente: recibe la misma política
+    # que la respuesta 200 (antes caía en la rama del HTML con no-store).
     es_recurso_estatico = (
         request.endpoint == 'static'
-        and not request.path.lower().endswith('.html')
-        and response.status_code == 200
+        and not ruta.endswith('.html')
+        and response.status_code in (200, 304)
     )
-    if es_recurso_estatico:
-        # CSS, JS e imágenes: iguales para todos, se guardan 1 hora en el
-        # navegador (el plan gratis de Render es lento; evita descargarlos
+    if es_recurso_estatico and ruta.endswith(('.js', '.css')):
+        # JS y CSS cambian con cada despliegue: el navegador los guarda pero
+        # pregunta en cada carga si cambiaron (ETag/Last-Modified → 304 sin
+        # cuerpo). Con max-age=3600 un despliegue tardaba hasta 1 hora en
+        # llegar y se mezclaba HTML nuevo con JS viejo.
+        response.headers['Cache-Control'] = 'no-cache'
+    elif es_recurso_estatico:
+        # Imágenes y demás: casi nunca cambian, se guardan 1 hora en el
+        # navegador (el plan gratis de Render es lento; evita descargarlas
         # en cada página).
         response.headers['Cache-Control'] = 'public, max-age=3600'
     else:
