@@ -4,6 +4,16 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### JS y CSS nuevos sin esperar 1 hora tras un despliegue (2026-11-09)
+
+#### Corregido
+- **JS y CSS se revalidan en cada carga:** pasan de `Cache-Control: public, max-age=3600` a `no-cache`. Con la caché de 1 hora, un despliegue podía tardar hasta 1 hora en llegar al navegador de quien ya había entrado. Pasó con la corrección del doble inicio de sesión: después de desplegarla, un doble clic todavía registró 6 inicios de sesión porque el navegador siguió usando el `login.js` anterior. También podía mezclarse un HTML nuevo con un JS viejo. Ahora el navegador conserva los archivos, pero pregunta en cada carga si cambiaron; si no cambiaron, el servidor responde 304 sin reenviarlos. Las imágenes siguen guardándose 1 hora. — `app.py`
+- **Respuestas 304 de archivos estáticos:** solo las respuestas 200 recibían la política de caché del recurso. Las 304 caían en la rama del HTML y recibían `no-store` y `Pragma: no-cache`, lo que podía hacer que el navegador descartara la copia que acababa de revalidar. Ahora las 304 llevan la misma política que las 200. — `app.py`
+- Documentación de la caché actualizada. — `docs/DESPLIEGUE_RENDER.md`
+
+#### Pruebas
+- Cabeceras de caché de imágenes, JS y CSS, y de las respuestas 304. Las pruebas de JS, CSS y 304 fallan sin la corrección. — `tests/test_seguridad.py`
+
 ### Inicio de sesión registrado dos veces (2026-11-09)
 
 #### Corregido

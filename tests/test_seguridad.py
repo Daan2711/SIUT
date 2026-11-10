@@ -94,11 +94,35 @@ def test_security_txt_legado_redirige(anon):
 
 
 # --- Fase C: caché, menú en celular y limpieza ------------------------------
-@pytest.mark.parametrize('recurso', ['/css/style.css', '/js/nav.js', '/img/logo.png'])
-def test_recursos_estaticos_se_guardan_en_cache(anon, recurso):
+@pytest.mark.parametrize('recurso', ['/img/logo.png', '/img/3.jpg'])
+def test_imagenes_se_guardan_en_cache_una_hora(anon, recurso):
     respuesta = anon.get(recurso)
     assert respuesta.status_code == 200
     assert respuesta.headers['Cache-Control'] == 'public, max-age=3600'
+
+
+@pytest.mark.parametrize('recurso', ['/css/style.css', '/js/nav.js', '/js/login.js'])
+def test_js_y_css_se_revalidan_en_cada_carga(anon, recurso):
+    """Tras un despliegue el navegador debe recibir el JS/CSS nuevo al momento
+    (con max-age=3600 un login.js corregido tardó hasta 1 hora en llegar)."""
+    respuesta = anon.get(recurso)
+    assert respuesta.status_code == 200
+    assert respuesta.headers['Cache-Control'] == 'no-cache'
+    # Sin validadores la revalidación descargaría el archivo completo
+    assert respuesta.headers.get('ETag') or respuesta.headers.get('Last-Modified')
+
+
+@pytest.mark.parametrize('recurso, politica', [
+    ('/js/login.js', 'no-cache'),
+    ('/css/style.css', 'no-cache'),
+    ('/img/logo.png', 'public, max-age=3600'),
+])
+def test_respuesta_304_conserva_la_politica_del_recurso(anon, recurso, politica):
+    etag = anon.get(recurso).headers['ETag']
+    respuesta = anon.get(recurso, headers={'If-None-Match': etag})
+    assert respuesta.status_code == 304
+    assert respuesta.headers['Cache-Control'] == politica
+    assert 'Pragma' not in respuesta.headers
 
 
 def test_html_y_api_nunca_se_guardan_en_cache(alumno):
