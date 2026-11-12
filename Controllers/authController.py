@@ -197,10 +197,16 @@ def logout():
 
 
 # =========================================================================
-# CAMBIO DE CONTRASEÑA (primer login)
+# CAMBIO DE CONTRASEÑA (primer login y cambio voluntario desde el perfil)
 # =========================================================================
+def _clave_intentos_cambio():
+    """Cuenta intentos por usuario: frena adivinar la contraseña actual
+    desde una sesión abierta."""
+    return f"cambio|{session.get('usuario_id') or get_remote_address()}"
+
 
 @auth_bp.route('/cambiar-password', methods=['POST'])
+@limiter.limit("5 per minute", key_func=_clave_intentos_cambio)
 def cambiar_password():
     if 'usuario_id' not in session:
         return jsonify({'error': 'No has iniciado sesión'}), 401
@@ -213,7 +219,7 @@ def cambiar_password():
     nueva_password = data.get('nueva_password')
     confirmar_password = data.get('confirmar_password')
 
-    if not nueva_password or not confirmar_password:
+    if not isinstance(nueva_password, str) or not isinstance(confirmar_password, str)             or not nueva_password or not confirmar_password:
         return jsonify({'error': 'Debes completar ambos campos'}), 400
 
     if nueva_password != confirmar_password:
@@ -228,6 +234,16 @@ def cambiar_password():
         if not usuario or not usuario.activo:
             session.clear()
             return jsonify({'error': 'La cuenta no está disponible'}), 401
+
+        # Cambio voluntario (ya no es el primer inicio): se exige la contraseña
+        # actual, para que una sesión abierta ajena no baste para cambiarla.
+        voluntario = not usuario.primer_login
+        if voluntario:
+            password_actual = data.get('password_actual')
+            if not password_actual or not isinstance(password_actual, str):
+                return jsonify({'error': 'Escribe tu contraseña actual'}), 400
+            if not bcrypt.check_password_hash(usuario.password_hash, password_actual):
+                return jsonify({'error': 'La contraseña actual no es correcta'}), 400
 
         # La contraseña temporal ya no vive en el código: se rechaza reutilizar
         # la contraseña actual (cubre la temporal) y, si está configurada,
@@ -247,7 +263,8 @@ def cambiar_password():
 
         nuevo_log = Auditoria(
             usuario_id=usuario.id,
-            accion='Cambio de contraseña obligatorio completado'
+            accion=('Cambio de contraseña voluntario' if voluntario
+                    else 'Cambio de contraseña obligatorio completado')
         )
 
         db.session.add(nuevo_log)

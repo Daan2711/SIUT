@@ -123,7 +123,7 @@ app.cli.add_command(crear_usuario)
 # =========================================================================
 # Toda página .html exige sesión salvo estas. Las de reclutador exigen ser
 # Empresa o Administrador; las de administración, ser Administrador.
-PAGINAS_PUBLICAS = {'/login.html', '/cambiar-password.html'}
+PAGINAS_PUBLICAS = {'/login.html'}
 PAGINAS_RECLUTADOR = {
     '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',
 }
@@ -399,6 +399,9 @@ def security_txt_legado():
 
 @app.route('/cambiar-password')
 def cambiar_password_page():
+    # Sin sesión no hay contraseña que cambiar
+    if 'usuario_id' not in session:
+        return redirect('/login')
     response = make_response(send_from_directory('Frontend', 'cambiar-password.html'))
     return response
 
