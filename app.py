@@ -16,6 +16,7 @@ from Database.database import db
 import Models.models
 from Models.models import Usuario
 from extensions import limiter
+from csrf import csrf_valido
 
 # Importación del controlador de autenticación (Blueprint)
 from Controllers.authController import auth_bp
@@ -156,6 +157,7 @@ RUTAS_PERMITIDAS_PRIMER_LOGIN = {
     'index', 'login_page', 'cambiar_password_page', 'security_txt', 'security_txt_legado',
     'healthz',
     'auth.login_usuario', 'auth.logout', 'auth.usuario_actual', 'auth.cambiar_password',
+    'auth.csrf_token',
 }
 
 
@@ -182,6 +184,31 @@ def exigir_cambio_password():
     if request.path.startswith('/api/') or request.method != 'GET':
         return jsonify({'error': 'Debes cambiar tu contraseña antes de continuar'}), 403
     return redirect('/cambiar-password')
+
+
+# =========================================================================
+# SECCIÓN 5.55: PROTECCIÓN CSRF (todas las peticiones que cambian datos)
+# =========================================================================
+# Toda petición POST/PUT/PATCH/DELETE con sesión debe traer en la cabecera
+# X-CSRF-Token el token de su sesión (ver csrf.py y Frontend/js/csrf.js).
+# Exentas: login y registro, porque antes de iniciar sesión no hay token.
+METODOS_QUE_CAMBIAN = {'POST', 'PUT', 'PATCH', 'DELETE'}
+RUTAS_SIN_CSRF = {'auth.login_usuario', 'auth.registrar_usuario'}
+
+
+@app.before_request
+def exigir_csrf():
+    if request.method not in METODOS_QUE_CAMBIAN or request.endpoint in RUTAS_SIN_CSRF:
+        return None
+    if 'usuario_id' not in session:
+        return None   # sin sesión cada ruta responde 401 por su cuenta
+    if csrf_valido():
+        return None
+    app.logger.warning('Petición rechazada por CSRF: %s %s (usuario %s)',
+                       request.method, request.path, session.get('usuario_id'))
+    return jsonify({
+        'error': 'La sesión del formulario expiró. Recarga la página e intenta de nuevo.'
+    }), 403
 
 
 # =========================================================================
