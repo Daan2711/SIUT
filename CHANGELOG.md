@@ -4,6 +4,15 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Borrada la tabla de ejemplo `playing_with_neon` de Neon (2026-11-12)
+
+#### Eliminado
+- **Tabla `public.playing_with_neon`**, la que Neon crea de ejemplo al abrir un proyecto (10 filas de datos aleatorios). SIUT no la usaba: ningún modelo, controlador, llave foránea, vista, trigger ni función la referenciaba (revisado en solo lectura). Su secuencia `playing_with_neon_id_seq` se borró con ella. Aplicado en Neon con aprobación; quedan 19 tablas en `public` y el diagnóstico sigue sin problemas. — `migrations/2026-11-12_borrar_playing_with_neon.sql`
+- El script para revertir recrea la tabla con sus 10 filas originales y el valor de la secuencia, copiados en solo lectura antes de borrarla. — `migrations/2026-11-12_borrar_playing_with_neon_revertir.sql`
+
+#### Documentación
+- El esquema pasa de 20 a 19 tablas y se quita la sección de la tabla. — `docs/ESQUEMA_BD.md`
+
 ### Script de diagnóstico de la base de datos (2026-11-12)
 
 #### Agregado

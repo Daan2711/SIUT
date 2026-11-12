@@ -1,8 +1,8 @@
 # Esquema de la base de datos SIUT (Neon / PostgreSQL 18)
 
-Generado el 2026-11-08 (actualizado tras la migración del CV y, el 2026-11-12, con `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql`) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
+Generado el 2026-11-08 (actualizado tras la migración del CV y, el 2026-11-12, con `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql` y `migrations/2026-11-12_borrar_playing_with_neon.sql`) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
 
-- 20 tablas en el esquema `public` (18 de la app, `siut_control_admin` de control y `playing_with_neon`, tabla de ejemplo de Neon).
+- 19 tablas en el esquema `public` (18 de la app y `siut_control_admin` de control). La tabla de ejemplo de Neon `playing_with_neon` se borró el 2026-11-12.
 - Todos los `id` son `bigint GENERATED ALWAYS AS IDENTITY` (salvo `postulacion_cv`, cuya llave es la de su postulación).
 - Cambios de esquema: scripts versionados en `migrations/`.
 - Todas las llaves foráneas usan `ON DELETE RESTRICT`.
@@ -628,14 +628,3 @@ erDiagram
 - CHECK `siut_control_admin_total_admins_check`: `CHECK (((total_admins >= 0) AND (total_admins <= 4)))`
 - PK `siut_control_admin_pkey`: `PRIMARY KEY (id)`
 
-### `playing_with_neon`
-
-| Columna | Tipo | Nulo | Por defecto |
-|---|---|---|---|
-| `id` | integer | no | `nextval('playing_with_neon_id_seq'::regclass)` |
-| `name` | text | no |  |
-| `value` | real | sí |  |
-
-**Restricciones e índices:**
-
-- PK `playing_with_neon_pkey`: `PRIMARY KEY (id)`
