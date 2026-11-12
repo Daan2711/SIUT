@@ -14,23 +14,28 @@
 
 <body>
 
-    <header>
-        <div class="logo">
-            <img src="img/logo.png" alt="UTSC">
+    <header class="encabezado">
+      <a class="logo" href="index.html" aria-label="Ir al inicio"><img src="img/logo.png" alt="UTSC"></a>
+      <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal"><span></span><span></span><span></span></button>
+      <nav id="menuPrincipal" class="nav-principal" aria-label="Menú principal">
+          <a href="index.html" data-icono="inicio">Inicio</a>
+          <a href="horario.html" data-icono="horario" class="activo" aria-current="page">Mi horario</a>
+          <a href="maestros.html" data-icono="maestros">Maestros</a>
+          <a href="buzon.html" data-icono="empleos">Empleos</a>
+          <a href="sugerencias.html" data-icono="buzon">Buzón</a>
+          <a href="soporte.html" data-icono="soporte">Soporte</a>
+      </nav>
+      <div class="perfil">
+        <button id="perfilBoton" class="perfil-boton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="perfilMenu">
+          <span class="perfil-avatar" aria-hidden="true">{{iniciales}}</span>
+          <span class="perfil-texto"><span id="nombreAlumno" class="perfil-nombre">Nombre del Alumno</span><span class="perfil-rol">{{rol}}</span></span>
+          <span class="perfil-flecha" aria-hidden="true"></span>
+        </button>
+        <div id="perfilMenu" class="perfil-menu" hidden>
+          <div class="perfil-menu-cabecera"><strong>Nombre del Alumno</strong><span>{{rol}}</span></div>
+          <button id="cerrarSesion" class="perfil-menu-item" type="button" data-icono="salir">Cerrar sesión</button>
         </div>
-        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal">&#9776;</button>
-        <nav id="menuPrincipal">
-            <a href="index.html">Inicio</a>
-            <a class="activo" href="horario.html">Mi Horario</a>
-            <a href="maestros.html">Directorio de Maestros</a>
-            <a href="buzon.html">Buscar empleos</a>
-            <a href="sugerencias.html">Buzón de sugerencias</a>
-            <a href="soporte.html">Soporte</a>
-        </nav>
-        <div class="perfil">
-            <img src="img/usuario.png" alt="Usuario">
-            <span>Nombre del Alumno</span>
-        </div>
+      </div>
     </header>
 
     <main class="contenedor">

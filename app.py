@@ -250,22 +250,52 @@ def login_page():
     return send_from_directory('Frontend', 'login.html')
 
 
+def _iniciales(usuario):
+    partes = [p for p in (usuario.nombre or '', usuario.apellido or '') if p.strip()]
+    if not partes:
+        return '··'
+    if len(partes) == 1:
+        return partes[0].strip()[:2].upper()
+    return (partes[0].strip()[0] + partes[1].strip()[0]).upper()
+
+
+def _etiqueta_rol(usuario):
+    """Texto bajo el nombre en el menú de perfil (p. ej. «Empresa · TecnoNova»)."""
+    rol = usuario.rol or ''
+    if rol == 'Empresa' and usuario.empresa_id:
+        empresa = db.session.get(Models.models.Empresa, usuario.empresa_id)
+        if empresa:
+            return f'Empresa · {empresa.nombre}'
+    return rol
+
+
 def _render_con_nombre(nombre_archivo):
-    """Sirve una vista del Frontend reemplazando 'Nombre del Alumno' por el nombre real."""
+    """Sirve una vista del Frontend con el nombre, rol e iniciales del usuario.
+
+    El rol también va en <body data-rol="…">: el CSS muestra desde la primera
+    carga el menú que le corresponde. Es solo presentación; el servidor sigue
+    validando cada permiso.
+    """
     if 'usuario_id' not in session:
         return redirect('/login')
 
     usuario = db.session.get(Usuario, session['usuario_id'])
+    # Se escapa para que un nombre con HTML no se ejecute en la página
     if usuario:
-        # Se escapa para que un nombre con HTML no se ejecute en la página
         nombre = str(escape(f"{usuario.nombre} {usuario.apellido or ''}".strip()))
+        rol = str(escape(_etiqueta_rol(usuario)))
+        iniciales = str(escape(_iniciales(usuario)))
+        data_rol = (usuario.rol or '').lower()
     else:
-        nombre = 'Nombre del Alumno'
+        nombre, rol, iniciales, data_rol = 'Nombre del Alumno', '', '··', ''
 
     with open(f'Frontend/{nombre_archivo}', 'r', encoding='utf-8') as f:
         html = f.read()
 
     html = html.replace('Nombre del Alumno', nombre)
+    html = html.replace('{{rol}}', rol).replace('{{iniciales}}', iniciales)
+    if data_rol in ('alumno', 'profesor', 'empresa', 'administrador'):
+        html = html.replace('<body>', f'<body data-rol="{data_rol}">', 1)
     return html
 
 

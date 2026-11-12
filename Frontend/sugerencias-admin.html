@@ -7,23 +7,41 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header>
-    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
-    <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal">&#9776;</button>
-    <nav id="menuPrincipal" aria-label="Gestión">
-      <a href="panel-admin.html" data-solo-admin hidden>Panel</a>
-      <a href="vacantes-publicadas.html">Vacantes publicadas</a>
-      <a href="cargar-vacantes.html">Cargar vacante</a>
-      <a href="postulaciones-recibidas.html">Postulaciones</a>
-      <a class="activo" href="sugerencias-admin.html" aria-current="page" data-solo-admin hidden>Sugerencias</a>
-      <a href="inscripciones-eventos.html" data-solo-admin hidden>Inscripciones a eventos</a>
-      <a href="nueva-cuenta.html" data-solo-admin hidden>Nueva cuenta</a>
+  <header class="encabezado">
+    <a class="logo" href="panel-admin.html" aria-label="Ir al panel" data-solo-admin><img src="img/logo.png" alt="UTSC"></a>
+    <a class="logo" href="vacantes-publicadas.html" aria-label="Ir a mis vacantes" data-solo-empresa><img src="img/logo.png" alt="UTSC"></a>
+    <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal"><span></span><span></span><span></span></button>
+    <nav id="menuPrincipal" class="nav-principal" aria-label="Gestión">
+        <a href="panel-admin.html" data-icono="panel" data-solo-admin>Panel</a>
+        <div class="nav-grupo" data-solo-admin>
+          <button class="nav-grupo-boton" type="button" data-icono="empleos" aria-expanded="false" aria-controls="grupoBolsa">Bolsa de empleo</button>
+          <div id="grupoBolsa" class="nav-submenu">
+            <a href="vacantes-publicadas.html" data-icono="vacantes">Vacantes publicadas</a>
+            <a href="cargar-vacantes.html" data-icono="publicar">Cargar vacante</a>
+            <a href="postulaciones-recibidas.html" data-icono="postulaciones">Postulaciones</a>
+          </div>
+        </div>
+        <div class="nav-grupo" data-solo-admin>
+          <button class="nav-grupo-boton activo" type="button" data-icono="comunidad" aria-expanded="false" aria-controls="grupoComunidad">Comunidad</button>
+          <div id="grupoComunidad" class="nav-submenu">
+            <a href="sugerencias-admin.html" data-icono="sugerencias" class="activo" aria-current="page">Sugerencias</a>
+            <a href="inscripciones-eventos.html" data-icono="eventos">Inscripciones a eventos</a>
+          </div>
+        </div>
+        <a href="nueva-cuenta.html" data-icono="cuentas" data-solo-admin>Cuentas</a>
+        <a href="vacantes-publicadas.html" data-icono="vacantes" data-solo-empresa>Vacantes</a>
+        <a href="cargar-vacantes.html" data-icono="publicar" data-solo-empresa>Publicar</a>
+        <a href="postulaciones-recibidas.html" data-icono="postulaciones" data-solo-empresa>Postulaciones</a>
     </nav>
     <div class="perfil">
-      <img src="img/usuario.png" alt="Usuario">
-      <div class="perfil-info">
-        <span id="nombreAlumno">Nombre del Alumno</span>
-        <button id="cerrarSesion" class="btn-logout" type="button">Cerrar Sesión</button>
+      <button id="perfilBoton" class="perfil-boton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="perfilMenu">
+        <span class="perfil-avatar" aria-hidden="true">{{iniciales}}</span>
+        <span class="perfil-texto"><span id="nombreAlumno" class="perfil-nombre">Nombre del Alumno</span><span class="perfil-rol">{{rol}}</span></span>
+        <span class="perfil-flecha" aria-hidden="true"></span>
+      </button>
+      <div id="perfilMenu" class="perfil-menu" hidden>
+        <div class="perfil-menu-cabecera"><strong>Nombre del Alumno</strong><span>{{rol}}</span></div>
+        <button id="cerrarSesion" class="perfil-menu-item" type="button" data-icono="salir">Cerrar sesión</button>
       </div>
     </div>
   </header>
@@ -59,7 +77,6 @@
     <p id="sinSugerencias" class="sin-resultados" hidden>No hay sugerencias con ese estado.</p>
   </main>
 
-  <script src="js/gestion.js"></script>
   <script src="js/sugerencias-admin.js"></script>
   <script src="js/nav.js"></script>
 </body>

@@ -56,15 +56,17 @@ def test_paginas_de_admin_solo_para_administrador(alumno, reclutador, administra
 
 @pytest.mark.parametrize('pagina', [
     '/cargar-vacantes.html', '/vacantes-publicadas.html', '/postulaciones-recibidas.html',
-    '/panel-admin.html', '/sugerencias-admin.html',
+    '/panel-admin.html', '/sugerencias-admin.html', '/inscripciones-eventos.html', '/nueva-cuenta.html',
 ])
 def test_paginas_de_gestion_tienen_menu_y_cerrar_sesion(administrador, pagina):
     texto = administrador.get(pagina).get_data(as_text=True)
     assert 'id="cerrarSesion"' in texto
-    assert 'js/gestion.js' in texto
-    # Los enlaces de administrador vienen ocultos; gestion.js los muestra según el rol
-    assert 'href="sugerencias-admin.html" data-solo-admin hidden' in texto or \
-           'aria-current="page" data-solo-admin hidden' in texto
+    assert 'js/nav.js' in texto
+    # El servidor marca el rol en <body>; el CSS muestra el menú agrupado del administrador
+    assert '<body data-rol="administrador">' in texto
+    assert 'id="grupoBolsa"' in texto and 'id="grupoComunidad"' in texto
+    assert 'href="sugerencias-admin.html" data-icono="sugerencias"' in texto
+    assert ' hidden>' not in texto.split('<nav id="menuPrincipal"')[1].split('</nav>')[0]
 
 
 # --- Bandeja de sugerencias ------------------------------------------------
