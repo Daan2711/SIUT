@@ -819,3 +819,14 @@ nav a.activo{
 .notificacion-respuesta{margin-top:10px;padding:10px 12px;border-left:3px solid #0b9282;background:#f2faf8;border-radius:6px}
 .notificacion-respuesta p{margin:6px 0;white-space:pre-line}
 .inscripcion-evento.inscripcion-ok{border-color:#a6d5ce;background:#f7fcfb}
+
+/* ===== Editar / borrar vacantes y vacante cerrada (2026-11-12) ===== */
+.vacante-acciones{margin-top:14px}
+.btn-editar-vacante{text-decoration:none;font-size:14px;padding:9px 16px}
+.btn-borrar-vacante{font-size:14px;padding:9px 16px;color:#a13725;border-color:#f0c4b9}
+.btn-borrar-vacante:hover{background:#fff0ed}
+.btn-borrar-vacante:disabled{opacity:.6;cursor:default}
+.vacante-card.vacante-cerrada{opacity:.85;background:#fafafa}
+.badge-cerrada{margin-left:auto;background:#fff0ed;color:#a13725;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+.vacante-cerrada .badge-postulado{margin-left:8px}
+.seguimiento-cerrada{font-weight:700;color:#a13725}

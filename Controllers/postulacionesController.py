@@ -12,7 +12,7 @@ from sqlalchemy import func
 from Models.models import Postulacion, PostulacionCV, Vacante, Alumno, Usuario, Empresa, Auditoria
 from Database.database import db
 from Controllers.vacantesController import (
-    _iso, usuario_en_sesion, perfil_de_carga, filtro_vacantes_visibles, puede_ver_vacante,
+    _iso, _serializar, usuario_en_sesion, perfil_de_carga, filtro_vacantes_visibles, puede_ver_vacante,
 )
 
 postulaciones_bp = Blueprint('postulaciones', __name__)
@@ -368,7 +368,7 @@ def mis_postulaciones():
         # Sin registro de alumno no hay postulaciones (no es un error)
         return jsonify({'ok': True, 'postulaciones': []}), 200
 
-    filas = (db.session.query(Postulacion, Vacante.titulo, Empresa.nombre)
+    filas = (db.session.query(Postulacion, Vacante, Empresa.nombre)
              .join(Vacante, Postulacion.vacante_id == Vacante.id)
              .outerjoin(Empresa, Vacante.empresa_id == Empresa.id)
              .filter(Postulacion.alumno_id == alumno.id)
@@ -378,11 +378,14 @@ def mis_postulaciones():
     return jsonify({'ok': True, 'postulaciones': [{
         'id': p.id,
         'vacante_id': p.vacante_id,
-        'vacante_titulo': titulo,
+        'vacante_titulo': v.titulo,
         'empresa': empresa or '',
+        # Si la empresa la dio de baja, el alumno la sigue viendo como «Vacante cerrada»
+        'vacante_activa': bool(v.activo),
+        'vacante': _serializar(v, empresa),
         'estado': p.estado,
         'enviada_en': _iso(p.creado_en),
         'revisada_en': _iso(p.revisada_en),
         'comentario': p.comentario_empresa,
         'comentario_en': _iso(p.comentario_en),
-    } for p, titulo, empresa in filas]}), 200
+    } for p, v, empresa in filas]}), 200

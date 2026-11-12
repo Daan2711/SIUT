@@ -46,7 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
         && (!filters[2].value || card.dataset.ubicacion === filters[2].value)
         && (!filters[3].value || card.dataset.experiencia === filters[3].value)
         && (!favoritesOnly || favorites.has(card.dataset.id))
-        && (!appliedOnly || applied.has(card.dataset.id));
+        && (!appliedOnly || applied.has(card.dataset.id))
+        // Las vacantes cerradas solo se ven en «Mis vacantes postuladas»
+        && (!card.dataset.cerrada || appliedOnly);
       card.hidden = !matches;
       if (matches) visible++;
     });
@@ -128,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const empresa = p.empresa || card.dataset.empresa;
     const parts = [el('p', 'seguimiento-titulo', '✓ Ya te postulaste a esta vacante')];
+    if (card.dataset.cerrada) {
+      parts.push(el('p', 'seguimiento-cerrada', 'Vacante cerrada: la empresa la dio de baja y ya no recibe postulaciones.'));
+    }
     if (p.enviada_en) parts.push(el('p', 'seguimiento-fecha', `Enviada el ${formatDate(p.enviada_en)}`));
     if (p.revisada_en) {
       const aviso = el('p', 'seguimiento-aviso');
@@ -354,7 +359,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Vacantes a las que se postuló y que la empresa ya dio de baja:
+  // se muestran con la leyenda «Vacante cerrada» (solo en «Mis vacantes postuladas»)
+  function addClosedCards() {
+    applied.forEach(p => {
+      if (p.vacante_activa !== false || !p.vacante) return;
+      if (list.querySelector(`.vacante-card[data-id="${CSS.escape(String(p.vacante_id))}"]`)) return;
+      const card = buildCard(p.vacante);
+      card.dataset.cerrada = '1';
+      card.classList.add('vacante-cerrada');
+      card.querySelector('.vacante-card-top').insertBefore(
+        el('span', 'badge-cerrada', 'Vacante cerrada'), card.querySelector('.btn-favorito'));
+      markApplied(card);
+      list.appendChild(card);
+    });
+    filterCards();
+  }
+
   loadProfile();
-  loadApplications();
-  loadVacancies();
+  Promise.all([loadApplications(), loadVacancies()]).then(addClosedCards);
 });

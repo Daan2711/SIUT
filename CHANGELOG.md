@@ -4,6 +4,18 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Editar y borrar vacantes, con «Vacante cerrada» para el alumno (2026-11-12)
+
+#### Agregado
+- **Botones «Editar» y «Borrar» en «Vacantes publicadas»:** una empresa los ve solo en las vacantes de su empresa; el administrador, en todas. El listado indica con `editable` cuáles puede modificar la sesión y cuántas postulaciones tiene cada una; esos datos no se envían a los alumnos. — `Controllers/vacantesController.py`, `Frontend/vacantes-publicadas.html`, `Frontend/js/vacantes-publicadas.js`, `Frontend/css/style.css`
+- **Editar vacante:** usa el mismo formulario de «Cargar vacante» (`cargar-vacantes.html?editar=<id>`) con los datos precargados y las mismas validaciones del alta, compartidas en `_validar_vacante`. Las postulaciones se conservan y la edición se registra en la auditoría («Edición de vacante»). Una empresa no puede cambiar la empresa de la vacante. El administrador sí puede, salvo en las vacantes que publicó una empresa: el trigger `trg_validar_creador_vacante` de Neon lo rechazaría, así que se responde 400 con un mensaje claro. — `Controllers/vacantesController.py` (`GET` y `POST /api/vacantes/<id>`), `Frontend/cargar-vacantes.html`, `Frontend/js/cargar-vacantes.js`
+- **Borrar vacante (baja lógica):** pide confirmación e indica cuántas postulaciones tiene. Marca `activo = false`: la vacante deja de mostrarse a los alumnos, pero sus postulaciones y CV se conservan y la empresa los sigue viendo en «Postulaciones recibidas». Se registra en la auditoría («Baja de vacante»). — `Controllers/vacantesController.py` (`POST /api/vacantes/<id>/baja`), `Frontend/js/vacantes-publicadas.js`
+- **«Vacante cerrada» para el alumno:** si se borra una vacante a la que se postuló, la sigue viendo en «Mis vacantes postuladas» con la etiqueta «Vacante cerrada», y en el detalle se explica que ya no recibe postulaciones. También conserva el seguimiento y el comentario de la empresa. — `Controllers/postulacionesController.py` (`/api/mis-postulaciones` incluye `vacante_activa` y los datos de la vacante), `Frontend/js/empleos.js`, `Frontend/css/style.css`
+- Sin cambios en Neon: la columna `vacantes.activo` ya existía.
+
+#### Pruebas
+- Permisos para editar y borrar (empresa dueña, otra empresa, alumno, administrador y sin sesión), validación igual a la del alta, cambio de empresa por el administrador, conservación de postulaciones y CV tras la baja, auditoría, error 500 sin detalle interno y «Vacante cerrada» en «Mis postulaciones». — `tests/test_editar_vacantes.py`
+
 ### Seguimiento de postulaciones, notificaciones del buzón e inscripciones a eventos (2026-11-12)
 
 #### Agregado

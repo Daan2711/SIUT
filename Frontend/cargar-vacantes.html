@@ -32,8 +32,8 @@
     <section class="empleos-hero">
       <div>
         <p class="empleos-eyebrow">PUBLICACIÓN DE OPORTUNIDADES</p>
-        <h1>Carga una nueva vacante</h1>
-        <p>Registra la información del puesto para que la comunidad UTSC pueda consultarla y postularse.</p>
+        <h1 id="tituloCarga">Carga una nueva vacante</h1>
+        <p id="textoCarga">Registra la información del puesto para que la comunidad UTSC pueda consultarla y postularse.</p>
       </div>
     </section>
 
@@ -69,7 +69,7 @@
           <label>Descripción del puesto <b>*</b><textarea name="descripcion" required rows="4" maxlength="2000" placeholder="Actividades principales, equipo y objetivos del puesto…"></textarea></label>
           <label>Requisitos y habilidades <b>*</b><textarea name="requisitos" required rows="3" maxlength="1500" placeholder="Ej. HTML, CSS, JavaScript y control de versiones Git."></textarea></label>
 
-          <p class="form-privacidad">🔒 La vacante quedará visible para los alumnos en la sección Buscar empleos y se registrará a tu nombre en SIUT.</p>
+          <p id="avisoCarga" class="form-privacidad">🔒 La vacante quedará visible para los alumnos en la sección Buscar empleos y se registrará a tu nombre en SIUT.</p>
           <p id="mensajeVacante" class="mensaje-postulacion" role="status" hidden></p>
           <div class="form-acciones"><button id="limpiarVacante" class="btn-empleo-outline" type="button">Limpiar</button><button id="publicarVacante" class="btn-empleo-primary" type="submit">Publicar vacante</button></div>
         </form>
