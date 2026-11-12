@@ -35,6 +35,29 @@ from extensions import limiter  # noqa: E402
 from Models.models import Usuario, Alumno, Empresa, PostulacionCV  # noqa: E402
 from Controllers.authController import bcrypt  # noqa: E402
 
+from flask.testing import FlaskClient  # noqa: E402
+
+
+class ClienteConCsrf(FlaskClient):
+    """Como el navegador con Frontend/js/csrf.js: si hay sesión, cada petición
+    que cambia datos lleva el token CSRF de la sesión en X-CSRF-Token, salvo que
+    la prueba fije la cabecera o desactive el envío con `csrf_auto = False`."""
+    csrf_auto = True
+
+    def open(self, *args, **kwargs):
+        metodo = (kwargs.get('method') or 'GET').upper()
+        cabeceras = kwargs.get('headers') or {}
+        if (self.csrf_auto and metodo in {'POST', 'PUT', 'PATCH', 'DELETE'}
+                and 'X-CSRF-Token' not in cabeceras and self._cookies):
+            with self.session_transaction() as sesion:
+                token = sesion.get('_csrf_token')
+            if token:
+                kwargs['headers'] = dict(cabeceras, **{'X-CSRF-Token': token})
+        return super().open(*args, **kwargs)
+
+
+flask_app.test_client_class = ClienteConCsrf
+
 # Hash rápido: el costo real (12) solo hace lentas las pruebas
 bcrypt._log_rounds = 4
 

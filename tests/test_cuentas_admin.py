@@ -33,6 +33,12 @@ def enviar(cliente, datos, clave=CLAVE, confirmacion=None, csrf='auto'):
         cabeceras['X-CSRF-Token'] = token(cliente)
     elif csrf is not None:
         cabeceras['X-CSRF-Token'] = csrf
+    else:
+        cliente.csrf_auto = False      # sin cabecera: ni la automática de conftest
+        try:
+            return cliente.post(URL, json=cuerpo)
+        finally:
+            cliente.csrf_auto = True
     return cliente.post(URL, json=cuerpo, headers=cabeceras)
 
 

@@ -6,7 +6,7 @@ from Models.models import Usuario, Alumno, Empresa, Auditoria
 from Database.database import db
 from sqlalchemy import func
 from extensions import limiter
-from csrf import nuevo_token_csrf
+from csrf import nuevo_token_csrf, token_csrf
 
 bcrypt = Bcrypt()
 auth_bp = Blueprint('auth', __name__)
@@ -159,6 +159,18 @@ def usuario_actual():
         } if alumno else None
     }), 200
 
+
+
+# =========================================================================
+# TOKEN CSRF (lo usa Frontend/js/csrf.js en cada POST)
+# =========================================================================
+
+@auth_bp.route('/api/csrf-token', methods=['GET'])
+def csrf_token():
+    if 'usuario_id' not in session:
+        return jsonify({'error': 'No has iniciado sesión'}), 401
+    # Cache-Control: no-store lo agrega set_security_headers (app.py)
+    return jsonify({'csrf_token': token_csrf()})
 
 
 # =========================================================================

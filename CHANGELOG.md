@@ -4,6 +4,17 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Protección CSRF en todos los formularios (2026-11-12)
+
+#### Seguridad
+- **Validación central de CSRF:** toda petición POST, PUT, PATCH o DELETE con sesión debe traer en la cabecera `X-CSRF-Token` el token de su sesión; si falta o no coincide, responde 403 con «La sesión del formulario expiró. Recarga la página e intenta de nuevo.» y lo registra en el log. Cubre las 13 acciones con sesión (cerrar sesión, cambiar contraseña, enviar y responder sugerencias, crear cuentas, postularse, «Recibido» y comentario de postulaciones, publicar, editar y dar de baja vacantes, inscribirse a eventos y marcar inscripciones OK) y cualquier POST que se agregue después. Exentos: `/login` y `/registro`, porque antes de iniciar sesión no hay token. — `app.py`
+- **Nuevo `GET /api/csrf-token`:** devuelve el token de la sesión (lo crea si una sesión antigua no lo tiene); sin sesión, 401. Se permite durante el primer inicio de sesión. — `Controllers/authController.py`, `app.py`
+- **Nuevo `js/csrf.js`:** agrega la cabecera `X-CSRF-Token` a toda petición POST, PUT, PATCH o DELETE al propio sitio; pide el token una sola vez y respeta el que ya envía una página. Se carga antes que los demás scripts en las 15 páginas con sesión. — `Frontend/js/csrf.js`, `Frontend/index.html`, `Frontend/horario.html`, `Frontend/maestros.html`, `Frontend/buzon.html`, `Frontend/sugerencias.html`, `Frontend/soporte.html`, `Frontend/panel-admin.html`, `Frontend/vacantes-publicadas.html`, `Frontend/cargar-vacantes.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/sugerencias-admin.html`, `Frontend/inscripciones-eventos.html`, `Frontend/nueva-cuenta.html`, `Frontend/inscripcion.html`, `Frontend/cambiar-password.html`
+
+#### Pruebas
+- Cada ruta POST con sesión rechaza peticiones sin token, con token vacío, falso o de otra sesión; con token válido funciona; login sin token; sin sesión sigue respondiendo 401; endpoint del token; sesión antigua sin token; primer inicio; `csrf.js` cargado primero en las 15 páginas. — `tests/test_csrf.py`
+- El cliente de pruebas envía el token de su sesión automáticamente, como el navegador con `csrf.js`. — `tests/conftest.py`, `tests/test_cuentas_admin.py`
+
 ### «Cambiar contraseña» en el menú de perfil (2026-11-12)
 
 #### Agregado
