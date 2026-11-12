@@ -5,6 +5,80 @@ document.addEventListener('DOMContentLoaded', async () => {
   const filtro = document.getElementById('filtroVacante');
   let postulaciones = [];
 
+  const leerJson = async response => {
+    try { return await response.json(); } catch { return {}; }
+  };
+  const enviarJson = async (url, cuerpo) => {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(cuerpo || {})
+    });
+    if (response.status === 401) { window.location.href = '/login'; throw new Error('Tu sesión terminó.'); }
+    const datos = await leerJson(response);
+    if (!response.ok || !datos.ok) throw new Error(datos.mensaje || 'No fue posible guardar.');
+    return datos.postulacion;
+  };
+  // Copia el seguimiento devuelto por el servidor y vuelve a pintar la lista
+  const actualizar = (p, seguimiento) => {
+    Object.assign(p, {
+      estado: seguimiento.estado, revisada_en: seguimiento.revisada_en,
+      comentario: seguimiento.comentario, comentario_en: seguimiento.comentario_en,
+    });
+    render();
+  };
+
+  // --- Cuadro de comentario ----------------------------------------------
+  const dialogo = document.getElementById('dialogoComentario');
+  const formComentario = document.getElementById('formComentario');
+  const texto = document.getElementById('comentarioTexto');
+  const resultado = document.getElementById('comentarioResultado');
+  const mensajeComentario = document.getElementById('mensajeComentario');
+  const botonEnviar = document.getElementById('enviarComentario');
+  let actual = null;
+
+  function abrirComentario(p) {
+    actual = p;
+    document.getElementById('comentarioCandidato').textContent = `${p.alumno} · ${p.vacante_titulo}`;
+    texto.value = p.comentario || '';
+    resultado.value = (p.estado === 'Aceptada' || p.estado === 'Rechazada') ? p.estado : '';
+    mensajeComentario.hidden = true;
+    botonEnviar.disabled = false;
+    dialogo.showModal();
+    texto.focus();
+  }
+  const cerrarComentario = () => dialogo.close();
+  document.getElementById('cerrarComentario').addEventListener('click', cerrarComentario);
+  document.getElementById('cancelarComentario').addEventListener('click', cerrarComentario);
+  dialogo.addEventListener('click', evento => { if (evento.target === dialogo) cerrarComentario(); });
+
+  formComentario.addEventListener('submit', async evento => {
+    evento.preventDefault();
+    if (!actual) return;
+    const comentario = texto.value.trim();
+    if (!comentario) {
+      mensajeComentario.textContent = 'Escribe un comentario para el alumno.';
+      mensajeComentario.className = 'mensaje-postulacion error';
+      mensajeComentario.hidden = false;
+      return;
+    }
+    botonEnviar.disabled = true;
+    mensajeComentario.hidden = true;
+    try {
+      const seguimiento = await enviarJson(
+        `/api/postulaciones/${encodeURIComponent(actual.id)}/comentario`,
+        { comentario, resultado: resultado.value });
+      actualizar(actual, seguimiento);
+      cerrarComentario();
+    } catch (error) {
+      mensajeComentario.textContent = error.message;
+      mensajeComentario.className = 'mensaje-postulacion error';
+      mensajeComentario.hidden = false;
+      botonEnviar.disabled = false;
+    }
+  });
+
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -50,7 +124,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cv = el('a', 'btn-empleo-primary btn-descargar-cv', `Descargar CV (${formatSize(p.cv_tamano_bytes)})`);
     cv.href = `/api/postulaciones/${encodeURIComponent(p.id)}/cv`;
     cv.setAttribute('download', '');
-    card.appendChild(cv);
+
+    // «Recibido»: avisa al alumno y abre el cuadro de comentario
+    const acciones = el('div', 'postulacion-acciones');
+    const recibido = el('button', 'btn-empleo-outline btn-recibido',
+      p.revisada_en ? (p.comentario ? 'Editar comentario' : 'Comentar') : 'Recibido');
+    recibido.type = 'button';
+    recibido.addEventListener('click', async () => {
+      if (p.revisada_en) { abrirComentario(p); return; }
+      recibido.disabled = true;
+      try {
+        actualizar(p, await enviarJson(`/api/postulaciones/${encodeURIComponent(p.id)}/recibido`));
+        abrirComentario(p);
+      } catch (error) {
+        alert(error.message);
+        recibido.disabled = false;
+      }
+    });
+    acciones.append(cv, recibido);
+    card.appendChild(acciones);
+
+    if (p.revisada_en) {
+      card.appendChild(el('p', 'vacante-fecha', `✓ Marcada como recibida el ${formatDate(p.revisada_en)}`));
+    }
+    if (p.comentario) {
+      const caja = el('div', 'seguimiento-comentario');
+      caja.append(el('strong', '', 'Tu comentario'), el('p', '', p.comentario));
+      card.appendChild(caja);
+    }
 
     card.appendChild(el('p', 'vacante-fecha', `Recibida el ${formatDate(p.recibida_en)} · Folio #${p.id}`));
     return card;

@@ -1,6 +1,6 @@
 # Esquema de la base de datos SIUT (Neon / PostgreSQL 18)
 
-Generado el 2026-11-08 (actualizado tras la migración del CV) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
+Generado el 2026-11-08 (actualizado tras la migración del CV y, el 2026-11-12, con `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql`) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
 
 - 20 tablas en el esquema `public` (18 de la app, `siut_control_admin` de control y `playing_with_neon`, tabla de ejemplo de Neon).
 - Todos los `id` son `bigint GENERATED ALWAYS AS IDENTITY` (salvo `postulacion_cv`, cuya llave es la de su postulación).
@@ -116,6 +116,9 @@ erDiagram
         bigint usuario_id FK
         bigint evento_id FK
         varchar estado "Inscrito|Asistió|Cancelado"
+        varchar nombre
+        varchar correo
+        boolean confirmada "marca OK del administrador"
     }
     vacantes {
         bigint id PK
@@ -139,6 +142,8 @@ erDiagram
         varchar cv_nombre
         bigint cv_tamano_bytes "máx. 5 MB"
         varchar estado "Recibida|En revisión|Aceptada|Rechazada"
+        timestamptz revisada_en "botón Recibido"
+        varchar comentario_empresa
     }
     postulacion_cv {
         bigint postulacion_id PK,FK
@@ -421,9 +426,17 @@ erDiagram
 | `evento_id` | bigint | no |  |
 | `estado` | varchar(20) | no | `'Inscrito'` |
 | `registrado_en` | timestamptz | no | `now()` |
+| `nombre` | varchar(150) | sí |  |
+| `correo` | varchar(254) | sí |  |
+| `confirmada` | boolean | no | `false` |
+| `confirmada_por` | bigint | sí |  |
+| `confirmada_en` | timestamptz | sí |  |
+
+`nombre` y `correo` son los que escribe el alumno al inscribirse; `confirmada` es la marca «OK» del administrador.
 
 **Restricciones e índices:**
 
+- FK `usuario_evento_confirmada_por_fkey`: `FOREIGN KEY (confirmada_por) REFERENCES usuarios(id) ON DELETE RESTRICT`
 - CHECK `chk_estado_evento`: `CHECK (((estado) = ANY ((ARRAY['Inscrito', 'Asistió', 'Cancelado']))))`
 - FK `usuario_evento_evento_id_fkey`: `FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE RESTRICT`
 - FK `usuario_evento_usuario_id_fkey`: `FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
@@ -482,9 +495,16 @@ erDiagram
 | `estado` | varchar(20) | no | `'Recibida'` |
 | `creado_en` | timestamptz | no | `now()` |
 | `modificado_en` | timestamptz | no | `now()` |
+| `revisada_en` | timestamptz | sí |  |
+| `revisada_por` | bigint | sí |  |
+| `comentario_empresa` | varchar(1500) | sí |  |
+| `comentario_en` | timestamptz | sí |  |
+
+`revisada_en` se llena con el botón «Recibido» de la empresa (el estado pasa de `Recibida` a `En revisión`); `comentario_empresa` es el comentario que ve el alumno.
 
 **Restricciones e índices:**
 
+- FK `postulaciones_revisada_por_fkey`: `FOREIGN KEY (revisada_por) REFERENCES usuarios(id) ON DELETE RESTRICT`
 - CHECK `chk_cv_tamano`: `CHECK (((cv_tamano_bytes > 0) AND (cv_tamano_bytes <= 5242880)))`
 - CHECK `chk_postulacion_estado`: `CHECK (((estado) = ANY ((ARRAY['Recibida', 'En revisión', 'Aceptada', 'Rechazada']))))`
 - CHECK `chk_postulacion_pdf`: `CHECK (((cv_content_type) = 'application/pdf'))`

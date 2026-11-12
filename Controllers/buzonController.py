@@ -111,6 +111,33 @@ def guardar_sugerencia():
 
 
 # =========================================================================
+# MIS NOTIFICACIONES (cada usuario ve solo las sugerencias que envió)
+# =========================================================================
+@buzon_bp.route('/api/mis-sugerencias', methods=['GET'])
+def mis_sugerencias():
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
+
+    filas = (db.session.query(Sugerencia, CategoriaSugerencia.nombre)
+             .join(CategoriaSugerencia, Sugerencia.categoria_id == CategoriaSugerencia.id)
+             .filter(Sugerencia.usuario_id == usuario_id, Sugerencia.activo.is_(True))
+             .order_by(Sugerencia.creado_en.desc(), Sugerencia.id.desc())
+             .all())
+
+    # No se devuelve quién la atendió: solo el estado y la respuesta
+    return jsonify({'ok': True, 'sugerencias': [{
+        'id': s.id,
+        'categoria': categoria,
+        'descripcion': s.descripcion,
+        'estado': s.estado,
+        'respuesta': s.respuesta_admin,
+        'enviada_en': _iso(s.creado_en),
+        'atendida_en': _iso(s.fecha_atencion),
+    } for s, categoria in filas]}), 200
+
+
+# =========================================================================
 # BANDEJA DE SUGERENCIAS (solo Administrador)
 # =========================================================================
 def _serializar_sugerencia(sugerencia, categoria, atendio):

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscripciones a eventos | SIUT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="Logo UTSC"></div>
+    <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuPrincipal">&#9776;</button>
+    <nav id="menuPrincipal" aria-label="Gestión">
+      <a href="panel-admin.html" data-solo-admin hidden>Panel</a>
+      <a href="vacantes-publicadas.html">Vacantes publicadas</a>
+      <a href="cargar-vacantes.html">Cargar vacante</a>
+      <a href="postulaciones-recibidas.html">Postulaciones</a>
+      <a href="sugerencias-admin.html" data-solo-admin hidden>Sugerencias</a>
+      <a class="activo" href="inscripciones-eventos.html" aria-current="page" data-solo-admin hidden>Inscripciones a eventos</a>
+      <a href="nueva-cuenta.html" data-solo-admin hidden>Nueva cuenta</a>
+    </nav>
+    <div class="perfil">
+      <img src="img/usuario.png" alt="Usuario">
+      <div class="perfil-info">
+        <span id="nombreAlumno">Nombre del Alumno</span>
+        <button id="cerrarSesion" class="btn-logout" type="button">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="empleos-page">
+    <section class="empleos-hero">
+      <div>
+        <p class="empleos-eyebrow">EVENTOS UTSC</p>
+        <h1>Inscripciones a eventos</h1>
+        <p>Personas que se inscribieron a los eventos (Hackathon, UT Canta, Club Música, etc.). Márcalas como «OK» cuando las hayas revisado.</p>
+      </div>
+    </section>
+
+    <section class="empleos-search-panel" aria-label="Filtrar inscripciones">
+      <div class="empleos-filtros">
+        <label>Evento
+          <select id="filtroEvento"><option value="">Todos los eventos</option></select>
+        </label>
+        <label>Estado
+          <select id="filtroConfirmada">
+            <option value="">Todas</option>
+            <option value="pendientes">Por revisar</option>
+            <option value="ok">Marcadas como OK</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <div class="empleos-list-heading">
+      <div><h2>Inscritos</h2><p id="contadorInscripciones">Cargando…</p></div>
+    </div>
+
+    <section id="listaInscripciones" class="empleos-grid" aria-live="polite"></section>
+    <p id="sinInscripciones" class="sin-resultados" hidden>Aún no hay inscripciones.</p>
+  </main>
+
+  <script src="js/gestion.js"></script>
+  <script src="js/inscripciones-eventos.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

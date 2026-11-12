@@ -8,10 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const count = document.getElementById('contadorVacantes');
   const empty = document.getElementById('sinResultados');
   const favoritesButton = document.getElementById('btnVerFavoritos');
+  const appliedButton = document.getElementById('btnVerPostuladas');
   const favorites = new Set();
+  // Postulaciones del alumno, por id de vacante (vienen de /api/mis-postulaciones)
+  const applied = new Map();
   let favoritesOnly = false;
+  let appliedOnly = false;
   let selectedCard = null;
   let perfil = null; // datos de /usuario-actual
+  const el = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  };
+  const formatDate = iso => {
+    const date = new Date(iso);
+    if (!iso || isNaN(date)) return '';
+    return date.toLocaleString('es-MX', {
+      timeZone: 'America/Monterrey', day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  };
   const normalize = value => (value || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
   // ---------------------------------------------------------------------
@@ -27,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         && (!filters[1].value || card.dataset.modalidad === filters[1].value)
         && (!filters[2].value || card.dataset.ubicacion === filters[2].value)
         && (!filters[3].value || card.dataset.experiencia === filters[3].value)
-        && (!favoritesOnly || favorites.has(card.dataset.id));
+        && (!favoritesOnly || favorites.has(card.dataset.id))
+        && (!appliedOnly || applied.has(card.dataset.id));
       card.hidden = !matches;
       if (matches) visible++;
     });
@@ -38,11 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
   search.addEventListener('input', filterCards);
   document.getElementById('btnBuscarEmpleo').addEventListener('click', filterCards);
   filters.forEach(filter => filter.addEventListener('change', filterCards));
-  favoritesButton.addEventListener('click', () => {
-    favoritesOnly = !favoritesOnly;
+  // «Mis favoritos» y «Mis vacantes postuladas» son excluyentes
+  function updateListButtons() {
     favoritesButton.setAttribute('aria-pressed', String(favoritesOnly));
     favoritesButton.textContent = favoritesOnly ? 'Ver todas las vacantes' : '♡ Mis favoritos';
+    appliedButton.setAttribute('aria-pressed', String(appliedOnly));
+    appliedButton.textContent = appliedOnly ? 'Ver todas las vacantes' : '✓ Mis vacantes postuladas';
     filterCards();
+  }
+  favoritesButton.addEventListener('click', () => {
+    favoritesOnly = !favoritesOnly;
+    if (favoritesOnly) appliedOnly = false;
+    updateListButtons();
+  });
+  appliedButton.addEventListener('click', () => {
+    appliedOnly = !appliedOnly;
+    if (appliedOnly) favoritesOnly = false;
+    updateListButtons();
   });
 
   // Delegación de eventos: las tarjetas se crean dinámicamente
@@ -80,7 +111,42 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('detalleDescripcion').textContent = card.dataset.descripcion;
     document.getElementById('detalleRequisitos').textContent = card.dataset.requisitos;
     document.getElementById('detalleJornada').textContent = card.dataset.jornada;
+    showFollowUp(card);
     dialog.showModal();
+  }
+
+  // Seguimiento de la postulación dentro del detalle de la vacante
+  const followUpBox = document.getElementById('detalleSeguimiento');
+  const applyButton = document.getElementById('btnPostularme');
+  const applyNote = document.getElementById('detalleNotaPostular');
+  function showFollowUp(card) {
+    const p = applied.get(card.dataset.id);
+    applyButton.hidden = Boolean(p);
+    applyNote.hidden = Boolean(p);
+    followUpBox.hidden = !p;
+    if (!p) { followUpBox.replaceChildren(); return; }
+
+    const empresa = p.empresa || card.dataset.empresa;
+    const parts = [el('p', 'seguimiento-titulo', '✓ Ya te postulaste a esta vacante')];
+    if (p.enviada_en) parts.push(el('p', 'seguimiento-fecha', `Enviada el ${formatDate(p.enviada_en)}`));
+    if (p.revisada_en) {
+      const aviso = el('p', 'seguimiento-aviso');
+      aviso.append('La empresa ', el('strong', '', empresa),
+        ' ha recibido tu información y la está revisando, en breve nos comunicaremos contigo.');
+      parts.push(aviso);
+    } else {
+      parts.push(el('p', 'seguimiento-aviso', 'Tu postulación fue enviada. Te avisaremos aquí cuando la empresa la reciba.'));
+    }
+    if (p.estado === 'Aceptada' || p.estado === 'Rechazada') {
+      parts.push(el('p', `seguimiento-resultado resultado-${p.estado.toLowerCase()}`, `Resultado: ${p.estado}`));
+    }
+    if (p.comentario) {
+      const box = el('div', 'seguimiento-comentario');
+      box.append(el('strong', '', `Comentario de ${empresa}`), el('p', '', p.comentario));
+      if (p.comentario_en) box.appendChild(el('small', '', formatDate(p.comentario_en)));
+      parts.push(box);
+    }
+    followUpBox.replaceChildren(...parts);
   }
   document.getElementById('cerrarDetalle').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
@@ -179,6 +245,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       enviado = true;
       showMessage(`¡Listo! Tu postulación quedó registrada con el folio #${result.id}.`, 'exito');
+      const appliedCard = selectedCard;
+      applied.set(appliedCard.dataset.id, {
+        id: result.id, vacante_id: Number(appliedCard.dataset.id), empresa: appliedCard.dataset.empresa,
+        estado: 'Recibida', enviada_en: new Date().toISOString(),
+      });
+      markApplied(appliedCard);
+      showFollowUp(appliedCard);
+      filterCards();
       submitButton.textContent = 'Postulación enviada ✓';
       form.reset();
       setTimeout(() => { closeForm(); dialog.close(); resetSubmit(); }, 1800);
@@ -198,12 +272,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!parts.length) return '··';
     return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
   };
-  const el = (tag, className, text) => {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  };
+  // Marca «✓ Postulado» en la tarjeta de una vacante a la que ya se postuló
+  function markApplied(card) {
+    if (!applied.has(card.dataset.id) || card.querySelector('.badge-postulado')) return;
+    card.classList.add('vacante-postulada');
+    card.querySelector('.vacante-card-top').insertBefore(
+      el('span', 'badge-postulado', '✓ Postulado'),
+      card.querySelector('.btn-favorito'));
+  }
 
   function buildCard(v) {
     const card = el('article', 'vacante-card');
@@ -246,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await readJson(response);
       if (!response.ok || !result.ok || !Array.isArray(result.vacantes)) throw new Error(result.mensaje || 'Error');
       result.vacantes.forEach(v => list.appendChild(buildCard(v)));
+      getCards().forEach(markApplied);
       filterCards();
     } catch (error) {
       count.textContent = 'No se pudieron cargar las vacantes';
@@ -263,6 +340,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Postulaciones del alumno: marca las tarjetas y alimenta el seguimiento
+  async function loadApplications() {
+    try {
+      const response = await fetch('/api/mis-postulaciones', { credentials: 'same-origin' });
+      const result = await readJson(response);
+      if (!response.ok || !result.ok || !Array.isArray(result.postulaciones)) return;
+      result.postulaciones.forEach(p => applied.set(String(p.vacante_id), p));
+      getCards().forEach(markApplied);
+      filterCards();
+    } catch {
+      // Sin esta información el alumno puede seguir viendo vacantes
+    }
+  }
+
   loadProfile();
+  loadApplications();
   loadVacancies();
 });

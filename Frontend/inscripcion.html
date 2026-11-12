@@ -57,7 +57,7 @@
             color: #333;
         }
 
-        input {
+        input, select {
             width: 100%;
             border: none;
             border-bottom: 1px solid #555;
@@ -81,6 +81,19 @@
             margin-top: 10px;
         }
 
+        select { cursor: pointer; }
+        .mensaje {
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fff0ed;
+            color: #a13725;
+        }
+        button:disabled {
+            opacity: .6;
+            cursor: default;
+        }
         button:hover {
             background-color: #e09400;
         }
@@ -102,18 +115,19 @@
         <h1>Inscríbete Ahora</h1>
         <p class="subtitle">Completa el formulario</p>
 
-        <!-- Formulario estático: no guarda datos. Los campos no llevan 'name'
-             para que el nombre y el correo no viajen en la URL (GET) ni queden
-             en los logs del servidor; se siguen validando como obligatorios. -->
-        <form action="confirmacion.html" method="get">
+        <form id="formInscripcion" novalidate>
+            <label for="inscripcionEvento">Evento</label>
+            <select id="inscripcionEvento" required>
+                <option value="">Cargando eventos…</option>
+            </select>
             <label for="inscripcionNombre">Nombre completo</label>
-            <input type="text" id="inscripcionNombre" placeholder="Ingresa tu nombre" autocomplete="name" required>
-
+            <input type="text" id="inscripcionNombre" maxlength="150" placeholder="Ingresa tu nombre" autocomplete="name" required>
             <label for="inscripcionCorreo">Correo electrónico</label>
-            <input type="email" id="inscripcionCorreo" placeholder="Ingresa tu correo" autocomplete="email" required>
-
-            <button type="submit">Enviar</button>
+            <input type="email" id="inscripcionCorreo" maxlength="254" placeholder="Ingresa tu correo" autocomplete="email" required>
+            <p id="mensajeInscripcion" class="mensaje" role="status" hidden></p>
+            <button type="submit" id="enviarInscripcion">Enviar</button>
         </form>
     </div>
+    <script src="js/inscripcion.js"></script>
 </body>
 </html>

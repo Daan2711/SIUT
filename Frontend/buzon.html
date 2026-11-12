@@ -54,7 +54,10 @@
 
     <div class="empleos-list-heading">
       <div><h2>Vacantes disponibles</h2><p id="contadorVacantes">Cargando vacantes…</p></div>
-      <button id="btnVerFavoritos" class="btn-empleo-outline" type="button" aria-pressed="false">♡ Mis favoritos</button>
+      <div class="empleos-list-botones">
+        <button id="btnVerFavoritos" class="btn-empleo-outline" type="button" aria-pressed="false">♡ Mis favoritos</button>
+        <button id="btnVerPostuladas" class="btn-empleo-outline" type="button" aria-pressed="false">✓ Mis vacantes postuladas</button>
+      </div>
     </div>
 
     <section id="listaVacantes" class="empleos-grid" aria-live="polite">
@@ -65,9 +68,10 @@
   <dialog id="detalleVacante" class="detalle-vacante-dialog">
     <button id="cerrarDetalle" class="cerrar-dialogo" type="button" aria-label="Cerrar detalle">×</button>
     <p id="detalleArea" class="vacante-area"></p><h2 id="detalleTitulo"></h2><p id="detalleEmpresa" class="vacante-empresa"></p><p id="detalleUbicacion"></p><div class="vacante-tags" id="detalleTags"></div>
+    <div id="detalleSeguimiento" class="seguimiento-postulacion" role="status" hidden></div>
     <h3>Descripción del puesto</h3><p id="detalleDescripcion"></p><h3>Requisitos y habilidades</h3><p id="detalleRequisitos"></p><h3>Tipo de jornada</h3><p id="detalleJornada"></p>
     <button id="btnPostularme" class="btn-empleo-primary btn-postular" type="button">Continuar con mi postulación →</button>
-    <p class="nota-demo">Adjunta tu CV en PDF para registrar tu postulación dentro del portal SIUT.</p>
+    <p id="detalleNotaPostular" class="nota-demo">Adjunta tu CV en PDF para registrar tu postulación dentro del portal SIUT.</p>
   </dialog>
   <dialog id="formularioPostulacion" class="postulacion-dialog">
     <button id="cerrarFormulario" class="cerrar-dialogo" type="button" aria-label="Cerrar formulario">×</button>
