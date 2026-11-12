@@ -4,6 +4,21 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### «Cambiar contraseña» en el menú de perfil (2026-11-12)
+
+#### Agregado
+- **Opción «Cambiar contraseña» en el menú de perfil** de las 13 páginas con sesión, con ícono de candado, arriba de «Cerrar sesión» (que sigue en rojo; la nueva opción tiene color neutro). — `Frontend/index.html`, `Frontend/horario.html`, `Frontend/maestros.html`, `Frontend/buzon.html`, `Frontend/sugerencias.html`, `Frontend/soporte.html`, `Frontend/panel-admin.html`, `Frontend/vacantes-publicadas.html`, `Frontend/cargar-vacantes.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/sugerencias-admin.html`, `Frontend/inscripciones-eventos.html`, `Frontend/nueva-cuenta.html`, `Frontend/css/style.css`, `Frontend/img/iconos/candado.svg`
+- **Cambio voluntario de contraseña:** si la cuenta ya no está en su primer inicio de sesión, `POST /cambiar-password` exige `password_actual` y responde 400 si falta o no coincide. La nueva debe ser distinta de la actual y tener al menos 8 caracteres. La sesión sigue abierta y se audita como «Cambio de contraseña voluntario». El primer inicio de sesión funciona igual que antes. — `Controllers/authController.py`
+- **Página `/cambiar-password` en dos modos:** en el cambio voluntario muestra «Cambiar contraseña», el campo «Contraseña actual» (con el botón para mostrarla) y un enlace «Volver sin cambiar»; al guardar regresa a Inicio. — `Frontend/cambiar-password.html`, `Frontend/js/cambiar-password.js`, `Frontend/css/style.css`
+
+#### Seguridad
+- Límite de 5 intentos por minuto por usuario en `POST /cambiar-password`, para que no se pueda adivinar la contraseña actual desde una sesión abierta. — `Controllers/authController.py`
+- `/cambiar-password` y `/cambiar-password.html` sin sesión redirigen a `/login`. — `app.py`
+
+#### Pruebas
+- Cambio voluntario correcto y auditado; contraseña actual faltante, vacía, no textual o incorrecta; no repetir la actual; primer inicio sin contraseña actual; límite de intentos; redirección sin sesión; opción en el menú de las 13 páginas; ícono. — `tests/test_cambiar_password_perfil.py`, `tests/test_seguridad.py`
+- Fuera del alcance: cambiar la contraseña no cierra las sesiones abiertas en otros dispositivos (las sesiones viven en la cookie firmada).
+
 ### Rediseño del menú superior para todos los roles (2026-11-12)
 
 #### Cambiado

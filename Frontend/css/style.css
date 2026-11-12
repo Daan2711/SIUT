@@ -794,6 +794,7 @@ body{
 [data-icono="sugerencias"]{--icono:url(../img/iconos/sugerencias.svg)}
 [data-icono="eventos"]{--icono:url(../img/iconos/eventos.svg)}
 [data-icono="salir"]{--icono:url(../img/iconos/salir.svg)}
+[data-icono="candado"]{--icono:url(../img/iconos/candado.svg)}
 
 /* Submenús del administrador */
 .nav-grupo{position:relative}
@@ -827,6 +828,9 @@ body[data-rol="administrador"] [data-solo-empresa]{display:none !important}
 .perfil-menu-cabecera span{font-size:12px;color:#6d7d7a}
 .perfil-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:0;border-radius:10px;background:transparent;font:inherit;font-size:14px;font-weight:600;color:#a13725;cursor:pointer;text-align:left}
 .perfil-menu-item:hover{background:#fff0ed}
+.perfil-menu-item{text-decoration:none}
+.perfil-menu-item--neutro{color:var(--enc-texto)}
+.perfil-menu-item--neutro:hover{background:#f1f7f6;color:var(--enc-verde-osc)}
 .perfil-menu-item:disabled{opacity:.6;cursor:default}
 @keyframes encAparece{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
@@ -872,3 +876,8 @@ body[data-rol="administrador"] [data-solo-empresa]{display:none !important}
 @media (prefers-reduced-motion:reduce){
   .encabezado *,.nav-principal{transition:none !important;animation:none !important}
 }
+
+/* Página de cambio de contraseña */
+.cambio-texto{font-size:.85rem;color:#666;text-align:center;margin-bottom:1rem}
+.cambio-volver{display:block;margin-top:1rem;text-align:center;font-size:.9rem;color:#0b9282;font-weight:600;text-decoration:none}
+.cambio-volver:hover{text-decoration:underline}
