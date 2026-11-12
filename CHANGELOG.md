@@ -4,6 +4,15 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Ícono del sitio (favicon) (2026-11-12)
+
+#### Agregado
+- **Favicon con el escudo de la UTSC** (león blanco sobre escudo naranja, recortado de `img/logo.png` con fondo transparente): `favicon.ico` con 16, 32 y 48 px (el navegador lo pide solo en `/favicon.ico`, que antes respondía 404), `favicon-32.png` para navegadores modernos y `apple-touch-icon.png` de 180 px con fondo blanco para la pantalla de inicio del celular. — `Frontend/favicon.ico`, `Frontend/img/favicon-32.png`, `Frontend/img/apple-touch-icon.png`
+- Enlaces `<link rel="icon">` y `<link rel="apple-touch-icon">` en el `<head>` de las 18 páginas. — `Frontend/buzon.html`, `Frontend/cambiar-password.html`, `Frontend/cargar-vacantes.html`, `Frontend/confirmacion.html`, `Frontend/confirmacion_inscripciones.html`, `Frontend/horario.html`, `Frontend/index.html`, `Frontend/inscripcion.html`, `Frontend/inscripciones-eventos.html`, `Frontend/login.html`, `Frontend/maestros.html`, `Frontend/nueva-cuenta.html`, `Frontend/panel-admin.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/soporte.html`, `Frontend/sugerencias.html`, `Frontend/sugerencias-admin.html`, `Frontend/vacantes-publicadas.html`
+
+#### Pruebas
+- Íconos servidos sin sesión y durante el primer inicio; las 18 páginas los enlazan. — `tests/test_favicon.py`
+
 ### Protección CSRF en todos los formularios (2026-11-12)
 
 #### Seguridad
