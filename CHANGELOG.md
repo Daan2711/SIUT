@@ -4,6 +4,20 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Script de diagnóstico de la base de datos (2026-11-12)
+
+#### Agregado
+- **`scripts/diagnostico_neon.py`:** diagnóstico general de Neon en solo lectura (`python scripts/diagnostico_neon.py`). Revisa espacio usado frente al límite del plan gratuito, esquema de Neon frente a los modelos, triggers, restricciones e índices, usuarios y perfiles, vacantes, postulaciones y CV, sugerencias, auditoría y secuencias de ids. Basado en el script usado en el diagnóstico del 2026-11-10, actualizado con:
+  - Eventos e inscripciones: conteos, inscripciones repetidas o a eventos/usuarios inexistentes, marcadas OK sin quién o sin fecha, o por alguien que no es Administrador.
+  - Seguimiento de postulaciones: estado fuera de la lista, revisión sin quién o sin fecha, revisada por alguien que no es la empresa dueña ni un Administrador, comentario sin fecha, resultado sin haberse marcado como recibida y vacantes dadas de baja con postulaciones sin revisar (aviso).
+  - Sin fechas ni referencias a PRs fijas: los inicios de sesión dobles se revisan en los últimos 7 días.
+  - La conexión se abre en solo lectura y se verifica antes de consultar; no imprime datos personales. Código de salida 0 sin problemas, 1 con problemas, 2 si no pudo ejecutarse.
+  — `scripts/diagnostico_neon.py`, `README.md`
+- Primera ejecución contra Neon (2026-11-12): sin problemas; 2 avisos ya conocidos (un alumno con el «semestre» antiguo e inicios de sesión dobles anteriores a la corrección del PR #16).
+
+#### Pruebas
+- El script no contiene instrucciones de escritura, abre y verifica la conexión en solo lectura, no consulta columnas con datos personales y sin `DATABASE_URL` se detiene con código 2. — `tests/test_diagnostico.py`
+
 ### Ícono del sitio (favicon) (2026-11-12)
 
 #### Agregado

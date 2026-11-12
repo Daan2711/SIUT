@@ -53,6 +53,7 @@ Controllers/
 Models/models.py        Modelos SQLAlchemy (con las restricciones de Neon)
 Frontend/               Páginas HTML, css/, js/, img/
 migrations/             Cambios de esquema en Neon (con su script para revertir)
+scripts/                Diagnóstico de la base de datos (solo lectura)
 docs/                   Despliegue, esquema de la base de datos, descripción del PR
 tests/                  Pruebas automatizadas
 ```
@@ -98,8 +99,23 @@ python -m pytest
 | `test_restricciones.py` | Restricciones UNIQUE y CHECK de la base de datos |
 | `test_comandos.py` | Comando `flask crear-usuario` |
 | `test_cuentas_admin.py` | Alta de cuentas desde la web: por rol, duplicados, acceso, CSRF, sin administradores |
+| `test_diagnostico.py` | El script de diagnóstico es de solo lectura y no consulta datos personales |
 
 Las fixtures comunes (usuarios por rol, vacante, clientes con sesión) están en `tests/conftest.py`. Cada prueba arranca con la base de datos vacía.
+
+## Diagnóstico de la base de datos
+
+`scripts/diagnostico_neon.py` revisa el estado de la base de datos de Neon **sin modificar nada**:
+
+```bash
+python scripts/diagnostico_neon.py
+```
+
+- **Qué revisa:** espacio usado frente al límite del plan gratuito, esquema de Neon frente a `Models/models.py`, triggers, restricciones e índices, consistencia de usuarios y perfiles, vacantes, postulaciones y CV, sugerencias, eventos e inscripciones, auditoría y secuencias de ids.
+- **Solo lectura:** abre la conexión en modo `readonly`, verifica que lo esté antes de consultar y no contiene instrucciones de escritura (lo comprueba `tests/test_diagnostico.py`).
+- **Sin datos personales:** solo imprime ids, conteos y el resultado de cada comprobación; nunca correos, nombres, contraseñas, hashes ni CV.
+- **Resultado:** cada comprobación sale como `OK`, `AVISO` o `PROBLEMA`, con un resumen al final. Código de salida: `0` sin problemas (puede haber avisos), `1` con problemas, `2` si no pudo ejecutarse (por ejemplo, falta `DATABASE_URL`).
+- Usa el `DATABASE_URL` del `.env`: si apunta a Neon, revisa la base de datos real.
 
 ## Explicación de la arquitectura (para presentar el proyecto)
 
