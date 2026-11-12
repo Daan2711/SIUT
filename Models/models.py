@@ -239,6 +239,10 @@ class Sugerencia(db.Model):
 
 class UsuarioEvento(db.Model):
     __tablename__ = 'usuario_evento'
+    # Una inscripción por usuario y evento (como en Neon)
+    __table_args__ = (
+        db.UniqueConstraint('usuario_id', 'evento_id', name='uq_usuario_evento'),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False)
@@ -249,6 +253,12 @@ class UsuarioEvento(db.Model):
         nullable=False,
         server_default=db.func.now()
     )
+    # migrations/2026-11-12_seguimiento_postulaciones_eventos.sql
+    nombre = db.Column(db.String(150), nullable=True)
+    correo = db.Column(db.String(254), nullable=True)
+    confirmada = db.Column(db.Boolean, nullable=False, server_default=db.text('false'))
+    confirmada_por = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=True)
+    confirmada_en = db.Column(db.DateTime(timezone=True), nullable=True)
 
 
 class Auditoria(db.Model):
@@ -330,6 +340,11 @@ class Postulacion(db.Model):
     cv_content_type = db.Column(db.String, nullable=False)
     cv_tamano_bytes = db.Column(db.BigInteger, nullable=False)
     estado = db.Column(db.String, nullable=False, server_default=db.text("'Recibida'"))
+    # migrations/2026-11-12_seguimiento_postulaciones_eventos.sql
+    revisada_en = db.Column(db.DateTime(timezone=True), nullable=True)
+    revisada_por = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=True)
+    comentario_empresa = db.Column(db.String(1500), nullable=True)
+    comentario_en = db.Column(db.DateTime(timezone=True), nullable=True)
     creado_en = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
     modificado_en = db.Column(
         db.DateTime(timezone=True),

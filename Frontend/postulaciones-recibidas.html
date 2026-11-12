@@ -16,6 +16,7 @@
       <a href="cargar-vacantes.html">Cargar vacante</a>
       <a class="activo" href="postulaciones-recibidas.html" aria-current="page">Postulaciones</a>
       <a href="sugerencias-admin.html" data-solo-admin hidden>Sugerencias</a>
+      <a href="inscripciones-eventos.html" data-solo-admin hidden>Inscripciones a eventos</a>
       <a href="nueva-cuenta.html" data-solo-admin hidden>Nueva cuenta</a>
     </nav>
     <div class="perfil">
@@ -32,7 +33,7 @@
       <div>
         <p class="empleos-eyebrow">SEGUIMIENTO DE CANDIDATOS</p>
         <h1>Postulaciones recibidas</h1>
-        <p>Alumnos que se postularon a las vacantes de tu empresa (o a todas, si eres administrador). Descarga su CV para revisarlo.</p>
+        <p>Alumnos que se postularon a las vacantes de tu empresa (o a todas, si eres administrador). Descarga su CV, márcalo como «Recibido» y déjale un comentario.</p>
       </div>
     </section>
 
@@ -56,6 +57,35 @@
       <a class="btn-empleo-primary btn-volver" href="cargar-vacantes.html">Cargar nueva vacante</a>
     </div>
   </main>
+
+  <dialog id="dialogoComentario" class="postulacion-dialog comentario-dialog" aria-labelledby="tituloComentario">
+    <button id="cerrarComentario" class="cerrar-dialogo" type="button" aria-label="Cerrar">×</button>
+    <div class="formulario-encabezado">
+      <p class="empleos-eyebrow">POSTULACIÓN RECIBIDA</p>
+      <h2 id="tituloComentario">Comentario para el alumno</h2>
+      <p id="comentarioCandidato"></p>
+    </div>
+    <form id="formComentario" novalidate>
+      <p class="form-privacidad">El alumno ya ve el aviso de que su información fue recibida y está en revisión. Si quieres, déjale un comentario.</p>
+      <label>Resultado <span class="opcional">Opcional</span>
+        <select id="comentarioResultado">
+          <option value="">Sin resultado (sigue en revisión)</option>
+          <option value="Aceptada">Aceptada</option>
+          <option value="Rechazada">Rechazada</option>
+        </select>
+      </label>
+      <label>Comentario <b>*</b>
+        <textarea id="comentarioTexto" rows="5" maxlength="1500" required
+                  placeholder="Ej. ¡Felicidades! Cumples con todos los requisitos… / Lamentamos informarte que no cumples con los requisitos…"></textarea>
+      </label>
+      <p id="mensajeComentario" class="mensaje-postulacion" role="status" hidden></p>
+      <div class="form-acciones">
+        <button id="cancelarComentario" class="btn-empleo-outline" type="button">Ahora no</button>
+        <button id="enviarComentario" class="btn-empleo-primary" type="submit">Enviar comentario</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="js/gestion.js"></script>
 
   <script src="js/postulaciones-recibidas.js"></script>

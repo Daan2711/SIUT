@@ -147,10 +147,11 @@ def test_archivos_eliminados_ya_no_existen(alumno, pagina):
     assert alumno.get(pagina).status_code == 404
 
 
-# --- Inscripción a eventos (restaurada desde la rama master) ----------------
+# --- Inscripción a eventos ----------------------------------------------------
 def test_eventos_del_inicio_llevan_a_la_inscripcion(alumno):
     texto = alumno.get('/index.html').get_data(as_text=True)
-    assert texto.count('href="inscripcion.html" target="_blank" rel="noopener"') == 3
+    for evento in ('Hackathon', 'UT%20Canta%202026', 'Club%20M%C3%BAsica'):
+        assert f'href="inscripcion.html?evento={evento}" target="_blank" rel="noopener"' in texto
     assert 'href="#"' not in texto
 
 
@@ -161,12 +162,14 @@ def test_paginas_de_inscripcion_exigen_sesion(anon, alumno, pagina):
 
 
 def test_inscripcion_no_envia_datos_personales_en_la_url(alumno):
-    """El formulario es estático y usa GET: sin 'name', nombre y correo no viajan en la URL."""
+    """El formulario se envía con fetch (POST JSON): sin 'action' ni 'name',
+    el nombre y el correo nunca viajan en la URL ni quedan en los logs."""
     texto = alumno.get('/inscripcion.html').get_data(as_text=True)
     formulario = texto[texto.index('<form'):texto.index('</form>')]
-    assert 'action="confirmacion.html"' in formulario
+    assert 'action=' not in formulario
     assert 'name="' not in formulario
-    assert formulario.count('required') == 2
+    assert formulario.count('required') == 3          # evento, nombre y correo
+    assert '<script src="js/inscripcion.js"></script>' in texto
     assert alumno.get('/confirmacion.html').status_code == 200
 
 

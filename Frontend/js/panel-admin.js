@@ -1,5 +1,5 @@
-// Panel de administración: muestra los totales de vacantes, postulaciones y
-// sugerencias pendientes.
+// Panel de administración: muestra los totales de vacantes, postulaciones,
+// sugerencias pendientes e inscripciones a eventos por revisar.
 document.addEventListener('DOMContentLoaded', async () => {
   const aviso = document.getElementById('avisoPanel');
 
@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     leer('/api/vacantes'),
     leer('/api/postulaciones'),
     leer('/api/sugerencias'),
+    leer('/api/inscripciones-eventos'),
   ]);
-  const [vacantes, postulaciones, sugerencias] = resultados;
+  const [vacantes, postulaciones, sugerencias, inscripciones] = resultados;
 
   if (vacantes.status === 'fulfilled') mostrar('totalVacantes', vacantes.value.vacantes.length);
   if (postulaciones.status === 'fulfilled') mostrar('totalPostulaciones', postulaciones.value.postulaciones.length);
@@ -25,6 +26,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const conteo = sugerencias.value.conteo || {};
     mostrar('totalPendientes', (conteo['Recibida'] || 0) + (conteo['En revisión'] || 0));
   }
+
+  if (inscripciones.status === 'fulfilled') mostrar('totalInscripciones', inscripciones.value.pendientes);
 
   if (resultados.some(r => r.status === 'rejected')) {
     aviso.textContent = 'No se pudieron cargar algunos datos. Recarga la página para intentarlo de nuevo.';

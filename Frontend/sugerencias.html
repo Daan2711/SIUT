@@ -64,6 +64,13 @@
             </div>
             <button type="submit" class="btn-enviar">Enviar</button>
         </form>
+
+        <section class="mis-notificaciones" aria-labelledby="tituloNotificaciones">
+            <h2 id="tituloNotificaciones">Mis notificaciones</h2>
+            <p class="notificaciones-ayuda">Aquí ves el estado de las sugerencias que enviaste y la respuesta del administrador.</p>
+            <p id="contadorNotificaciones" class="notificaciones-ayuda">Cargando…</p>
+            <div id="listaNotificaciones" aria-live="polite"></div>
+        </section>
     </main>
 
     <!-- SweetAlert2 desde cdnjs (permitido por la CSP), con SRI verificado -->
@@ -71,6 +78,7 @@
             integrity="sha512-cAiOMQ6IleoiPyH2UGR2k9OCclUh6tFL6RMnFsH26pntGnKyNtjwFpD7CodlP/TvYz+F7vLoBJQmIgSvScdzQA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="js/buzon.js"></script>
+    <script src="js/mis-sugerencias.js"></script>
   <script src="js/nav.js"></script>
 </body>
 </html>

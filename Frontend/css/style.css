@@ -785,3 +785,37 @@ nav a.activo{
 .ver-password:hover{color:#0b9282;background:#0b92820f}
 .ver-password:focus-visible{outline:2px solid #0b9282;outline-offset:1px}
 .ver-password svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== Seguimiento de postulaciones, notificaciones del buzón y eventos (2026-11-12) ===== */
+.empleos-list-botones{display:flex;gap:10px;flex-wrap:wrap}
+.badge-postulado{margin-left:auto;margin-right:10px;background:#e2f5f1;color:#087e72;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+.vacante-card.vacante-postulada{border-color:#a6d5ce}
+.seguimiento-postulacion{margin:18px 0 4px;padding:16px 18px;border-radius:12px;background:#f2faf8;border:1px solid #cfe9e4}
+.seguimiento-postulacion p{margin:0 0 8px}
+.seguimiento-titulo{font-weight:700;color:#087e72}
+.seguimiento-fecha{font-size:13px;color:#75817f}
+.seguimiento-resultado{font-weight:700}
+.seguimiento-resultado.resultado-aceptada{color:#176b48}
+.seguimiento-resultado.resultado-rechazada{color:#a13725}
+.seguimiento-comentario{margin-top:10px;padding:12px 14px;border-radius:10px;background:#fff;border:1px solid #e3ebe9}
+.seguimiento-comentario p{margin:6px 0;white-space:pre-line;line-height:1.5}
+.seguimiento-comentario small{color:#75817f}
+.postulacion-acciones{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn-recibido{font-size:14px;padding:10px 16px}
+.btn-recibido:disabled{opacity:.6;cursor:default}
+#formComentario{padding:18px 34px 26px}
+@media(max-width:600px){#formComentario{padding:10px 18px 22px}}
+.mis-notificaciones{margin-top:40px}
+.mis-notificaciones h2{margin:0 0 6px;color:#243a38}
+.notificaciones-ayuda{color:#61716e;margin:0 0 10px;font-size:14px}
+.notificacion-item{background:#fff;border:1px solid #e7eae9;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.notificacion-encabezado{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.notificacion-descripcion{margin:8px 0;color:#425451;white-space:pre-line}
+.notificacion-item small{color:#75817f}
+.notificacion-estado{border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;background:#eef2f1;color:#425451}
+.notificacion-estado.estado-revision{background:#fff4e5;color:#9a5b00}
+.notificacion-estado.estado-atendida{background:#eaf8f1;color:#176b48}
+.notificacion-estado.estado-rechazada{background:#fff0ed;color:#a13725}
+.notificacion-respuesta{margin-top:10px;padding:10px 12px;border-left:3px solid #0b9282;background:#f2faf8;border-radius:6px}
+.notificacion-respuesta p{margin:6px 0;white-space:pre-line}
+.inscripcion-evento.inscripcion-ok{border-color:#a6d5ce;background:#f7fcfb}

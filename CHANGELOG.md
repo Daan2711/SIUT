@@ -4,6 +4,30 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Seguimiento de postulaciones, notificaciones del buzón e inscripciones a eventos (2026-11-12)
+
+#### Agregado
+- **Botón «Recibido» en las postulaciones (empresa y administrador):** aparece junto a «Descargar CV». Al presionarlo, la postulación pasa de «Recibida» a «En revisión», se registra en la auditoría (una sola vez) y se abre el cuadro de comentario. Después el botón cambia a «Comentar» o «Editar comentario». Una empresa solo puede marcar las postulaciones de sus vacantes. — `Controllers/postulacionesController.py` (`POST /api/postulaciones/<id>/recibido`), `Frontend/postulaciones-recibidas.html`, `Frontend/js/postulaciones-recibidas.js`
+- **Comentario de la empresa para el alumno:** cuadro de texto (máx. 1500 caracteres) con un resultado opcional, «Aceptada» o «Rechazada». Sin resultado, la postulación queda «En revisión». Se registra en la auditoría. — `Controllers/postulacionesController.py` (`POST /api/postulaciones/<id>/comentario`), `Frontend/postulaciones-recibidas.html`, `Frontend/js/postulaciones-recibidas.js`
+- **Seguimiento en «Buscar empleo» (alumno):** el detalle de cada vacante a la que se postuló muestra «La empresa *{nombre}* ha recibido tu información y la está revisando, en breve nos comunicaremos contigo», el resultado (si lo hay) y el comentario de la empresa. Para esas vacantes se oculta «Continuar con mi postulación». — `Controllers/postulacionesController.py` (`GET /api/mis-postulaciones`), `Frontend/buzon.html`, `Frontend/js/empleos.js`
+- **Vacantes postuladas marcadas y botón «Mis vacantes postuladas»:** las tarjetas llevan la etiqueta «✓ Postulado», que se guarda en la base y se conserva entre sesiones. El nuevo botón, junto a «Mis favoritos», filtra solo esas vacantes; ambos botones son excluyentes. Al enviar una postulación, la tarjeta se marca sin recargar la página. — `Frontend/buzon.html`, `Frontend/js/empleos.js`
+- **«Mis notificaciones» en el buzón de sugerencias:** cada usuario ve sus sugerencias con el estado (Recibida, En revisión, Atendida o Rechazada) y la respuesta del administrador. No se muestra qué administrador la atendió. — `Controllers/buzonController.py` (`GET /api/mis-sugerencias`), `Frontend/sugerencias.html`, `Frontend/js/mis-sugerencias.js`
+- **Inscripciones a eventos guardadas en SIUT:** antes, el formulario «Inscríbete aquí» no guardaba nada. Ahora guarda el evento, el nombre y el correo (precargados con los datos de la cuenta y editables) mediante POST JSON, así que nada viaja en la URL. Solo se permite una inscripción por persona en cada evento. Cada tarjeta del inicio abre el formulario con su evento ya elegido. — `Controllers/eventosController.py` (nuevo: `GET /api/eventos`, `POST /api/eventos/<id>/inscripcion`), `Frontend/inscripcion.html`, `Frontend/js/inscripcion.js`, `Frontend/index.html`, `app.py`
+- **Página «Inscripciones a eventos» (solo administrador):** muestra el evento, el nombre, el correo y la fecha de cada inscripción, con filtros por evento y por estado. El botón «Marcar OK» se puede deshacer y queda registrado en la auditoría. — `Controllers/eventosController.py` (`GET /api/inscripciones-eventos`, `POST /api/inscripciones-eventos/<id>/ok`), `Frontend/inscripciones-eventos.html`, `Frontend/js/inscripciones-eventos.js`, `app.py`
+- **Atajo «EVENTOS» en el panel de administración** con el número de inscripciones por revisar, y el enlace «Inscripciones a eventos» en el menú de todas las páginas de gestión (visible solo para el administrador). — `Frontend/panel-admin.html`, `Frontend/js/panel-admin.js`, `Frontend/cargar-vacantes.html`, `Frontend/nueva-cuenta.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/sugerencias-admin.html`, `Frontend/vacantes-publicadas.html`
+- Estilos de las secciones nuevas. — `Frontend/css/style.css`
+
+#### Base de datos (Neon)
+- **Migración solo aditiva** `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql` (se revierte con `…_revertir.sql`):
+  - `postulaciones`: `revisada_en`, `revisada_por`, `comentario_empresa` varchar(1500) y `comentario_en`.
+  - `usuario_evento`: `nombre`, `correo`, `confirmada` (por defecto `false`), `confirmada_por` y `confirmada_en`.
+  - `eventos`: se insertan Hackathon, UT Canta 2026 y Club Música, publicados, con fecha provisional del 1 de diciembre de 2026.
+- Modelos y documentación del esquema actualizados. — `Models/models.py`, `docs/ESQUEMA_BD.md`
+
+#### Pruebas
+- Recibido y comentario: permisos por empresa, alumno y anónimo; validación; auditoría sin duplicados; error 500 sin detalle interno. También «Mis postulaciones» (solo las propias), «Mis notificaciones» del buzón, inscripción a eventos (validación, duplicados, eventos no publicados), la página de administrador y el atajo del panel. — `tests/test_seguimiento.py`, `tests/test_eventos.py`
+- Se actualizaron 2 pruebas de la inscripción a eventos, que comprobaban que el formulario era estático; ahora comprueban que no usa `action` ni `name` y que carga `js/inscripcion.js`. — `tests/test_seguridad.py`
+
 ### Cuatrimestres en lugar de semestres y botón para mostrar la contraseña (2026-11-10)
 
 #### Cambiado
