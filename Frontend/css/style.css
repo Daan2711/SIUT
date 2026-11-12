@@ -309,46 +309,6 @@ body{
     color:#555;
 }
 
-/* HEADER */
-header{
-    background:#c9ebe7;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 30px;
-}
-
-.logo img{
-    width:120px;
-}
-
-nav{
-    display:flex;
-    gap:20px;
-}
-
-nav a{
-    text-decoration:none;
-    color:#222;
-    font-size:14px;
-    font-weight:600;
-}
-
-nav a.activo{
-    border-bottom:2px solid black;
-}
-
-.perfil{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.perfil img{
-    width:35px;
-    height:35px;
-}
-
 /* EVENTOS PILL */
 .cards-eventos {
     display: grid;
@@ -393,26 +353,6 @@ nav a.activo{
 
 .card-evento a:hover {
     color: #b86200;
-}
-
-.btn-logout {
-    background: transparent;
-    border: 1px solid #888;
-    border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    color: #444;
-}
-
-.btn-logout:hover {
-    background: #f0f0f0;
-}
-.perfil-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
 }
 
 /*======================================================
@@ -762,22 +702,7 @@ nav a.activo{
 .sugerencia-form textarea{resize:vertical;min-height:70px}
 .sugerencia-form button{align-self:flex-start}
 
-/* ==========================================================================
-   Menú del encabezado en pantallas pequeñas (botón ☰, ver js/nav.js)
-   ========================================================================== */
 [hidden]{display:none !important}
-.menu-toggle{display:none;background:transparent;border:1px solid #6b9e98;border-radius:8px;font-size:22px;line-height:1;padding:6px 11px;cursor:pointer;color:#163b3b}
-.menu-toggle:focus-visible{outline:2px solid #087e72;outline-offset:2px}
-@media (max-width:900px){
-    header{flex-wrap:wrap;padding:12px 16px;gap:10px}
-    .logo img{width:96px}
-    .perfil{order:1;margin-left:auto}
-    .menu-toggle{display:block;order:2}
-    header nav{display:none;order:3;width:100%;flex-direction:column;gap:0}
-    header nav.abierto{display:flex}
-    header nav a{padding:11px 4px;border-top:1px solid #b5ddd8}
-    header nav a.activo{border-bottom:none;font-weight:800}
-}
 /* Botón «ojito» para mostrar u ocultar la contraseña (js/mostrar-password.js) */
 .campo-password{position:relative;display:block;width:100%}
 .campo-password input{width:100%;box-sizing:border-box;padding-right:44px}
@@ -830,3 +755,120 @@ nav a.activo{
 .badge-cerrada{margin-left:auto;background:#fff0ed;color:#a13725;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
 .vacante-cerrada .badge-postulado{margin-left:8px}
 .seguimiento-cerrada{font-weight:700;color:#a13725}
+
+/* ==========================================================================
+   ENCABEZADO (todos los roles) — ver js/nav.js
+   ========================================================================== */
+:root{--enc-alto:68px;--enc-verde:#0b9282;--enc-verde-osc:#087e72;--enc-texto:#30413f;--enc-suave:#e6f4f1}
+.encabezado{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:24px;height:var(--enc-alto);padding:0 28px;background:#fffffff2;backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid #e3ecea;transition:box-shadow .25s}
+.encabezado.con-sombra{box-shadow:0 6px 24px #10232114}
+.encabezado .logo{width:auto;display:flex;align-items:center;flex-shrink:0;border-radius:8px}
+.encabezado .logo img{height:42px;width:auto;display:block}
+.encabezado .logo:focus-visible{outline:2px solid var(--enc-verde);outline-offset:4px}
+
+/* Opciones del menú */
+.nav-principal{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+.nav-principal a,.nav-grupo-boton{position:relative;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:0;border-radius:10px;background:transparent;color:var(--enc-texto);font:inherit;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background .2s,color .2s,transform .2s}
+.nav-principal a:hover,.nav-grupo-boton:hover{background:#f1f7f6;color:var(--enc-verde-osc)}
+.nav-principal a:active,.nav-grupo-boton:active{transform:scale(.97)}
+.nav-principal a:focus-visible,.nav-grupo-boton:focus-visible,.perfil-boton:focus-visible,.perfil-menu-item:focus-visible{outline:2px solid var(--enc-verde);outline-offset:2px}
+.nav-principal a.activo,.nav-grupo-boton.activo{background:var(--enc-suave);color:var(--enc-verde-osc)}
+/* Línea naranja bajo la opción activa */
+.nav-principal>a.activo{box-shadow:inset 0 -2px 0 #f58220}
+.nav-grupo-boton.activo{box-shadow:inset 0 -2px 0 #f58220}
+
+/* Íconos (toman el color del texto) */
+[data-icono]::before{content:"";flex-shrink:0;width:18px;height:18px;background:currentColor;-webkit-mask:var(--icono) center/contain no-repeat;mask:var(--icono) center/contain no-repeat}
+[data-icono="inicio"]{--icono:url(../img/iconos/inicio.svg)}
+[data-icono="horario"]{--icono:url(../img/iconos/horario.svg)}
+[data-icono="maestros"]{--icono:url(../img/iconos/maestros.svg)}
+[data-icono="empleos"]{--icono:url(../img/iconos/empleos.svg)}
+[data-icono="buzon"]{--icono:url(../img/iconos/buzon.svg)}
+[data-icono="soporte"]{--icono:url(../img/iconos/soporte.svg)}
+[data-icono="panel"]{--icono:url(../img/iconos/panel.svg)}
+[data-icono="comunidad"]{--icono:url(../img/iconos/comunidad.svg)}
+[data-icono="cuentas"]{--icono:url(../img/iconos/cuentas.svg)}
+[data-icono="vacantes"]{--icono:url(../img/iconos/vacantes.svg)}
+[data-icono="publicar"]{--icono:url(../img/iconos/publicar.svg)}
+[data-icono="postulaciones"]{--icono:url(../img/iconos/postulaciones.svg)}
+[data-icono="sugerencias"]{--icono:url(../img/iconos/sugerencias.svg)}
+[data-icono="eventos"]{--icono:url(../img/iconos/eventos.svg)}
+[data-icono="salir"]{--icono:url(../img/iconos/salir.svg)}
+
+/* Submenús del administrador */
+.nav-grupo{position:relative}
+.nav-grupo-boton::after{content:"";width:14px;height:14px;margin-left:-2px;background:currentColor;-webkit-mask:url(../img/iconos/flecha.svg) center/contain no-repeat;mask:url(../img/iconos/flecha.svg) center/contain no-repeat;transition:transform .2s}
+.nav-grupo.abierto .nav-grupo-boton::after{transform:rotate(180deg)}
+.nav-submenu{position:absolute;top:calc(100% + 10px);left:50%;min-width:230px;padding:8px;background:#fff;border:1px solid #e3ecea;border-radius:14px;box-shadow:0 18px 40px #10232124;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translate(-50%,-6px);transition:opacity .18s,transform .18s,visibility .18s}
+/* Puente invisible para que el submenú no se cierre al bajar el mouse */
+.nav-submenu::before{content:"";position:absolute;top:-12px;left:0;right:0;height:12px}
+.nav-grupo.abierto .nav-submenu{opacity:1;visibility:visible;transform:translate(-50%,0)}
+@media (hover:hover) and (min-width:901px){.nav-grupo:hover .nav-submenu,.nav-grupo:focus-within .nav-submenu{opacity:1;visibility:visible;transform:translate(-50%,0)}}
+.nav-submenu a{width:100%;justify-content:flex-start;padding:10px 12px}
+.nav-submenu a.activo{box-shadow:inset 3px 0 0 #f58220}
+
+/* Qué ve cada rol (lo decide <body data-rol>, puesto por el servidor) */
+body:not([data-rol="administrador"]) [data-solo-admin]{display:none !important}
+body[data-rol="administrador"] [data-solo-empresa]{display:none !important}
+
+/* Perfil */
+.perfil{position:relative;flex-shrink:0}
+.perfil-boton{display:flex;align-items:center;gap:10px;padding:5px 10px 5px 5px;border:1px solid #e3ecea;border-radius:999px;background:#fff;cursor:pointer;font:inherit;color:var(--enc-texto);transition:border-color .2s,box-shadow .2s}
+.perfil-boton:hover,.perfil-boton[aria-expanded="true"]{border-color:#b9ddd7;box-shadow:0 4px 14px #10232112}
+.perfil-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--enc-verde),#2bb3a1);color:#fff;font-size:13px;font-weight:800;letter-spacing:.03em}
+.perfil-texto{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;max-width:170px}
+.perfil-nombre{font-size:13px;font-weight:700;color:#1e302e;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perfil-rol{font-size:11px;color:#6d7d7a;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perfil-flecha{width:14px;height:14px;background:#6d7d7a;-webkit-mask:url(../img/iconos/flecha.svg) center/contain no-repeat;mask:url(../img/iconos/flecha.svg) center/contain no-repeat;transition:transform .2s}
+.perfil-boton[aria-expanded="true"] .perfil-flecha{transform:rotate(180deg)}
+.perfil-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:102;min-width:230px;padding:8px;background:#fff;border:1px solid #e3ecea;border-radius:14px;box-shadow:0 18px 40px #10232124;animation:encAparece .16s ease-out}
+.perfil-menu-cabecera{display:flex;flex-direction:column;gap:2px;padding:8px 10px 10px;margin-bottom:6px;border-bottom:1px solid #edf2f1}
+.perfil-menu-cabecera strong{font-size:14px;color:#1e302e}
+.perfil-menu-cabecera span{font-size:12px;color:#6d7d7a}
+.perfil-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:0;border-radius:10px;background:transparent;font:inherit;font-size:14px;font-weight:600;color:#a13725;cursor:pointer;text-align:left}
+.perfil-menu-item:hover{background:#fff0ed}
+.perfil-menu-item:disabled{opacity:.6;cursor:default}
+@keyframes encAparece{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* Botón ☰ (solo celular) */
+.menu-toggle{display:none;position:relative;z-index:101;flex-direction:column;justify-content:center;gap:5px;width:42px;height:42px;padding:0 10px;border:1px solid #e3ecea;border-radius:10px;background:#fff;cursor:pointer}
+.menu-toggle span{display:block;height:2px;border-radius:2px;background:#30413f;transition:transform .25s,opacity .2s}
+.menu-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.menu-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.menu-toggle:focus-visible{outline:2px solid var(--enc-verde);outline-offset:2px}
+.nav-fondo{position:fixed;inset:0;z-index:98;background:#1023216b;backdrop-filter:blur(2px);animation:encFondo .2s ease-out}
+@keyframes encFondo{from{opacity:0}to{opacity:1}}
+
+/* Pantallas medianas: opciones más compactas y perfil solo con iniciales */
+@media (max-width:1180px) and (min-width:901px){
+  .encabezado{gap:14px;padding:0 18px}
+  .nav-principal a,.nav-grupo-boton{padding:9px 10px;gap:6px;font-size:13px}
+  .perfil-texto{display:none}
+}
+
+/* Celular: menú lateral */
+@media (max-width:900px){
+  :root{--enc-alto:60px}
+  /* Sin backdrop-filter: si no, el panel lateral (position:fixed) quedaría dentro del encabezado */
+  .encabezado{gap:10px;padding:0 14px;background:#fff;backdrop-filter:none}
+  .encabezado .logo img{height:36px}
+  /* Orden: logo · perfil · ☰ (el botón queda en la esquina y encima del panel) */
+  .perfil{order:2;margin-left:auto}
+  .perfil-texto{display:none}
+  .perfil-boton{padding:4px 8px 4px 4px}
+  .menu-toggle{display:flex;order:3}
+  .nav-principal{position:fixed;top:0;right:0;bottom:0;z-index:99;width:min(320px,86vw);flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;padding:76px 14px 24px;background:#fff;box-shadow:-18px 0 40px #10232126;overflow-y:auto;transform:translateX(100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s}
+  .nav-principal.abierto{transform:none;visibility:visible}
+  .nav-principal a,.nav-grupo-boton{width:100%;justify-content:flex-start;padding:12px 14px;font-size:15px}
+  .nav-principal>a.activo,.nav-submenu a.activo{box-shadow:inset 3px 0 0 #f58220}
+  /* En el panel lateral los submenús se muestran como secciones */
+  .nav-grupo-boton,.nav-grupo-boton.activo{pointer-events:none;margin-top:10px;padding:8px 14px 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7b8a87;background:transparent;box-shadow:none}
+  .nav-grupo-boton::after,.nav-grupo-boton::before{display:none}
+  .nav-submenu{position:static;min-width:0;padding:0;border:0;box-shadow:none;opacity:1;visibility:visible;transform:none;transition:none}
+  .nav-submenu::before{display:none}
+  body.menu-abierto{overflow:hidden}
+}
+@media (prefers-reduced-motion:reduce){
+  .encabezado *,.nav-principal{transition:none !important;animation:none !important}
+}

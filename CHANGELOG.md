@@ -4,6 +4,23 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Rediseño del menú superior para todos los roles (2026-11-12)
+
+#### Cambiado
+- **Encabezado nuevo, igual en las 13 páginas con sesión:** fondo blanco con sombra suave que se queda fijo arriba al hacer scroll. Cada opción lleva un ícono y una etiqueta corta («Directorio de Maestros» pasa a «Maestros», «Buscar empleos» a «Empleos», «Buzón de sugerencias» a «Buzón»). La página actual se marca con una píldora verde y una línea naranja, y al pasar el mouse hay una transición. — `Frontend/css/style.css`, `Frontend/index.html`, `Frontend/horario.html`, `Frontend/maestros.html`, `Frontend/buzon.html`, `Frontend/sugerencias.html`, `Frontend/soporte.html`, `Frontend/panel-admin.html`, `Frontend/vacantes-publicadas.html`, `Frontend/cargar-vacantes.html`, `Frontend/postulaciones-recibidas.html`, `Frontend/sugerencias-admin.html`, `Frontend/inscripciones-eventos.html`, `Frontend/nueva-cuenta.html`
+- **Menú del administrador agrupado:** de 7 opciones pasa a 4: Panel, «Bolsa de empleo» (submenú con Vacantes publicadas, Cargar vacante y Postulaciones), «Comunidad» (submenú con Sugerencias e Inscripciones a eventos) y Cuentas. Los submenús se abren con el mouse o con un clic, y se cierran con Escape o con un clic fuera. La empresa ve sus 3 opciones directas: Vacantes, Publicar y Postulaciones. Alumno y profesor ven Inicio, Mi horario, Maestros, Empleos, Buzón y Soporte. — mismos archivos, `Frontend/js/nav.js`
+- **Menú de perfil:** círculo con las iniciales, el nombre y el rol («Alumno», «Profesor», «Empresa · {empresa}», «Administrador»). Al hacer clic se despliega «Cerrar sesión». **Cerrar sesión ahora existe en todas las páginas;** antes, en las páginas del alumno solo aparecía en Inicio. — `Frontend/js/nav.js`, `app.py`
+- **Celular:** el botón ☰ queda en la esquina, se convierte en ✕ y abre un panel lateral con animación y fondo oscurecido. En ese panel, los submenús del administrador se muestran como secciones. En pantallas medianas, las opciones se compactan y el perfil muestra solo las iniciales. — `Frontend/css/style.css`, `Frontend/js/nav.js`
+- **El servidor indica el rol en `<body data-rol>`** junto con el nombre, el rol y las iniciales (escapados). Así cada rol ve su menú desde la primera carga, sin parpadeo. Ocultar opciones es solo presentación: los permisos se siguen validando en el servidor. — `app.py`
+- Íconos SVG propios; su color lo controla el CSS. — `Frontend/img/iconos/`
+
+#### Eliminado
+- `Frontend/js/gestion.js` y `Frontend/js/index.js`: el cierre de sesión y el menú los maneja `Frontend/js/nav.js` en todas las páginas.
+
+#### Pruebas
+- Menú y perfil por rol (alumno, profesor, empresa, administrador); una sola opción activa por página; nombre y rol escapados; reglas CSS por rol; íconos disponibles; scripts eliminados. — `tests/test_encabezado.py`, `tests/test_admin.py`
+- No se incluyó «Cambiar contraseña» en el menú de perfil: la página actual no pide la contraseña anterior y está pensada solo para el primer inicio de sesión.
+
 ### Editar y borrar vacantes, con «Vacante cerrada» para el alumno (2026-11-12)
 
 #### Agregado
