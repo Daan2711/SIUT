@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session, current_app
 from sqlalchemy import func, true, false
-from Models.models import Usuario, Vacante, Empresa, Auditoria
+from Models.models import Usuario, Vacante, Empresa, Postulacion, Auditoria
 from Database.database import db
 
 vacantes_bp = Blueprint('vacantes', __name__)
@@ -100,8 +100,8 @@ def _iso(fecha):
     return texto if fecha.tzinfo else texto + 'Z'
 
 
-def _serializar(v, nombre_empresa):
-    return {
+def _serializar(v, nombre_empresa, editable=False, postulaciones=None):
+    datos = {
         'id': v.id,
         'titulo': v.titulo,
         'empresa': nombre_empresa or '',
@@ -114,6 +114,11 @@ def _serializar(v, nombre_empresa):
         'requisitos': v.requisitos,
         'publicada_en': _iso(v.publicada_en or v.creado_en),
     }
+    if editable:
+        # Solo para quien puede editarla o darla de baja (su empresa o un administrador)
+        datos['editable'] = True
+        datos['postulaciones'] = postulaciones or 0
+    return datos
 
 
 def _obtener_o_crear_empresa(nombre):
@@ -130,6 +135,49 @@ def _obtener_o_crear_empresa(nombre):
     return empresa
 
 
+def _validar_vacante(perfil):
+    """Valida el JSON de una vacante (alta o edición). Devuelve (campos, None) o (None, respuesta de error)."""
+    def _falla(mensaje, codigo=400):
+        return None, (jsonify({'ok': False, 'mensaje': mensaje}), codigo)
+
+    if not request.is_json:
+        return _falla('Formato de solicitud inválido', 415)
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return _falla('No se recibieron datos')
+
+    # Una Empresa siempre publica a nombre propio: el campo 'empresa' se ignora
+    requeridos = ['titulo', 'area', 'modalidad', 'ubicacion',
+                  'experiencia', 'jornada', 'descripcion', 'requisitos']
+    if perfil != PERFIL_EMPRESA:
+        requeridos.insert(1, 'empresa')
+
+    campos = {}
+    for nombre in requeridos:
+        valor = data.get(nombre)
+        valor = valor.strip() if isinstance(valor, str) else ''
+        if not valor:
+            return _falla(f'Falta el campo: {nombre}')
+        if nombre in LIMITES and len(valor) > LIMITES[nombre]:
+            return _falla(f'El campo {nombre} excede {LIMITES[nombre]} caracteres')
+        campos[nombre] = valor
+
+    catalogos = {
+        'area': AREAS, 'modalidad': MODALIDADES, 'ubicacion': UBICACIONES,
+        'experiencia': EXPERIENCIAS, 'jornada': JORNADAS,
+    }
+    for nombre, permitidos in catalogos.items():
+        if campos[nombre] not in permitidos:
+            return _falla(f'Valor no válido en: {nombre}')
+
+    # Coherencia: ubicación "Remoto" exige modalidad "Remoto"
+    if campos['ubicacion'] == 'Remoto' and campos['modalidad'] != 'Remoto':
+        return _falla('Si la ubicación es "Remoto", la modalidad debe ser "Remoto"')
+
+    return campos, None
+
+
 # =========================================================================
 # LISTAR VACANTES (cualquier usuario con sesión)
 # =========================================================================
@@ -143,9 +191,21 @@ def listar_vacantes():
              .filter(Vacante.activo.is_(True))
              .order_by(Vacante.creado_en.desc())
              .all())
+
+    usuario = usuario_en_sesion()
+    perfil = perfil_de_carga(usuario)
+    conteo = {}
+    if perfil:
+        conteo = dict(db.session.query(Postulacion.vacante_id, func.count(Postulacion.id))
+                      .group_by(Postulacion.vacante_id).all())
     return jsonify({
         'ok': True,
-        'vacantes': [_serializar(v, nombre) for v, nombre in filas]
+        'vacantes': [
+            _serializar(v, nombre,
+                        editable=bool(perfil) and puede_ver_vacante(usuario, perfil, v),
+                        postulaciones=conteo.get(v.id, 0))
+            for v, nombre in filas
+        ]
     }), 200
 
 
@@ -162,43 +222,9 @@ def crear_vacante():
     if not perfil:
         return jsonify({'ok': False, 'mensaje': 'No tienes permiso para cargar vacantes'}), 403
 
-    if not request.is_json:
-        return jsonify({'ok': False, 'mensaje': 'Formato de solicitud inválido'}), 415
-
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return jsonify({'ok': False, 'mensaje': 'No se recibieron datos'}), 400
-
-    # Una Empresa siempre publica a nombre propio: el campo 'empresa' se ignora
-    requeridos = ['titulo', 'area', 'modalidad', 'ubicacion',
-                  'experiencia', 'jornada', 'descripcion', 'requisitos']
-    if perfil != PERFIL_EMPRESA:
-        requeridos.insert(1, 'empresa')
-
-    campos = {}
-    for nombre in requeridos:
-        valor = data.get(nombre)
-        valor = valor.strip() if isinstance(valor, str) else ''
-        if not valor:
-            return jsonify({'ok': False, 'mensaje': f'Falta el campo: {nombre}'}), 400
-        if nombre in LIMITES and len(valor) > LIMITES[nombre]:
-            return jsonify({'ok': False, 'mensaje': f'El campo {nombre} excede {LIMITES[nombre]} caracteres'}), 400
-        campos[nombre] = valor
-
-    catalogos = {
-        'area': AREAS, 'modalidad': MODALIDADES, 'ubicacion': UBICACIONES,
-        'experiencia': EXPERIENCIAS, 'jornada': JORNADAS,
-    }
-    for nombre, permitidos in catalogos.items():
-        if campos[nombre] not in permitidos:
-            return jsonify({'ok': False, 'mensaje': f'Valor no válido en: {nombre}'}), 400
-
-    # Coherencia: ubicación "Remoto" exige modalidad "Remoto"
-    if campos['ubicacion'] == 'Remoto' and campos['modalidad'] != 'Remoto':
-        return jsonify({
-            'ok': False,
-            'mensaje': 'Si la ubicación es "Remoto", la modalidad debe ser "Remoto"'
-        }), 400
+    campos, error = _validar_vacante(perfil)
+    if error:
+        return error
 
     nombre_empresa = campos.pop('empresa', None)
 
@@ -225,3 +251,101 @@ def crear_vacante():
         db.session.rollback()
         current_app.logger.exception('Error al guardar una vacante (usuario %s)', usuario.id)
         return jsonify({'ok': False, 'mensaje': 'No fue posible guardar la vacante'}), 500
+
+
+# =========================================================================
+# EDITAR Y DAR DE BAJA (Empresa: las de su empresa; Administrador: todas)
+# =========================================================================
+def _vacante_gestionable(vacante_id):
+    """(usuario, perfil, vacante) si la sesión puede gestionarla; si no, (None, None, respuesta de error)."""
+    if 'usuario_id' not in session:
+        return None, None, (jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401)
+    usuario = usuario_en_sesion()
+    perfil = perfil_de_carga(usuario)
+    if not perfil:
+        return None, None, (jsonify({'ok': False, 'mensaje': 'No tienes permiso para modificar vacantes'}), 403)
+    vacante = db.session.get(Vacante, vacante_id)
+    if not vacante or not vacante.activo:
+        return None, None, (jsonify({'ok': False, 'mensaje': 'La vacante no existe o ya fue dada de baja'}), 404)
+    if not puede_ver_vacante(usuario, perfil, vacante):
+        return None, None, (jsonify({'ok': False, 'mensaje': 'Esta vacante no pertenece a tu empresa'}), 403)
+    return usuario, perfil, vacante
+
+
+def _nombre_empresa(vacante):
+    empresa = db.session.get(Empresa, vacante.empresa_id)
+    return empresa.nombre if empresa else ''
+
+
+@vacantes_bp.route('/api/vacantes/<int:vacante_id>', methods=['GET'])
+def obtener_vacante(vacante_id):
+    """Datos de una vacante para el formulario de edición."""
+    usuario, perfil, vacante = _vacante_gestionable(vacante_id)
+    if usuario is None:
+        return vacante
+    return jsonify({'ok': True, 'vacante': _serializar(vacante, _nombre_empresa(vacante))}), 200
+
+
+@vacantes_bp.route('/api/vacantes/<int:vacante_id>', methods=['POST'])
+def editar_vacante(vacante_id):
+    usuario, perfil, vacante = _vacante_gestionable(vacante_id)
+    if usuario is None:
+        return vacante
+
+    campos, error = _validar_vacante(perfil)
+    if error:
+        return error
+    nombre_empresa = campos.pop('empresa', None)
+
+    # Una Empresa no puede mover la vacante a otra empresa. El administrador sí,
+    # salvo que la haya publicado una Empresa: el trigger trg_validar_creador_vacante
+    # de Neon exige que el creador pertenezca a la empresa de la vacante.
+    if perfil == PERFIL_ADMINISTRADOR and nombre_empresa.lower() != _nombre_empresa(vacante).lower():
+        creador = db.session.get(Usuario, vacante.creado_por)
+        if not creador or creador.rol != 'Administrador':
+            return jsonify({
+                'ok': False,
+                'mensaje': 'Esta vacante la publicó la propia empresa; no se puede cambiar de empresa',
+            }), 400
+
+    try:
+        if perfil == PERFIL_ADMINISTRADOR:
+            vacante.empresa_id = _obtener_o_crear_empresa(nombre_empresa).id
+        for campo, valor in campos.items():
+            setattr(vacante, campo, valor)
+        db.session.add(Auditoria(
+            usuario_id=usuario.id,
+            accion='Edición de vacante',
+            tabla_afectada='vacantes',
+            registro_id=vacante.id,
+            descripcion=campos['titulo'],
+        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error al editar la vacante %s (usuario %s)', vacante_id, usuario.id)
+        return jsonify({'ok': False, 'mensaje': 'No fue posible guardar los cambios'}), 500
+    return jsonify({'ok': True, 'id': vacante.id}), 200
+
+
+@vacantes_bp.route('/api/vacantes/<int:vacante_id>/baja', methods=['POST'])
+def dar_de_baja_vacante(vacante_id):
+    """Baja lógica: deja de mostrarse, pero conserva sus postulaciones y CV."""
+    usuario, perfil, vacante = _vacante_gestionable(vacante_id)
+    if usuario is None:
+        return vacante
+    try:
+        vacante.activo = False
+        db.session.add(Auditoria(
+            usuario_id=usuario.id,
+            accion='Baja de vacante',
+            tabla_afectada='vacantes',
+            registro_id=vacante.id,
+            descripcion=vacante.titulo,
+        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error al dar de baja la vacante %s (usuario %s)', vacante_id, usuario.id)
+        return jsonify({'ok': False, 'mensaje': 'No fue posible borrar la vacante'}), 500
+    return jsonify({'ok': True}), 200

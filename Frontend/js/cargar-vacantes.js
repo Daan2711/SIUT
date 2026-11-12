@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const message = document.getElementById('mensajeVacante');
   const submitButton = document.getElementById('publicarVacante');
   const clearButton = document.getElementById('limpiarVacante');
+  // Modo edición: cargar-vacantes.html?editar=<id>
+  const editarId = new URLSearchParams(window.location.search).get('editar');
+  const editando = /^\d+$/.test(editarId || '');
+  const submitLabel = editando ? 'Guardar cambios' : 'Publicar vacante';
   const preview = {
     avatar: document.getElementById('prevAvatar'),
     area: document.getElementById('prevArea'),
@@ -59,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   clearButton.addEventListener('click', () => {
+    if (editando) { window.location.href = '/vacantes-publicadas.html'; return; }
     form.reset();
     aplicarEmpresaPropia();
     message.hidden = true;
@@ -80,6 +85,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
+  if (editando) {
+    document.title = 'Editar vacante | SIUT';
+    document.getElementById('tituloCarga').textContent = 'Editar vacante';
+    document.getElementById('textoCarga').textContent =
+      'Corrige la información del puesto. Las postulaciones que ya recibió se conservan.';
+    document.getElementById('avisoCarga').textContent =
+      '🔒 Los cambios se verán de inmediato en la sección Buscar empleos y quedarán registrados en SIUT.';
+    submitButton.textContent = submitLabel;
+    clearButton.textContent = 'Cancelar';
+    submitButton.disabled = true;   // hasta que carguen los datos
+
+    (async () => {
+      try {
+        const response = await fetch(`/api/vacantes/${encodeURIComponent(editarId)}`, { credentials: 'same-origin' });
+        if (response.status === 401) { window.location.href = '/login'; return; }
+        let result = {};
+        try { result = await response.json(); } catch { /* respuesta no JSON */ }
+        if (!response.ok || !result.ok) throw new Error(result.mensaje || 'No se pudo cargar la vacante.');
+        const v = result.vacante;
+        ['titulo', 'empresa', 'area', 'experiencia', 'modalidad', 'ubicacion', 'jornada', 'descripcion', 'requisitos']
+          .forEach(campo => { if (form.elements[campo]) form.elements[campo].value = v[campo] || ''; });
+        aplicarEmpresaPropia();
+        updatePreview();
+        submitButton.disabled = false;
+      } catch (error) {
+        showMessage(`${error.message} Regresa a «Vacantes publicadas» e intenta de nuevo.`, 'error');
+      }
+    })();
+  }
+
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -91,11 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = 'Publicando…';
+    submitButton.textContent = editando ? 'Guardando…' : 'Publicando…';
     message.hidden = true;
 
     try {
-      const response = await fetch('/api/vacantes', {
+      const response = await fetch(editando ? `/api/vacantes/${encodeURIComponent(editarId)}` : '/api/vacantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -113,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage('No se pudo conectar con SIUT. Verifica que el servidor esté iniciado e intenta nuevamente.', 'error');
     } finally {
       submitButton.disabled = false;
-      submitButton.textContent = 'Publicar vacante';
+      submitButton.textContent = submitLabel;
     }
   });
 
