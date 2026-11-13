@@ -30,3 +30,10 @@ services:
       # Opcional: contraseña temporal institucional que no podrá reutilizarse
       - key: TEMP_PASSWORD
         sync: false
+      # Recuperación de contraseña por correo con Brevo (ver docs/DESPLIEGUE_RENDER.md).
+      # El plan gratis bloquea SMTP: se envía por la API HTTPS de Brevo.
+      - key: BREVO_API_KEY
+        sync: false
+      # Correo verificado en Brevo como remitente
+      - key: CORREO_REMITENTE
+        sync: false

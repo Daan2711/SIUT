@@ -48,10 +48,12 @@
                 </div>
 
                 <div class="recuperar">
-                    <a href="#">
+                    <a href="#" id="enlaceRecuperar">
                         ¿Olvidaste tu contraseña?
                     </a>
                 </div>
+
+                <p id="avisoLogin" class="aviso-login" role="status" hidden></p>
 
                 <button 
                     type="submit" 
@@ -64,8 +66,72 @@
         </div>
     </div>
 
+    <!-- Recuperar contraseña: ver js/recuperar.js -->
+    <dialog id="dialogoRecuperar" class="recuperar-dialog" aria-labelledby="tituloRecuperar">
+
+        <section data-paso="confirmar">
+            <h2 id="tituloRecuperar">Recuperar contraseña</h2>
+            <p>¿Estás seguro de querer recuperar la contraseña?</p>
+            <p class="recuperar-nota">Te enviaremos un código de 4 dígitos a tu correo.</p>
+            <div class="recuperar-acciones">
+                <button type="button" class="btn-secundario" data-accion="cancelar">En otro momento</button>
+                <button type="button" class="btn-login" data-accion="continuar">Recuperar contraseña</button>
+            </div>
+        </section>
+
+        <form data-paso="correo" hidden novalidate>
+            <h2>Recuperar contraseña</h2>
+            <div class="input-group">
+                <label for="recuperarEmail">Correo con el que inicias sesión</label>
+                <input type="email" id="recuperarEmail" autocomplete="username" maxlength="254" required>
+            </div>
+            <p class="mensaje-recuperar" role="alert" hidden></p>
+            <div class="recuperar-acciones">
+                <button type="button" class="btn-secundario" data-accion="cancelar">En otro momento</button>
+                <button type="submit" class="btn-login">Enviar código</button>
+            </div>
+        </form>
+
+        <form data-paso="codigo" hidden novalidate>
+            <h2>Escribe el código</h2>
+            <p class="recuperar-nota" data-texto="enviado"></p>
+            <div class="input-group">
+                <label for="recuperarCodigo">Código de 4 dígitos</label>
+                <input type="text" id="recuperarCodigo" class="campo-codigo" inputmode="numeric"
+                       autocomplete="one-time-code" pattern="[0-9]{4}" maxlength="4" required>
+            </div>
+            <p class="mensaje-recuperar" role="alert" hidden></p>
+            <p class="recuperar-reenviar">
+                <button type="button" class="enlace-boton" data-accion="reenviar" disabled>Reenviar código</button>
+            </p>
+            <div class="recuperar-acciones">
+                <button type="button" class="btn-secundario" data-accion="cancelar">En otro momento</button>
+                <button type="submit" class="btn-login">Verificar</button>
+            </div>
+        </form>
+
+        <form data-paso="nueva" hidden novalidate>
+            <h2>Nueva contraseña</h2>
+            <div class="input-group">
+                <label for="recuperarNueva">Nueva contraseña</label>
+                <input type="password" id="recuperarNueva" autocomplete="new-password" minlength="8" required>
+            </div>
+            <div class="input-group">
+                <label for="recuperarConfirmar">Confirmar contraseña</label>
+                <input type="password" id="recuperarConfirmar" autocomplete="new-password" minlength="8" required>
+            </div>
+            <p class="recuperar-nota">Mínimo 8 caracteres.</p>
+            <p class="mensaje-recuperar" role="alert" hidden></p>
+            <div class="recuperar-acciones">
+                <button type="button" class="btn-secundario" data-accion="cancelar">En otro momento</button>
+                <button type="submit" class="btn-login">Guardar contraseña</button>
+            </div>
+        </form>
+    </dialog>
+
     <script src="js/mostrar-password.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/recuperar.js"></script>
 </body>
 
 </html>

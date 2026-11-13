@@ -110,6 +110,116 @@ body{
     background:#e97800;
 }
 
+.btn-login:disabled{
+    opacity:.7;
+    cursor:wait;
+}
+
+/* RECUPERAR CONTRASEÑA (login.html + js/recuperar.js) */
+
+.aviso-login{
+    margin-bottom:15px;
+    padding:10px 12px;
+    border-radius:8px;
+    background:#eaf8f1;
+    color:#176b48;
+    font-size:13px;
+}
+
+.recuperar-dialog{
+    width:min(420px,calc(100% - 32px));
+    margin:auto;
+    border:0;
+    border-radius:14px;
+    padding:28px;
+    background:#c9ebe7;
+    color:#263b39;
+    box-shadow:0 20px 70px #0003;
+}
+
+.recuperar-dialog::backdrop{
+    background:#10232180;
+    backdrop-filter:blur(3px);
+}
+
+.recuperar-dialog h2{
+    font-size:21px;
+    margin-bottom:12px;
+}
+
+.recuperar-dialog p{
+    line-height:1.5;
+    margin-bottom:12px;
+}
+
+.recuperar-nota{
+    font-size:13px;
+    color:#4c5f5c;
+}
+
+.campo-codigo{
+    font-size:24px;
+    letter-spacing:10px;
+    text-align:center;
+}
+
+.mensaje-recuperar{
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:13px;
+    background:#fff0ed;
+    color:#a13725;
+}
+
+.mensaje-recuperar.exito{
+    background:#eaf8f1;
+    color:#176b48;
+}
+
+.recuperar-reenviar{
+    text-align:right;
+}
+
+.enlace-boton{
+    border:0;
+    background:none;
+    padding:0;
+    color:#0b6f63;
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+}
+
+.enlace-boton:disabled{
+    color:#7a8a87;
+    text-decoration:none;
+    cursor:default;
+}
+
+.recuperar-acciones{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+}
+
+.recuperar-acciones button{
+    flex:1;
+}
+
+.btn-secundario{
+    background:transparent;
+    color:#33504c;
+    border:1px solid #7fa7a1;
+    padding:12px;
+    border-radius:25px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-secundario:hover{
+    background:#ffffff80;
+}
+
 /* CARRUSEL */
 
 .slider{

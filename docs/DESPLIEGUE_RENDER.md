@@ -14,6 +14,7 @@ Guía para publicar SIUT en Render usando la base de datos de Neon.
 2. **Migraciones aplicadas en Neon.** Las tablas de Neon las controlan los scripts de `migrations/`, no la app.
    - `2026-11-08_postulacion_cv.sql` — **ya aplicada** el 2026-11-08 (tabla de CV).
    - `2026-11-09_corregir_validar_perfiles_usuario.sql` — **ya aplicada** el 2026-11-09 (sin ella no se pueden crear cuentas ni cambiar contraseñas).
+   - `2026-11-12_recuperaciones_password.sql` — **ya aplicada** el 2026-11-12 (tabla de códigos para «¿Olvidaste tu contraseña?»).
 3. **Cadena de conexión de Neon** a la mano (Neon → *Connection Details*). Usa la del endpoint con *pooler* (el host contiene `-pooler`) y con `sslmode=require`.
 
 ## 1. Crear el servicio
@@ -23,6 +24,7 @@ Guía para publicar SIUT en Render usando la base de datos de Neon.
 3. Te pedirá los valores marcados como secretos:
    - `DATABASE_URL`: la cadena de conexión de Neon.
    - `TEMP_PASSWORD`: opcional; contraseña temporal institucional que no se podrá elegir como nueva. Puede quedar vacía.
+   - `BREVO_API_KEY` y `CORREO_REMITENTE`: para «¿Olvidaste tu contraseña?» (ver [Correo para recuperar la contraseña](#correo-para-recuperar-la-contraseña-brevo)). Si quedan vacías, la app funciona igual pero la recuperación responde que no está disponible.
 4. Crea el servicio. El primer despliegue construye la imagen Docker (unos minutos).
 
 ### Variables de entorno
@@ -35,6 +37,25 @@ Guía para publicar SIUT en Render usando la base de datos de Neon.
 | `PROXY_HOPS` | `1` | IP real del cliente detrás del proxy de Render (límite de intentos de login) |
 | `LOG_LEVEL` | `INFO` | Nivel de los logs |
 | `TEMP_PASSWORD` | opcional (secreto) | Contraseña temporal que no puede reutilizarse |
+| `BREVO_API_KEY` | secreto | Clave de la API de Brevo para enviar el código de recuperación |
+| `CORREO_REMITENTE` | correo verificado en Brevo | Remitente del correo de recuperación |
+| `NOMBRE_REMITENTE` | opcional (por defecto `SIUT`) | Nombre que ve quien recibe el correo |
+
+### Correo para recuperar la contraseña (Brevo)
+
+«¿Olvidaste tu contraseña?» envía un código de 4 dígitos al correo del usuario. El plan gratis de Render bloquea el SMTP saliente, así que SIUT envía por la **API HTTPS de Brevo** (gratis, 300 correos al día).
+
+1. **Remitente exclusivo:** crea un correo solo para SIUT (por ejemplo, un Gmail nuevo). No uses un correo personal.
+2. **Cuenta de Brevo:** regístrate en [brevo.com](https://www.brevo.com) con ese correo.
+3. **Verificar el remitente:** Brevo → *Senders, Domains & Dedicated IPs* → *Senders* → *Add a sender*. Escribe el correo y abre el enlace que Brevo le envía.
+4. **Clave de la API:** Brevo → *SMTP & API* → *API Keys* → *Generate a new API key*. Cópiala: Brevo la muestra una sola vez.
+5. **Render:** en el servicio → *Environment*, agrega `BREVO_API_KEY` (la clave) y `CORREO_REMITENTE` (el correo verificado) y guarda. Render vuelve a desplegar solo.
+6. **Probar:** en `/login` → «¿Olvidaste tu contraseña?» con una cuenta cuyo correo sea real. Si no llega, revisa spam y los *Logs* de Render: un envío fallido aparece como `No se pudo enviar el código de recuperación (usuario N): Brevo respondió …` con el motivo.
+
+- La clave es un secreto: no la subas al repositorio ni la compartas por chat. Para probar en local, ponla en `.env` (que no se sube).
+- Algunas cuentas nuevas de Brevo quedan en revisión unas horas antes de poder enviar.
+- Los correos desde un Gmail enviados por Brevo pueden llegar a spam; con un dominio propio verificado en Brevo llegan mejor.
+- Requiere la migración `migrations/2026-11-12_recuperaciones_password.sql` en Neon.
 
 No definas `AUTO_CREATE_TABLES` en Render: la app no debe crear tablas en Neon.
 

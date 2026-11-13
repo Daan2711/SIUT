@@ -4,6 +4,30 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Recuperación de contraseña con código por correo (2026-11-12)
+
+#### Agregado
+- **«¿Olvidaste tu contraseña?» en el login** abre una ventana: «¿Estás seguro de querer recuperar la contraseña?» con **Recuperar contraseña** y **En otro momento** (cierra y deja el login como estaba). Después pide el correo (rellenado con el del login), el **código de 4 dígitos** que llega por correo y la **nueva contraseña con su confirmación** (con el botón para mostrarla). «Reenviar código» se habilita a los 60 segundos. Al terminar vuelve al login con «Contraseña actualizada». — `Frontend/login.html`, `Frontend/js/recuperar.js`, `Frontend/css/style.css`
+- **Endpoints** `POST /recuperar-password/solicitar`, `/verificar` y `/restablecer`. — `Controllers/recuperacionController.py`, `app.py`
+  - El código vence a los 10 minutos, se anula con 5 intentos fallidos y pedir uno nuevo anula el anterior. Se guarda cifrado con bcrypt.
+  - La respuesta de «solicitar» es la misma exista o no el correo (o esté desactivada la cuenta), y el correo se envía en segundo plano para que el tiempo de respuesta tampoco lo delate.
+  - Límites: 3 códigos cada 15 minutos por correo (con respaldo en la base de datos, porque el límite en memoria cuenta por worker) y 10 por red; 10 verificaciones y 10 restablecimientos por minuto por red.
+  - Tras validar el código, la sesión del navegador recuerda la verificación; restablecer desde otro navegador o después de pedir otro código no funciona.
+  - La nueva contraseña no puede ser la actual ni la temporal (`TEMP_PASSWORD`). Si la cuenta tenía pendiente cambiar su contraseña temporal, queda resuelto.
+  - Auditoría: «Código de recuperación solicitado» y «Contraseña restablecida con código por correo».
+  - Las tres rutas están exentas de CSRF, como el login (se usan sin sesión y la página de login no tiene token), y permitidas durante el primer inicio de sesión.
+- **Envío de correo con la API HTTPS de Brevo** (el plan gratis de Render bloquea SMTP), con la librería estándar: sin dependencias nuevas. Variables `BREVO_API_KEY`, `CORREO_REMITENTE` y opcional `NOMBRE_REMITENTE`. Sin configurar, la recuperación responde que no está disponible. Un envío fallido queda en el log con el motivo, sin el código ni el correo. — `servicios/correo.py`, `render.yaml`
+- **Tabla `recuperaciones_password`** (usuario, código cifrado, vencimiento, intentos, usado/anulado, creación). Aplicada en Neon el 2026-11-12 con aprobación; quedan 20 tablas y el diagnóstico sigue sin problemas. — `Models/models.py`, `migrations/2026-11-12_recuperaciones_password.sql`, `migrations/2026-11-12_recuperaciones_password_revertir.sql`
+- El diagnóstico cuenta la tabla nueva y revisa su secuencia. — `scripts/diagnostico_neon.py`
+
+#### Documentación
+- Cómo configurar Brevo (remitente exclusivo, verificación, clave de la API y variables en Render). — `docs/DESPLIEGUE_RENDER.md`
+- El esquema pasa a 20 tablas, con la sección de `recuperaciones_password`. — `docs/ESQUEMA_BD.md`
+
+#### Pruebas
+- 36 pruebas nuevas con el envío simulado: flujo completo, código cifrado, misma respuesta para correos inexistentes o desactivados, vencimiento, 5 intentos, código nuevo que anula el anterior, formato, validaciones de la nueva contraseña, límites (incluido el respaldo en la base de datos), uso con una sesión abierta sin token CSRF, la petición a Brevo, el log sin datos sensibles y la ventana del login. — `tests/test_recuperar_password.py`
+- El login tiene ahora 3 campos de contraseña con el botón para mostrarla. — `tests/test_seguridad.py`
+
 ### Borrada la tabla de ejemplo `playing_with_neon` de Neon (2026-11-12)
 
 #### Eliminado

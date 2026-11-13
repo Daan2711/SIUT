@@ -25,6 +25,7 @@ from Controllers.vacantesController import vacantes_bp, puede_cargar_vacantes, e
 from Controllers.postulacionesController import postulaciones_bp
 from Controllers.cuentasController import cuentas_bp
 from Controllers.eventosController import eventos_bp
+from Controllers.recuperacionController import recuperacion_bp
 
 # =========================================================================
 # SECCIÓN 2: CARGA DE CONFIGURACIONES DE ENTORNO
@@ -99,6 +100,11 @@ def archivo_demasiado_grande(_error):
 
 @app.errorhandler(429)
 def demasiados_intentos(_error):
+    if request.endpoint == 'recuperacion.solicitar_codigo':
+        # Ese límite es por 15 minutos, no por minuto
+        return jsonify({
+            'error': 'Ya pediste varios códigos. Espera 15 minutos e intenta de nuevo.'
+        }), 429
     return jsonify({
         'error': 'Demasiados intentos. Espera un minuto e intenta de nuevo.'
     }), 429
@@ -113,6 +119,7 @@ app.register_blueprint(vacantes_bp)
 app.register_blueprint(postulaciones_bp)
 app.register_blueprint(cuentas_bp)
 app.register_blueprint(eventos_bp)
+app.register_blueprint(recuperacion_bp)
 
 # Comandos de administración: `flask crear-usuario` (ver comandos.py)
 from comandos import crear_usuario  # noqa: E402
@@ -158,6 +165,8 @@ RUTAS_PERMITIDAS_PRIMER_LOGIN = {
     'healthz',
     'auth.login_usuario', 'auth.logout', 'auth.usuario_actual', 'auth.cambiar_password',
     'auth.csrf_token',
+    'recuperacion.solicitar_codigo', 'recuperacion.verificar_codigo',
+    'recuperacion.restablecer_password',
 }
 
 
@@ -191,9 +200,14 @@ def exigir_cambio_password():
 # =========================================================================
 # Toda petición POST/PUT/PATCH/DELETE con sesión debe traer en la cabecera
 # X-CSRF-Token el token de su sesión (ver csrf.py y Frontend/js/csrf.js).
-# Exentas: login y registro, porque antes de iniciar sesión no hay token.
+# Exentas: login, registro y recuperación de contraseña, porque se usan
+# antes de iniciar sesión y la página de login no tiene token.
 METODOS_QUE_CAMBIAN = {'POST', 'PUT', 'PATCH', 'DELETE'}
-RUTAS_SIN_CSRF = {'auth.login_usuario', 'auth.registrar_usuario'}
+RUTAS_SIN_CSRF = {
+    'auth.login_usuario', 'auth.registrar_usuario',
+    'recuperacion.solicitar_codigo', 'recuperacion.verificar_codigo',
+    'recuperacion.restablecer_password',
+}
 
 
 @app.before_request
