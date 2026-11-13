@@ -30,9 +30,10 @@ ESTADOS_SUGERENCIA = ('Recibida', 'En revisión', 'Atendida', 'Rechazada')
 ESTADOS_POSTULACION = ('Recibida', 'En revisión', 'Aceptada', 'Rechazada')
 TABLAS_CONTEO = ('usuarios', 'alumnos', 'profesores', 'empresas', 'vacantes', 'postulaciones',
                  'postulacion_cv', 'sugerencias', 'categorias_sugerencia', 'eventos',
-                 'usuario_evento', 'auditoria')
+                 'usuario_evento', 'auditoria', 'recuperaciones_password')
 TABLAS_SECUENCIA = ('usuarios', 'alumnos', 'profesores', 'empresas', 'vacantes', 'postulaciones',
-                    'sugerencias', 'eventos', 'usuario_evento', 'auditoria')
+                    'sugerencias', 'eventos', 'usuario_evento', 'auditoria',
+                    'recuperaciones_password')
 
 
 def detener(mensaje):

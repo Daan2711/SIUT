@@ -175,7 +175,7 @@ def test_inscripcion_no_envia_datos_personales_en_la_url(alumno):
 
 # --- Botón para mostrar la contraseña ------------------------------------------
 @pytest.mark.parametrize('cliente, pagina, campos', [
-    ('anon', '/login', 1),
+    ('anon', '/login', 3),             # login + nueva y confirmación (recuperar)
     ('alumno', '/cambiar-password', 3),
     ('administrador', '/nueva-cuenta.html', 2),
 ])

@@ -384,3 +384,24 @@ class Notificacion(db.Model):
     mensaje = db.Column(db.Text, nullable=False)
     leida = db.Column(db.Boolean, nullable=False, server_default=db.text('false'))
     creado_en = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
+
+class RecuperacionPassword(db.Model):
+    """Código de 4 dígitos para recuperar la contraseña («¿Olvidaste tu contraseña?»).
+
+    El código se guarda cifrado con bcrypt. Vence a los 10 minutos y se anula
+    con 5 intentos fallidos o al pedir uno nuevo (usado_en marca ambos casos).
+    Creada por migrations/2026-11-12_recuperaciones_password.sql.
+    """
+    __tablename__ = 'recuperaciones_password'
+    __table_args__ = (
+        db.CheckConstraint('intentos BETWEEN 0 AND 5', name='chk_recuperaciones_intentos'),
+        db.Index('idx_recuperaciones_usuario', 'usuario_id', 'creado_en'),
+    )
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    usuario_id = db.Column(db.BigInteger, db.ForeignKey('usuarios.id'), nullable=False)
+    codigo_hash = db.Column(db.String(100), nullable=False)
+    vence_en = db.Column(db.DateTime(timezone=True), nullable=False)
+    intentos = db.Column(db.SmallInteger, nullable=False, server_default=db.text('0'))
+    usado_en = db.Column(db.DateTime(timezone=True), nullable=True)
+    creado_en = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
