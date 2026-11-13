@@ -1,8 +1,8 @@
 # Esquema de la base de datos SIUT (Neon / PostgreSQL 18)
 
-Generado el 2026-11-08 (actualizado tras la migración del CV y, el 2026-11-12, con `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql` y `migrations/2026-11-12_borrar_playing_with_neon.sql`) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
+Generado el 2026-11-08 (actualizado tras la migración del CV y, el 2026-11-12, con `migrations/2026-11-12_seguimiento_postulaciones_eventos.sql`, `migrations/2026-11-12_borrar_playing_with_neon.sql` y `migrations/2026-11-12_recuperaciones_password.sql`) leyendo el catálogo de Neon en modo **solo lectura**. Refleja la base de datos real, no `Models/models.py`.
 
-- 19 tablas en el esquema `public` (18 de la app y `siut_control_admin` de control). La tabla de ejemplo de Neon `playing_with_neon` se borró el 2026-11-12.
+- 20 tablas en el esquema `public` (19 de la app y `siut_control_admin` de control). La tabla de ejemplo de Neon `playing_with_neon` se borró el 2026-11-12.
 - Todos los `id` son `bigint GENERATED ALWAYS AS IDENTITY` (salvo `postulacion_cv`, cuya llave es la de su postulación).
 - Cambios de esquema: scripts versionados en `migrations/`.
 - Todas las llaves foráneas usan `ON DELETE RESTRICT`.
@@ -34,6 +34,7 @@ erDiagram
     categorias_sugerencia ||--o{ sugerencias : "clasifica"
     usuarios ||--o{ sugerencias : "envía / atiende"
     usuarios ||--o{ auditoria : "genera"
+    usuarios ||--o{ recuperaciones_password : "pide código"
 
     usuarios {
         bigint id PK
@@ -180,6 +181,14 @@ erDiagram
         varchar tabla_afectada
         bigint registro_id
     }
+    recuperaciones_password {
+        bigint id PK
+        bigint usuario_id FK
+        varchar codigo_hash "bcrypt"
+        timestamptz vence_en
+        smallint intentos "0-5"
+        timestamptz usado_en
+    }
 ```
 
 ## Reglas de negocio implementadas en la base de datos
@@ -200,6 +209,7 @@ erDiagram
 | Horarios: día Lunes–Domingo y `hora_fin > hora_inicio` | CHECK `chk_dia_semana`, `chk_horario` |
 | Un alumno solo puede tener un grupo activo a la vez | índice único parcial `uq_alumno_un_grupo_activo` |
 | Fechas de fin ≥ fechas de inicio (eventos, inscripciones) | CHECK `chk_fechas_evento`, `chk_fechas_inscripcion` |
+| Código de recuperación de contraseña: de 0 a 5 intentos | CHECK `chk_recuperaciones_intentos` |
 
 ## Detalle por tabla
 
@@ -614,6 +624,27 @@ erDiagram
 - FK `auditoria_usuario_id_fkey`: `FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
 - PK `auditoria_pkey`: `PRIMARY KEY (id)`
 - ÍNDICE `idx_auditoria_usuario`: `btree (usuario_id, creado_en DESC)`
+
+### `recuperaciones_password`
+
+Códigos de 4 dígitos para «¿Olvidaste tu contraseña?», cifrados con bcrypt. Vencen a los 10 minutos; `usado_en` marca cuándo se usó o se anuló (5 intentos fallidos o código nuevo). Creada por `migrations/2026-11-12_recuperaciones_password.sql`.
+
+| Columna | Tipo | Nulo | Por defecto |
+|---|---|---|---|
+| `id` | bigint | no |  |
+| `usuario_id` | bigint | no |  |
+| `codigo_hash` | varchar(100) | no |  |
+| `vence_en` | timestamptz | no |  |
+| `intentos` | smallint | no | `0` |
+| `usado_en` | timestamptz | sí |  |
+| `creado_en` | timestamptz | no | `now()` |
+
+**Restricciones e índices:**
+
+- CHECK `chk_recuperaciones_intentos`: `CHECK (((intentos >= 0) AND (intentos <= 5)))`
+- FK `recuperaciones_password_usuario_id_fkey`: `FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+- PK `recuperaciones_password_pkey`: `PRIMARY KEY (id)`
+- ÍNDICE `idx_recuperaciones_usuario`: `btree (usuario_id, creado_en DESC)`
 
 ### `siut_control_admin`
 

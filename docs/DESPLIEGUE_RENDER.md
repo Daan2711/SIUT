@@ -14,7 +14,7 @@ Guía para publicar SIUT en Render usando la base de datos de Neon.
 2. **Migraciones aplicadas en Neon.** Las tablas de Neon las controlan los scripts de `migrations/`, no la app.
    - `2026-11-08_postulacion_cv.sql` — **ya aplicada** el 2026-11-08 (tabla de CV).
    - `2026-11-09_corregir_validar_perfiles_usuario.sql` — **ya aplicada** el 2026-11-09 (sin ella no se pueden crear cuentas ni cambiar contraseñas).
-   - `2026-11-12_recuperaciones_password.sql` — tabla de códigos para «¿Olvidaste tu contraseña?».
+   - `2026-11-12_recuperaciones_password.sql` — **ya aplicada** el 2026-11-12 (tabla de códigos para «¿Olvidaste tu contraseña?»).
 3. **Cadena de conexión de Neon** a la mano (Neon → *Connection Details*). Usa la del endpoint con *pooler* (el host contiene `-pooler`) y con `sslmode=require`.
 
 ## 1. Crear el servicio

@@ -17,11 +17,12 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
   - Auditoría: «Código de recuperación solicitado» y «Contraseña restablecida con código por correo».
   - Las tres rutas están exentas de CSRF, como el login (se usan sin sesión y la página de login no tiene token), y permitidas durante el primer inicio de sesión.
 - **Envío de correo con la API HTTPS de Brevo** (el plan gratis de Render bloquea SMTP), con la librería estándar: sin dependencias nuevas. Variables `BREVO_API_KEY`, `CORREO_REMITENTE` y opcional `NOMBRE_REMITENTE`. Sin configurar, la recuperación responde que no está disponible. Un envío fallido queda en el log con el motivo, sin el código ni el correo. — `servicios/correo.py`, `render.yaml`
-- **Tabla `recuperaciones_password`** (usuario, código cifrado, vencimiento, intentos, usado/anulado, creación). — `Models/models.py`, `migrations/2026-11-12_recuperaciones_password.sql`, `migrations/2026-11-12_recuperaciones_password_revertir.sql`
+- **Tabla `recuperaciones_password`** (usuario, código cifrado, vencimiento, intentos, usado/anulado, creación). Aplicada en Neon el 2026-11-12 con aprobación; quedan 20 tablas y el diagnóstico sigue sin problemas. — `Models/models.py`, `migrations/2026-11-12_recuperaciones_password.sql`, `migrations/2026-11-12_recuperaciones_password_revertir.sql`
 - El diagnóstico cuenta la tabla nueva y revisa su secuencia. — `scripts/diagnostico_neon.py`
 
 #### Documentación
 - Cómo configurar Brevo (remitente exclusivo, verificación, clave de la API y variables en Render). — `docs/DESPLIEGUE_RENDER.md`
+- El esquema pasa a 20 tablas, con la sección de `recuperaciones_password`. — `docs/ESQUEMA_BD.md`
 
 #### Pruebas
 - 36 pruebas nuevas con el envío simulado: flujo completo, código cifrado, misma respuesta para correos inexistentes o desactivados, vencimiento, 5 intentos, código nuevo que anula el anterior, formato, validaciones de la nueva contraseña, límites (incluido el respaldo en la base de datos), uso con una sesión abierta sin token CSRF, la petición a Brevo, el log sin datos sensibles y la ventana del login. — `tests/test_recuperar_password.py`
