@@ -4,6 +4,14 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Corregido: validación del teléfono en el navegador (2026-11-12)
+
+#### Corregido
+- **El formato del teléfono no funcionaba en Edge ni en Chrome.** Esos navegadores compilan el atributo `pattern` con la bandera `v` de RegExp, que obliga a escapar `(`, `)` y `-` dentro de `[ ]`. Los patrones `[0-9+() -]{8,30}` (postulación) y `[0-9+() \-]{8,30}` (crear cuenta) no compilaban: el navegador ignoraba la validación y dejaba un error en la consola. El servidor sí validaba (`TELEFONO_RE`), así que no entraban teléfonos inválidos, pero el aviso solo llegaba después de enviar. Ahora ambos usan `[0-9+\(\) \-]{8,30}`, que acepta y rechaza lo mismo que el servidor. Verificado en Edge: «abc» o «1234567» marcan el campo como inválido y el formulario no se envía; un teléfono válido se envía; la consola queda sin errores. — `Frontend/buzon.html`, `Frontend/nueva-cuenta.html`
+
+#### Pruebas
+- Todos los `pattern` de `Frontend/*.html` compilan con la bandera `v` (con Node, el mismo motor de Chrome y Edge; se salta si Node no está instalado), y el teléfono de ambos formularios acepta y rechaza los mismos ejemplos que `TELEFONO_RE`. — `tests/test_patrones_html.py`
+
 ### Corregido: el código de recuperación no salía desde Render (2026-11-12)
 
 #### Corregido
