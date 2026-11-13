@@ -115,6 +115,10 @@ def _enviar(destinatario, nombre, codigo, usuario_id, logger):
     except CorreoNoEnviado as error:
         logger.error('No se pudo enviar el código de recuperación (usuario %s): %s',
                      usuario_id, error)
+    except Exception as error:
+        # Sin traza: podría incluir el código o el correo del destinatario
+        logger.error('No se pudo enviar el código de recuperación (usuario %s): '
+                     'error inesperado (%s)', usuario_id, type(error).__name__)
 
 
 def _despachar(*args):

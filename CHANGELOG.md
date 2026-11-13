@@ -4,6 +4,17 @@ Todos los cambios relevantes de SIUT se documentan en este archivo.
 
 ## [Sin publicar]
 
+### Corregido: el código de recuperación no salía desde Render (2026-11-12)
+
+#### Corregido
+- **El correo con el código no se enviaba en producción.** El log de Render mostró un error no capturado dentro de `_enviar`; la causa probable es que el valor de `BREVO_API_KEY` pegado en Render traía un carácter que no se puede mandar en una cabecera HTTP (por ejemplo, un salto de línea). La llamada fallaba antes de llegar a Brevo con un error que no se capturaba: el envío en segundo plano se detenía sin el mensaje «No se pudo enviar el código de recuperación». Con la misma clave en `.env` local el envío sí funcionaba. — `servicios/correo.py`, `Controllers/recuperacionController.py`
+  - `BREVO_API_KEY`, `CORREO_REMITENTE` y `NOMBRE_REMITENTE` se usan sin espacios ni saltos de línea al inicio o al final.
+  - Si la clave tiene caracteres no válidos en medio, no se llama a Brevo y el log dice «BREVO_API_KEY tiene caracteres no válidos (¿se copió con saltos de línea o espacios?)», sin mostrar la clave.
+  - Cualquier otro error al llamar a Brevo, o al enviar en segundo plano, queda en el log con el prefijo «No se pudo enviar el código de recuperación (usuario N)» y solo el tipo de error, sin el código, el correo ni la clave.
+
+#### Pruebas
+- Variables con espacios y saltos de línea, clave con caracteres no válidos (salto de línea, espacio, carácter invisible o acento), solo espacios equivale a no configurado, error inesperado al llamar a Brevo, respuesta que no es 2xx y error inesperado en segundo plano sin datos sensibles en el log. — `tests/test_recuperar_password.py`
+
 ### Recuperación de contraseña con código por correo (2026-11-12)
 
 #### Agregado
