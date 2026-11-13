@@ -329,3 +329,85 @@ def test_login_tiene_la_ventana_de_recuperacion(anon):
     assert 'Recuperar contraseña</button>' in html and 'En otro momento</button>' in html
     assert html.index('src="js/recuperar.js"') > html.index('src="js/mostrar-password.js"')
     assert anon.get('/js/recuperar.js').status_code == 200
+
+
+# --- Variables de Brevo pegadas con espacios o saltos de línea (Render) ---------
+def capturar_peticiones(monkeypatch):
+    peticiones = []
+
+    def urlopen(peticion, timeout):
+        peticiones.append(peticion)
+        return RespuestaFalsa()
+
+    monkeypatch.setattr(correo.urllib.request, 'urlopen', urlopen)
+    return peticiones
+
+
+def test_variables_con_espacios_y_saltos_de_linea_se_limpian(monkeypatch):
+    monkeypatch.setenv('BREVO_API_KEY', '  xkeysib-clave-de-prueba\n')
+    monkeypatch.setenv('CORREO_REMITENTE', ' siut@x.mx\r\n')
+    monkeypatch.setenv('NOMBRE_REMITENTE', ' SIUT UTSC \n')
+    peticiones = capturar_peticiones(monkeypatch)
+    correo.enviar_correo('alu@x.mx', 'Asunto', 'Texto')
+    assert peticiones[0].get_header('Api-key') == 'xkeysib-clave-de-prueba'
+    assert json.loads(peticiones[0].data)['sender'] == {'name': 'SIUT UTSC', 'email': 'siut@x.mx'}
+
+
+@pytest.mark.parametrize('clave', ['xkeysib-mitad\nmitad', 'xkeysib-con espacio',
+                                   'xkeysib-invisible​', 'xkeysib-acentó'])
+def test_clave_con_caracteres_no_validos_da_un_error_claro(monkeypatch, clave):
+    monkeypatch.setenv('BREVO_API_KEY', clave)
+    monkeypatch.setenv('CORREO_REMITENTE', 'siut@x.mx')
+    peticiones = capturar_peticiones(monkeypatch)
+    with pytest.raises(correo.CorreoNoEnviado) as error:
+        correo.enviar_correo('alu@x.mx', 'Asunto', 'Texto')
+    assert 'caracteres no válidos' in str(error.value)
+    assert 'xkeysib' not in str(error.value)
+    assert not peticiones                       # ni siquiera se intenta llamar a Brevo
+
+
+def test_solo_espacios_cuenta_como_no_configurado(anon, usuario, monkeypatch):
+    monkeypatch.setenv('BREVO_API_KEY', '  \n')
+    monkeypatch.setenv('CORREO_REMITENTE', 'siut@x.mx')
+    assert solicitar(anon).status_code == 503
+
+
+def test_error_inesperado_de_la_llamada_se_convierte_en_correo_no_enviado(monkeypatch):
+    monkeypatch.setenv('BREVO_API_KEY', 'xkeysib-clave-de-prueba')
+    monkeypatch.setenv('CORREO_REMITENTE', 'siut@x.mx')
+
+    def urlopen(peticion, timeout):
+        raise ValueError('Invalid header value xkeysib-clave-de-prueba')
+
+    monkeypatch.setattr(correo.urllib.request, 'urlopen', urlopen)
+    with pytest.raises(correo.CorreoNoEnviado) as error:
+        correo.enviar_correo('alu@x.mx', 'Asunto', 'Texto')
+    assert 'ValueError' in str(error.value)
+    assert 'xkeysib' not in str(error.value)
+
+
+def test_respuesta_no_2xx_conserva_su_mensaje(monkeypatch):
+    monkeypatch.setenv('BREVO_API_KEY', 'xkeysib-clave-de-prueba')
+    monkeypatch.setenv('CORREO_REMITENTE', 'siut@x.mx')
+
+    class Respuesta302(RespuestaFalsa):
+        status = 302
+
+    monkeypatch.setattr(correo.urllib.request, 'urlopen', lambda peticion, timeout: Respuesta302())
+    with pytest.raises(correo.CorreoNoEnviado, match='Brevo respondió 302'):
+        correo.enviar_correo('alu@x.mx', 'Asunto', 'Texto')
+
+
+def test_error_inesperado_en_segundo_plano_queda_en_el_log_sin_datos(monkeypatch, caplog):
+    import logging
+
+    def falla(*args, **kwargs):
+        raise RuntimeError('fallo con 4821 y alu@x.mx')
+
+    monkeypatch.setattr(recuperacion, 'enviar_correo', falla)
+    logger = logging.getLogger('prueba-recuperacion')
+    with caplog.at_level(logging.INFO, logger='prueba-recuperacion'):
+        recuperacion._enviar('alu@x.mx', 'Alu', '4821', 7, logger)
+    assert 'No se pudo enviar el código de recuperación (usuario 7)' in caplog.text
+    assert 'RuntimeError' in caplog.text
+    assert '4821' not in caplog.text and 'alu@x.mx' not in caplog.text
